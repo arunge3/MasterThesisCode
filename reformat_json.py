@@ -17,7 +17,7 @@ def load_first_timestamp_and_offset(file_path):
     return date_time
 
 
-def synchronize_time(event_time_str, first_timestamp_str, offset_fr, fps):
+def synchronize_time(event_time_str, second_half, first_timestamp_str, offset_fr,offseth2_fr, first_vh2, fps):
     utc_timezone = pytz.utc
     
     event_time = datetime.fromisoformat(event_time_str).replace(tzinfo=utc_timezone)
@@ -29,6 +29,8 @@ def synchronize_time(event_time_str, first_timestamp_str, offset_fr, fps):
 
     # Berechnung der synchronisierten Zeit
     synced_time = delta_fr+ offset_fr
+    if(second_half):
+        synced_time = synced_time + offseth2_fr
     return synced_time
 
 def get_paths_by_match_id(match_id):
@@ -45,7 +47,7 @@ def get_paths_by_match_id(match_id):
     match_row =  df[df['match_id'] == int(match_id)]
     
     if match_row.empty:
-        return None, None, None,  None, None, None 
+        return None, None, None,  None, None, None , None
 
     # Extrahiere die relevanten Informationen
     video_file = match_row.iloc[0]['raw_video']
@@ -58,19 +60,19 @@ def get_paths_by_match_id(match_id):
     output_path = os.path.join(output_base_path, output_file)
     
      # Extract and construct the file path for positions
-    home_team_name = match_row.iloc[0]['home_team_name'].replace(" ", "_")  # Replace spaces with underscores
-    away_team_name = match_row.iloc[0]['away_team_name'].replace(" ", "_")  # Replace spaces with underscores
-    match_date = match_row.iloc[0]['date'].replace(".", "-")  # Replace dots with dashes
+    home_team_name = match_row.iloc[0]['home_team_name']
+    away_team_name = match_row.iloc[0]['away_team_name']
+    match_date = match_row.iloc[0]['date']
 
     # Construct the position file path
-    file_path_position = os.path.join(position_base_path, f"{home_team_name}_{away_team_name}_{match_date}_20-21.csv")
+    file_path_position = os.path.join(position_base_path, f"{away_team_name}_{home_team_name}_{match_date}_20-21.csv")
     cut_h1 = match_row.iloc[0]['cutH1']
     offset_h2 = match_row.iloc[0]['offset_h2']
     first_vh2 = match_row.iloc[0]['firstVH2']
     
     return video_path, annotation_path, output_path, file_path_position, cut_h1, offset_h2, first_vh2
 
-def reformatJson(path_timeline, path_output_jsonl  , first_timestamp_ms, offset, fps):    
+def reformatJson(path_timeline, path_output_jsonl  , first_timestamp_ms, offset, offset_h2, first_vh2,fps):    
     """ Reformats a JSON timeline of events into a JSONL file with specific event details.
 
     Args:
@@ -92,6 +94,7 @@ def reformatJson(path_timeline, path_output_jsonl  , first_timestamp_ms, offset,
             competitor = event.get('competitor', None)
             type = event.get('type')
             id = event.get('id')
+            match_clock = event.get('match_clock', None)
             ball_possession = {
                 'home': 'A',
                 'away': 'B',
@@ -162,6 +165,7 @@ def reformatJson(path_timeline, path_output_jsonl  , first_timestamp_ms, offset,
                     ball_reception = ''
                     static_ball_action = 'kick-off'
                     referee_decision = ''
+                    period_name = event.get('period_name', None)
                 case 'shot_off_target':
                     pass_handball = ''
                     shot = 'off target'
@@ -239,12 +243,25 @@ def reformatJson(path_timeline, path_output_jsonl  , first_timestamp_ms, offset,
                     ball_reception = ''
                     static_ball_action = ''
                     referee_decision = ''
-            
+            second_half = False       
+            if match_clock is not None:
+                # Split the match_clock and "30:00" into minutes and seconds for comparison
+                match_minutes, match_seconds = map(int, match_clock.split(':'))
+                threshold_minutes = 30
+                threshold_seconds = 0
+                # Compare the times
+                if (match_minutes > threshold_minutes) or (match_minutes == threshold_minutes and match_seconds > threshold_seconds):
+                    second_half = True                 
+            if (type == 'period_start' and period_name == '2nd Half'):
+                second_half = True
+                
             reformatted_event = {
-                't_start': int(synchronize_time(str(event.get('time', None)), first_timestamp_ms, offset, fps)),
+                't_start': int(synchronize_time(str(event.get('time', None)),second_half, first_timestamp_ms, offset, offset_h2, first_vh2, fps)),
                 't_end': '-1',
-                'annotator': id,
+                # 'annotator': str(id),
+                'annotator': "id: " + str(id),
                 'labels': {
+                    # "type": type,
                     "type": type,
                     "pass": pass_handball,
                     "shot": shot,
@@ -258,19 +275,9 @@ def reformatJson(path_timeline, path_output_jsonl  , first_timestamp_ms, offset,
             file.write(json.dumps(reformatted_event) + '\n')
 
 
-
-
-# Beispielparameter
-# file_path_Position = r"D:\Handball\HBL_Positions\20-21\Die Eulen Ludwigshafen_SC DHFK Leipzig_01.10.2020_20-21.csv"
-# file_mapping = r"D:\Handball\HBL_Synchronization\mapping20_21.csv"
-# offset = -7730  # ms
-# event_time_str = "2020-10-01T18:24:56+00:00"  # Beispiel-Event-Zeit
-# Nutzung der Methoden
-
-
 fps = 29.97  # Frames pro Sekunde
-match_id = 23400265
+match_id = 23400267
 video_path, path_timeline, path_output_jsonl, file_path_position, cut_h1, offset_h2, first_vh2 = get_paths_by_match_id(match_id)
 
 first_timestamp_ms = load_first_timestamp_and_offset(file_path_position)
-reformatJson(path_timeline, path_output_jsonl, first_timestamp_ms, cut_h1, fps) 
+reformatJson(path_timeline, path_output_jsonl, first_timestamp_ms, cut_h1, offset_h2, first_vh2, fps) 
