@@ -36,13 +36,13 @@ def synchronize_time(event_time_str, second_half, first_timestamp_str, offset_fr
 def get_paths_by_match_id(match_id):
     
     csv_file = r"D:\Handball\HBL_Synchronization\mapping20_21.csv"
+    lookup_file = r"D:\Handball\HBL_Events\lookup\lookup_matches_20_21.csv"
     video_base_path = r"D:\Handball\HBL_Videos\season_2021"
     annotation_base_path = r"D:\Handball\HBL_Events\season_20_21\EventTimeline"
     output_base_path = r"D:\Handball\HBL_Events\season_20_21\EventJson"
     position_base_path = r"D:\Handball\HBL_Positions\20-21"
     
     df = pd.read_csv(csv_file, delimiter=';')
-    test  = df[df['match_id'] == int(match_id)]
     # Suche nach dem Eintrag für die gegebene match_id
     match_row =  df[df['match_id'] == int(match_id)]
     
@@ -59,13 +59,18 @@ def get_paths_by_match_id(match_id):
     annotation_path = os.path.join(annotation_base_path, annotation_file)
     output_path = os.path.join(output_base_path, output_file)
     
-     # Extract and construct the file path for positions
-    home_team_name = match_row.iloc[0]['home_team_name']
-    away_team_name = match_row.iloc[0]['away_team_name']
-    match_date = match_row.iloc[0]['date']
-
-    # Construct the position file path
-    file_path_position = os.path.join(position_base_path, f"{away_team_name}_{home_team_name}_{match_date}_20-21.csv")
+    lookup_df = pd.read_csv(lookup_file)
+    lookup_row = lookup_df[lookup_df['match_id'] == f"sr:sport_event:{match_id}"]
+    if lookup_row.empty:
+        return None, None, None, None, None, None, None
+    
+    # Extract the file_name from the lookup file
+    file_name_position = lookup_row.iloc[0]['file_name']
+    
+    # Construct the position file path using the file_name from the lookup file
+    file_path_position = os.path.join(position_base_path, file_name_position)
+    
+    # Extract other relevant information from the mapping file
     cut_h1 = match_row.iloc[0]['cutH1']
     offset_h2 = match_row.iloc[0]['offset_h2']
     first_vh2 = match_row.iloc[0]['firstVH2']
@@ -276,7 +281,7 @@ def reformatJson(path_timeline, path_output_jsonl  , first_timestamp_ms, offset,
 
 
 fps = 29.97  # Frames pro Sekunde
-match_id = 23400267
+match_id = 23400275
 video_path, path_timeline, path_output_jsonl, file_path_position, cut_h1, offset_h2, first_vh2 = get_paths_by_match_id(match_id)
 
 first_timestamp_ms = load_first_timestamp_and_offset(file_path_position)
