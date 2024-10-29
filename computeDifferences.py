@@ -69,13 +69,15 @@ def load_jsonl_as_dict(filename):
                 event_key = (annotator, event_type)
                 data_dict[event_key] = event
             else:
-                print(f"Warnung: Event ohne 'annotator', 't_start' oder 'type' in Datei {filename} gefunden.")
+                print(f"Warning: Event without 'annotator', 't_start' or 'type' found in file {filename}.")
     return data_dict
 
 # Directories containing the old and new JSONL files
 old_jsonl_dir = r"D:\Handball\HBL_Events\season_20_21\EventJson"
 new_jsonl_dir = r"D:\Handball\HBL_Synchronization\Annotationen"
-output_dir = r"D:\Handball\HBL_Events\season_20_21\EventDifference"
+output_dir_sum = r"D:\Handball\HBL_Events\season_20_21\EventDifference\Summary"
+output_dir_det = r"D:\Handball\HBL_Events\season_20_21\EventDifference\Details"
+output_dir_box = r"D:\Handball\HBL_Events\season_20_21\EventDifference\Boxplot"
 
 # Paths to the old and new JSONL files
 old_file = os.path.join(old_jsonl_dir, "sport_events_23400321_timeline_reformatted.jsonl")
@@ -106,53 +108,65 @@ for event_key in old_data.keys():
                 'difference': diff
             })
         else:
-            print(f"Warnung: Nicht-integer t_start-Werte für Schlüssel {event_key}")
+            print(f"Warning: Not integer t_start values for key {event_key}")
 
 # Create a DataFrame from the list of changes
 df_changes = pd.DataFrame(changes_list)
 
 # Filter out specific event types
-df_filtered = df_changes[~df_changes['event_type'].isin(["match_started", "period_start"])]
+excluded_events_boxplot = ["match_started", "period_start", "substitution", "suspension_over", "period_score","break_start","match_ended"]
+df_filtered_boxplot = df_changes[~df_changes['event_type'].isin(excluded_events_boxplot)]
 
 # Create a boxplot of the differences in timestamps by event type
 plt.figure(figsize=(12, 6))
-boxplot_data = [df_filtered[df_filtered['event_type'] == et]['difference'] for et in df_filtered['event_type'].unique()]
-plt.boxplot(boxplot_data, labels=df_filtered['event_type'].unique(), showmeans=True)
+boxplot_data = [df_filtered_boxplot[df_filtered_boxplot['event_type'] == et]['difference'] for et in df_filtered_boxplot['event_type'].unique()]
+plt.boxplot(boxplot_data, labels=df_filtered_boxplot['event_type'].unique(), showmeans=True)
 plt.xlabel('Event Type')
-plt.ylabel('Differenz in t_start (neu - alt)')
-plt.title('Differenzen der t_start-Werte (neu - alt) nach Event Type')
+plt.ylabel('Difference in t_start (new - old)')
+plt.title('Boxplot of Differences in t_start by Event Type')
 plt.xticks(rotation=45)
 plt.grid(True)
 plt.tight_layout()
 
 # Save the boxplot image
 match_id = os.path.basename(old_file).split('_')[2]
-boxplot_filename = os.path.join(output_dir, f'boxplot_differences_match_{match_id}.png')
+boxplot_filename = os.path.join(output_dir_box, f'boxplot_differences_match_{match_id}.png')
 plt.savefig(boxplot_filename)
 plt.close() 
 
-# Save the detailed differences to a CSV file
-csv_filename = os.path.join(output_dir, f'differences_details_match_{match_id}.csv')
-df_filtered.to_csv(csv_filename, index=False)
+# Speichern der Änderungen in einer CSV-Datei
+csv_filename = os.path.join(output_dir_det, f'differences_details_match_{match_id}.csv')
+df_changes.to_csv(csv_filename, index=False)
 
-# Calculate summary statistics for each event type and overall
-summary_stats = df_filtered.groupby('event_type')['difference'].agg(['mean', 'std']).reset_index()
+print(f"Boxplot saved here: {boxplot_filename}")
+print(f"Calculations saved here: {csv_filename}")
+
+# Berechnung der summary_statistics mit nur "substitution" und "suspension_over" als Ausschlüsse
+excluded_events_summary = ["substitution", "suspension_over"]
+df_filtered_summary = df_changes[~df_changes['event_type'].isin(excluded_events_summary)]
+
+# Durchschnitt und Standardabweichung für Event-Typen berechnen
+summary_stats = df_filtered_summary.groupby('event_type')['difference'].agg(['mean', 'std']).reset_index()
+
+# Benennen der Spalten für Klarheit
 summary_stats.columns = ['event_type', 'average_difference', 'std_deviation']
-overall_mean = df_filtered['difference'].mean()
-overall_std = df_filtered['difference'].std()
 
+# Gesamtdurchschnitt und -standardabweichung berechnen
+overall_mean = df_filtered_summary['difference'].mean()
+overall_std = df_filtered_summary['difference'].std()
+
+# Gesamtstatistiken in ein neues DataFrame einfügen
 overall_stats = pd.DataFrame({
     'event_type': ['overall'],
     'average_difference': [overall_mean],
     'std_deviation': [overall_std]
 })
 
-# Combine the event type-specific and overall summary statistics
+# Gesamte Statistiken mit den Event-Typ-Statistiken zusammenfügen
 final_summary_stats = pd.concat([summary_stats, overall_stats], ignore_index=True)
-summary_csv_filename = os.path.join(output_dir, f'summary_statistics_match_{match_id}.csv')
+
+# Speichern der zusammengefassten Statistiken in einer CSV-Datei
+summary_csv_filename = os.path.join(output_dir_sum, f'summary_statistics_match_{match_id}.csv')
 final_summary_stats.to_csv(summary_csv_filename, index=False)
 
-# Print the paths to the output files
-print(f"Zusammenfassung der Statistiken (inkl. Gesamt) gespeichert unter: {summary_csv_filename}")
-print(f"Boxplot gespeichert unter: {boxplot_filename}")
-print(f"Werte gespeichert unter: {csv_filename}")
+print(f"Summary saved here: {summary_csv_filename}")
