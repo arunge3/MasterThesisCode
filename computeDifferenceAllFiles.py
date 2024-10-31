@@ -76,6 +76,7 @@ overall_stats = pd.DataFrame({
     'std': [overall_std]
 })
 final_summary_stats_all_games = pd.concat([summary_stats_all_games, overall_stats], ignore_index=True)
+
 summary_filename = os.path.join(output_dir_sum, "summary_statistics_all_games.csv")
 final_summary_stats_all_games.to_csv(summary_filename, index=False)
 print(f"Summary of Calculations for all events saved here: {summary_filename}")
