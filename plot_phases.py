@@ -9,15 +9,11 @@ matplotlib.use('TkAgg',force=True)
 
 print("Switched to:",matplotlib.get_backend())
 base_path = "D:\\Handball\\"
-season = "season_20_21"  # season of the match
-match = "Bergischer HC_Die Eulen Ludwigshafen_16.12.2020_20-21"  # name of the match
-path_positions = "D:\\Handball\\HBL_Positions\\21-22\\Bergischer HC_Die Eulen Ludwigshafen_16.12.2020_20-21.csv"
-path_events = "D:\\Handball\\HBL_Events\\season_21_22\\EventTimelines\\sport_events_23400513_timeline.json"
-path_slice = "D:\\Handball\\HBL_Slicing\\season_20_21\\Bergischer HC_Die Eulen Ludwigshafen_16.12.2020_20-21.csv.npy"
+season = "season_20_21"  
+match = "Bergischer HC_Die Eulen Ludwigshafen_16.12.2020_20-21"  
 
 positions_path = f"{base_path}HBL_Positions\\{season}\\{match}.csv"
 phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.csv.npy"
-lookup_path = f"{base_path}\\HBL_Events\\lookup\\lookup_matches{season[6:]}.csv"
 
 pitch = pitch.Pitch(xlim=(-20, 20), ylim=(-10, 10), unit="m", boundaries="fixed", sport="handball")
 
@@ -28,17 +24,17 @@ predictions = rolling_mode(predictions, 101)
 slices = Code(predictions, "match_phases", {0: "inac", 1: "CATT-A", 2: "CATT-B", 3: "PATT-A", 4: "PATT-B"}, framerate=20)
 
 
-# get Spielphasen
+# get Sequences of the game phases
 sequences = slices.find_sequences(return_type="list")
 sequences = [x for x in sequences if x[1] - x[0] > slices.framerate]
 
 # Define positions for each phase
 phase_positions = {
-    0: 2,   # Center (inac)
-    1: 3,   # Above center (CATT-A)
-    2: 1,  # Below center (CATT-B)
-    3: 4,   # Higher above center (PATT-A)
-    4: 0   # Lower below center (PATT-B)
+    0: 2,  # (inac)
+    1: 3,  # (CATT-A)
+    2: 1,  # (CATT-B)
+    3: 4,  # (PATT-A)
+    4: 0   # (PATT-B)
 }
 phase_labels = {
     2: "inac",
@@ -65,15 +61,16 @@ for start, end, phase in sequences:
 # Create the plot
 fig, ax = plt.subplots(figsize=(14, 4))
 
-# Plot the continuous line without colors
+# Plot the continuous line
 ax.plot(x_vals, y_vals, color="black", linewidth=2)
 
 # Customize the plot
-ax.axhline(0, color='grey', linewidth=0.5)  # Centerline
+ax.axhline(0, color='grey', linewidth=0.5) 
 ax.set_yticks(sorted(set(phase_positions.values())))
 ax.set_yticklabels([phase_labels[phase] for phase in sorted(phase_positions.keys())])
-ax.set_xlabel("Time")
-ax.set_title("Continuous Phase Timeline without Color Transitions")
+ax.set_xlabel("Timeframe")
+ax.set_title("Continuous Game phase Timeline")
+
 # Set x-axis limit to show only from 0 to 2000
 ax.set_xlim(0, 2000)
 # Show plot
