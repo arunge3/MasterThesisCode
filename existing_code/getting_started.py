@@ -6,8 +6,8 @@ from floodlight.core import pitch
 import numpy as np
 import pandas as pd
 import json
-from rolling_mode import rolling_mode
-import template_matching
+from existing_code.rolling_mode import rolling_mode
+import existing_code.template_matching as template_matching
 from floodlight.models.kinematics import DistanceModel
 from floodlight.models.kinematics import VelocityModel
 import matplotlib

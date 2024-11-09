@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-import os
 import matplotlib.pyplot as plt
 from floodlight.io.kinexon import read_position_data_csv
 from floodlight import Code
@@ -15,20 +14,22 @@ import helpFunctions.reformatJson_Methods as helpFuctions
 base_path = "D:\\Handball\\"
 season = "season_20_21"  
 match = "TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21"  
-new_jsonl_dir = r"D:\Handball\HBL_Events\season_20_21\Event_Timeline_modified"
 match_id = 23400263
 
 phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.csv.npy"
-video_path, path_timeline, _, positions_path, cut_h1, offset_h2, first_vh2 = helpFuctions.get_paths_by_match_id(match_id)
+event_path = f"{base_path}HBL_Synchronization\\Annotationen\\241015-212637_2020-10-01_754520_tsv_hannover-burgdorf-gwd_minden-720p-3000kbps.jsonl"
+video_path, path_timeline, _, positions_path, cut_h1, offset_h2, _ = helpFuctions.get_paths_by_match_id(match_id)
 first_time_pos_str, first_time_pos_unix, fps_positional = helpFuctions.load_first_timestamp_and_offset(positions_path)
-path_output_jsonl = os.path.join(new_jsonl_dir, match,".jsonl")
 
-# Framerate of the video
-fps_video = 29.97
+# Initialize an empty list to store events
+events = []
 
-event_json = helpFuctions.reformatJson_Time_only(path_timeline, first_time_pos_str, cut_h1, offset_h2, first_vh2, fps_video)
-#
-events = event_json.get('timeline', [])
+# Read the JSONL file
+with open(event_path, 'r') as file:
+    for line in file:
+        # Parse the JSON object from the line and append it to the events list
+        event = json.loads(line)
+        events.append(event)
 
 # Match start timestamp 
 first_time_stamp_event = helpFuctions.getFirstTimeStampEvent(path_timeline)
@@ -37,23 +38,24 @@ print("match_start_datetime:", first_time_stamp_event)
 match_start_timestamp = match_start_datetime.timestamp()  
 utc_timezone = pytz.utc
 
-positional_data_start_timestamp = first_time_pos_unix/1000 # Unix timestamp
+positional_data_start_timestamp = 1601571214400/1000 # Unix timestamp
 positional_data_start_date = datetime.fromtimestamp(positional_data_start_timestamp).replace(tzinfo=utc_timezone)
 print("positional_data_start_date:", positional_data_start_date)
-
+# Framerate of the video
+fps_video = 29.97
 
 
 # Convert event frame numbers to absolute timestamps
-
+events_with_timestamps = []
 for event in events:
-    t_start = event["time"]
+    t_start = event["t_start"]
     event_time_seconds = (t_start-cut_h1) / fps_video
     event_absolute_timestamp = positional_data_start_timestamp + event_time_seconds
     event_timestamp_date = datetime.fromtimestamp(event_absolute_timestamp).replace(tzinfo=utc_timezone)
     print("event_timestamp_date:", event_timestamp_date)
     event_timeframe= (event_timestamp_date-positional_data_start_date).seconds*20
     # events_with_timestamps.append(event_absolute_timestamp, event["labels"]["type"])
-    event["time"] = event_timeframe
+    events_with_timestamps.append([event_timeframe, event["labels"]["type"]])
 
 # Load positional data and phase predictions
 positions = read_position_data_csv(positions_path)
@@ -116,9 +118,9 @@ fig, ax = plt.subplots(figsize=(14, 4))
 # Plot the continuous line
 ax.plot(x_vals, y_vals, color="black", linewidth=2)
 # Add event markers with labels from `type`
-for event in events:
-    t_start = event["time"]
-    event_type = event["type"]
+for event in events_with_timestamps:
+    t_start = event[0]
+    event_type = event[1]
     color = event_colors.get(event_type, event_colors["default"])
      # Find the y value on the continuous line for this event's time (t_start)
     event_y = None

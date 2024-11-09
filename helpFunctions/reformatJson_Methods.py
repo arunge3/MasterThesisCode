@@ -354,3 +354,37 @@ def reformatJson(path_timeline, path_output_jsonl, first_timestamp_ms, offset, o
                 }
             }
             file.write(json.dumps(reformatted_event) + '\n')
+            
+            
+def reformatJson_Time_only(path_timeline, first_timestamp_ms, offset, offset_h2, first_vh2, fps):
+    with open(path_timeline, 'r') as file:
+        data = json.load(file)
+
+    events = data.get('timeline', [])
+    # Loop through the entries and change their timestamps
+    for event in events:
+        type = event.get('type')
+        match_clock = event.get('match_clock', None)
+        second_half = False     
+        if (type== 'period_start'):
+            period_name = event.get('period_name', None)
+        else :
+            period_name = None
+        if match_clock is not None:
+            match_minutes, match_seconds = map(int, match_clock.split(':'))
+            threshold_minutes = 30
+            threshold_seconds = 0
+            if (match_minutes > threshold_minutes) or (match_minutes == threshold_minutes and match_seconds > threshold_seconds):
+                second_half = True                 
+            elif (type == 'period_start' and period_name == '2nd Half'):
+                second_half = True
+        event["time"] =  int(synchronize_time(str(event.get('time', None)),second_half, first_timestamp_ms, offset, offset_h2, first_vh2, fps))
+
+    return data
+    # # Save the modified data back to JSON
+    # with open(output_path, "w") as file:
+    #     json.dump(data, file, indent=4)
+
+
+
+
