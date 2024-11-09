@@ -71,6 +71,7 @@ def get_paths_by_match_id(match_id):
             - cut_h1 (str or None): Metadata for the first half cut.
             - offset_h2 (str or None): Metadata for the second half offset.
             - first_vh2 (str or None): Metadata for the first video of the second half.
+            - matchname (str or None): Name of the match.
     Returns None for all elements if the match ID is not found in the CSV files.
     """
     
@@ -85,7 +86,7 @@ def get_paths_by_match_id(match_id):
     match_row =  df[df['match_id'] == int(match_id)]
     
     if match_row.empty:
-        return None, None, None,  None, None, None , None
+        return None, None, None,  None, None, None , None, None
 
     video_file = match_row.iloc[0]['raw_video']
     annotation_file = f"sport_events_{match_id}_timeline.json"
@@ -94,11 +95,12 @@ def get_paths_by_match_id(match_id):
     video_path = os.path.join(video_base_path, video_file)
     annotation_path = os.path.join(annotation_base_path, annotation_file)
     output_path = os.path.join(output_base_path, output_file)
+    match_name = match_row.iloc[0]['raw_pos_knx']
     
     lookup_df = pd.read_csv(lookup_file)
     lookup_row = lookup_df[lookup_df['match_id'] == f"sr:sport_event:{match_id}"]
     if lookup_row.empty:
-        return None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None
 
     file_name_position = lookup_row.iloc[0]['file_name']
 
@@ -108,7 +110,7 @@ def get_paths_by_match_id(match_id):
     offset_h2 = match_row.iloc[0]['offset_h2']
     first_vh2 = match_row.iloc[0]['firstVH2']
     
-    return video_path, annotation_path, output_path, file_path_position, cut_h1, offset_h2, first_vh2
+    return video_path, annotation_path, output_path, file_path_position, cut_h1, offset_h2, first_vh2, match_name
 
 def getFirstTimeStampEvent(path_timeline):
     with open(path_timeline, 'r') as file:

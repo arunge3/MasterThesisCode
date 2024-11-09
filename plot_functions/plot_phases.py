@@ -1,7 +1,5 @@
-import json
 from datetime import datetime
 import matplotlib.pyplot as plt
-from floodlight.io.kinexon import read_position_data_csv
 from floodlight import Code
 import numpy as np
 import pytz
@@ -10,76 +8,67 @@ import matplotlib
 matplotlib.use('TkAgg',force=True)
 import helpFunctions.reformatJson_Methods as helpFuctions
 
-def plot_phases(match_id, event_name):
+def plot_phases(match_id):
     """
-    Plots the phases of a handball match along with annotated events.
+    Plots the phases of a handball match along with event markers.
     Args:
-        match_id (int): The ID of the match to plot.
-        event_name (str): The name of the event file (without extension) containing annotations.
+        match_id (int): The ID of the match.
     Returns:
         None
     This function performs the following steps:
-    1. Constructs file paths for phase predictions and event annotations based on the provided match ID and event name.
-    2. Loads the first timestamp and offset for positional data.
-    3. Reads event annotations from a JSONL file and converts event frame numbers to absolute timestamps.
-    4. Loads positional data and phase predictions, and processes the predictions to find sequences of game phases.
-    5. Defines positions for each phase and colors for different event categories.
-    6. Plots a continuous line representing the game phases and adds markers for events with labels.
+    1. Loads paths and initial timestamps for the match.
+    2. Converts event frame numbers to absolute timestamps.
+    3. Loads positional data and phase predictions.
+    4. Calculates sequences of game phases.
+    5. Defines positions and labels for each phase.
+    6. Defines event colors based on categories.
+    7. Initializes lists to hold x (time) and y (position) values for a continuous line.
+    8. Fills in x_vals and y_vals for a continuous line.
+    9. Creates the plot and adds event markers with labels from `type`.
+    10. Customizes the plot and shows it.
     Note:
-        - The function assumes that the necessary helper functions (`helpFuctions.get_paths_by_match_id`, 
-          `helpFuctions.load_first_timestamp_and_offset`, `rolling_mode`, and `Code`) are defined elsewhere in the codebase.
-        - The function uses the `matplotlib` library for plotting.
+        The function assumes the existence of several helper functions and modules such as `helpFuctions`, `np`, `plt`, and `Code`.
     """
     
     # Paths
     base_path = "D:\\Handball\\"
     season = "season_20_21"  
-    match_id = 23400263
+    _, path_timeline, _, positions_path, cut_h1, offset_h2, first_vh2, match= helpFuctions.get_paths_by_match_id(match_id)
+    first_time_pos_str, first_time_pos_unix, fps_positional = helpFuctions.load_first_timestamp_and_offset(positions_path)
+    phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.csv.npy"
     
     # Framerate of the video
     fps_video = 29.97
-    
-    phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.csv.npy"
-    event_path = f"{base_path}HBL_Synchronization\\Annotationen\\{event_name}.jsonl"
-    _, _, _, positions_path, cut_h1, _, _, match = helpFuctions.get_paths_by_match_id(match_id)
-    first_time_pos_str, first_time_pos_unix, fps_positional = helpFuctions.load_first_timestamp_and_offset(positions_path)
 
-    # Initialize an empty list to store events
-    events = []
-
-    # Read the JSONL file
-    with open(event_path, 'r') as file:
-        for line in file:
-            # Parse the JSON object from the line and append it to the events list
-            event = json.loads(line)
-            events.append(event)
+    # Load event data and adjust timestamps
+    event_json = helpFuctions.reformatJson_Time_only(path_timeline, first_time_pos_str, cut_h1, offset_h2, first_vh2, fps_video)
+    events = event_json.get('timeline', [])
 
     # Match start timestamp 
-    print("match_start_datetime:", first_time_pos_str)
-
-    # Timezone
+    first_time_stamp_event = helpFuctions.getFirstTimeStampEvent(path_timeline)
+    print("match_start_datetime:", first_time_stamp_event)
+    
+    # timezone
     utc_timezone = pytz.utc
 
-    # Timestamp of the first positional data converting to datetime
+    # timestamp of the first positional data converting to datetime
     positional_data_start_timestamp = first_time_pos_unix/1000 # Unix timestamp
     positional_data_start_date = datetime.fromtimestamp(positional_data_start_timestamp).replace(tzinfo=utc_timezone)
     print("positional_data_start_date:", positional_data_start_date)
 
-    # Convert event frame numbers to absolute timestamps
-    events_with_timestamps = []
+    # Change the time of the events to the timeframe of the positional data
     for event in events:
-        t_start = event["t_start"]
+        t_start = event["time"]
         event_time_seconds = (t_start-cut_h1) / fps_video
         event_absolute_timestamp = positional_data_start_timestamp + event_time_seconds
         event_timestamp_date = datetime.fromtimestamp(event_absolute_timestamp).replace(tzinfo=utc_timezone)
         print("event_timestamp_date:", event_timestamp_date)
         event_timeframe= (event_timestamp_date-positional_data_start_date).seconds*20
-        events_with_timestamps.append([event_timeframe, event["labels"]["type"]])
+        event["time"] = event_timeframe
 
     # Load positional data and phase predictions
     predictions = np.load(phase_predictions_path)
     predictions = rolling_mode(predictions, 101)
-
     slices = Code(predictions, "match_phases", {0: "inac", 1: "CATT-A", 2: "CATT-B", 3: "PATT-A", 4: "PATT-B"}, fps_positional)
 
     # get Sequences of the game phases
@@ -133,15 +122,16 @@ def plot_phases(match_id, event_name):
     # Plot the continuous line
     ax.plot(x_vals, y_vals, color="black", linewidth=2)
     # Add event markers with labels from `type`
-    for event in events_with_timestamps:
-        t_start = event[0]
-        event_type = event[1]
+    for event in events:
+        t_start = event["time"]
+        event_type = event["type"]
         color = event_colors.get(event_type, event_colors["default"])
         # Find the y value on the continuous line for this event's time (t_start)
         event_y = None
         for start, end, phase in sequences:
             if start <= t_start < end:
                 event_y = phase_positions[phase]
+
                 break
         # Plot event marker
         # ax.axvline(t_start, color="red", linestyle="--", linewidth=1)  # Vertical line at event time
