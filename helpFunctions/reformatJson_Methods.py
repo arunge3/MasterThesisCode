@@ -155,203 +155,202 @@ def calculateOffset(first_event_time_str,first_timestamp_pos, fps_vid, fps_pos,o
         synced_time = synced_time + offseth2_fr
     return synced_time
     
-# def reformatJson(path_timeline, path_output_jsonl, first_timestamp_ms, offset, offset_h2, first_vh2, fps):
-#     """
-#     Reformats a JSON timeline of events into a JSONL file with specific event details.
-#     Args:
-#         path_timeline (str): Path to the input JSON file containing the timeline of events.
-#         path_output_jsonl (str): Path to the output JSONL file where reformatted events will be written.
-#         first_timestamp_ms (int): The first timestamp in milliseconds.
-#         offset (int): Offset value for time synchronization.
-#         offset_h2 (int): Offset value for the second half of the game.
-#         first_vh2 (int): First value for the second half.
-#         fps (int): Frames per second for time synchronization.
-#     Returns:
-#         None
-#     """
+def reformatJson(path_timeline, path_output_jsonl, first_timestamp_ms, offset, offset_h2, first_vh2, fps):
+    """
+    Reformats a JSON timeline of events into a JSONL file with specific event details.
+    Args:
+        path_timeline (str): Path to the input JSON file containing the timeline of events.
+        path_output_jsonl (str): Path to the output JSONL file where reformatted events will be written.
+        first_timestamp_ms (int): The first timestamp in milliseconds.
+        offset (int): Offset value for time synchronization.
+        offset_h2 (int): Offset value for the second half of the game.
+        first_vh2 (int): First value for the second half.
+        fps (int): Frames per second for time synchronization.
+    Returns:
+        None
+    """
 
-#     with open(path_timeline, 'r') as file:
-#         data = json.load(file)
+    with open(path_timeline, 'r') as file:
+        data = json.load(file)
 
-#     events = data.get('timeline', [])
+    events = data.get('timeline', [])
 
-#     with open(path_output_jsonl, 'w') as file:
-#         for event in events:
-#             competitor = event.get('competitor', None)
-#             type = event.get('type')
-#             id = event.get('id')
-#             match_clock = event.get('match_clock', None)
-#             ball_possession = {
-#                 'home': 'A',
-#                 'away': 'B',
-#                 'None': 'none'
-#             }.get(competitor, '')
+    with open(path_output_jsonl, 'w') as file:
+        for event in events:
+            competitor = event.get('competitor', None)
+            type = event.get('type')
+            id = event.get('id')
+            match_clock = event.get('match_clock', None)
+            ball_possession = {
+                'home': 'A',
+                'away': 'B',
+                'None': 'none'
+            }.get(competitor, '')
 
-#             match type:
-#                 case 'score_change':
-#                     pass_handball = ''
-#                     shot = 'successful'
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''    
-#                     static_ball_action ='kick-off'
-#                     referee_decision = 'goal'
-#                 case 'yellow_card':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''    
-#                     static_ball_action = ''
-#                     referee_decision = 'yellow'
-#                 case 'red_card':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''    
-#                     static_ball_action = ''
-#                     referee_decision = 'red'
-#                 case 'suspension':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''    
-#                     static_ball_action = ''
-#                     referee_decision = 'two min'
-#                 case 'seven_m_awarded':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = 'penalty'
-#                     ball_reception = ''
-#                     static_ball_action = 'penalty'
-#                     referee_decision = '7m'
-#                 case 'seven_m_missed':
-#                     pass_handball = ''
-#                     shot = 'saved'
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = 'penalty'
-#                     referee_decision = ''
-#                 case 'break_start':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case 'period_score':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case 'period_start':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = 'kick-off'
-#                     referee_decision = ''
-#                     period_name = event.get('period_name', None)
-#                 case 'shot_off_target':
-#                     pass_handball = ''
-#                     shot = 'off target'
-#                     unintentional_ball_release = 'other'
-#                     ball_reception = ''
-#                     static_ball_action = 'throw-in'
-#                     referee_decision = 'out of field'
-#                 case 'shot_blocked': 
-#                     pass_handball = ''
-#                     shot = 'blocked/intercepted'
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case 'shot_saved':
-#                     pass_handball = ''
-#                     shot = 'saved'
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case 'steal':
-#                     pass_handball = 'intercepted'
-#                     shot = ''
-#                     unintentional_ball_release = 'successful interference'
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case 'suspension_over':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case 'technical_rule_fault':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = 'other'
-#                     ball_reception = ''
-#                     static_ball_action = 'free-throw'
-#                     referee_decision = 'other'
-#                 case 'technical_ball_fault':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = 'other'
-#                     ball_reception = ''
-#                     static_ball_action = 'free-throw'
-#                     referee_decision = 'other'
-#                 case 'substitution':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case 'timeout':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case 'timeout_over':
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#                 case _:
-#                     pass_handball = ''
-#                     shot = ''
-#                     unintentional_ball_release = ''
-#                     ball_reception = ''
-#                     static_ball_action = ''
-#                     referee_decision = ''
-#             second_half = False       
-#             if match_clock is not None:
-#                 match_minutes, match_seconds = map(int, match_clock.split(':'))
-#                 threshold_minutes = 30
-#                 threshold_seconds = 0
-#                 if (match_minutes > threshold_minutes) or (match_minutes == threshold_minutes and match_seconds > threshold_seconds):
-#                     second_half = True                 
-#             if (type == 'period_start' and period_name == '2nd Half'):
-#                 second_half = True
+            if (type=='score_change'):
+                    pass_handball = ''
+                    shot = 'successful'
+                    unintentional_ball_release = ''
+                    ball_reception = ''    
+                    static_ball_action ='kick-off'
+                    referee_decision = 'goal'
+            elif (type=='yellow_card'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''    
+                    static_ball_action = ''
+                    referee_decision = 'yellow'
+            elif (type=='red_card'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''    
+                    static_ball_action = ''
+                    referee_decision = 'red'
+            elif (type== 'suspension'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''    
+                    static_ball_action = ''
+                    referee_decision = 'two min'
+            elif (type== 'seven_m_awarded'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = 'penalty'
+                    ball_reception = ''
+                    static_ball_action = 'penalty'
+                    referee_decision = '7m'
+            elif (type== 'seven_m_missed'):
+                    pass_handball = ''
+                    shot = 'saved'
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = 'penalty'
+                    referee_decision = ''
+            elif (type== 'break_start'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            elif (type== 'period_score'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            elif (type== 'period_start'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = 'kick-off'
+                    referee_decision = ''
+                    period_name = event.get('period_name', None)
+            elif (type== 'shot_off_target'):
+                    pass_handball = ''
+                    shot = 'off target'
+                    unintentional_ball_release = 'other'
+                    ball_reception = ''
+                    static_ball_action = 'throw-in'
+                    referee_decision = 'out of field'
+            elif (type== 'shot_blocked'): 
+                    pass_handball = ''
+                    shot = 'blocked/intercepted'
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            elif (type== 'shot_saved'):
+                    pass_handball = ''
+                    shot = 'saved'
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            elif (type== 'steal'):
+                    pass_handball = 'intercepted'
+                    shot = ''
+                    unintentional_ball_release = 'successful interference'
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            elif (type== 'suspension_over'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            elif (type== 'technical_rule_fault'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = 'other'
+                    ball_reception = ''
+                    static_ball_action = 'free-throw'
+                    referee_decision = 'other'
+            elif (type== 'technical_ball_fault'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = 'other'
+                    ball_reception = ''
+                    static_ball_action = 'free-throw'
+                    referee_decision = 'other'
+            elif (type== 'substitution'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            elif (type== 'timeout'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            elif (type== 'timeout_over'):
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            else:
+                    pass_handball = ''
+                    shot = ''
+                    unintentional_ball_release = ''
+                    ball_reception = ''
+                    static_ball_action = ''
+                    referee_decision = ''
+            second_half = False       
+            if match_clock is not None:
+                match_minutes, match_seconds = map(int, match_clock.split(':'))
+                threshold_minutes = 30
+                threshold_seconds = 0
+                if (match_minutes > threshold_minutes) or (match_minutes == threshold_minutes and match_seconds > threshold_seconds):
+                    second_half = True                 
+            if (type == 'period_start' and period_name == '2nd Half'):
+                second_half = True
                 
-#             reformatted_event = {
-#                 't_start': int(synchronize_time(str(event.get('time', None)),second_half, first_timestamp_ms, offset, offset_h2, first_vh2, fps)),
-#                 't_end': '-1',
-#                 'annotator': "id: " + str(id),
-#                 'labels': {
-#                     "type": type,
-#                     "pass": pass_handball,
-#                     "shot": shot,
-#                     "unintentional ball release": unintentional_ball_release,
-#                     "ball reception": ball_reception,
-#                     "static ball action": static_ball_action,
-#                     "referee decision": referee_decision,
-#                     "ball possession":ball_possession
-#                 }
-#             }
-#             file.write(json.dumps(reformatted_event) + '\n')
+            reformatted_event = {
+                't_start': int(synchronize_time(str(event.get('time', None)),second_half, first_timestamp_ms, offset, offset_h2, first_vh2, fps)),
+                't_end': '-1',
+                'annotator': "id: " + str(id),
+                'labels': {
+                    "type": type,
+                    "pass": pass_handball,
+                    "shot": shot,
+                    "unintentional ball release": unintentional_ball_release,
+                    "ball reception": ball_reception,
+                    "static ball action": static_ball_action,
+                    "referee decision": referee_decision,
+                    "ball possession":ball_possession
+                }
+            }
+            file.write(json.dumps(reformatted_event) + '\n')
