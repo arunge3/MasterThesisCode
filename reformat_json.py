@@ -35,7 +35,7 @@ Functions:
 # Main script
 fps = 29.97  # Frames pro Sekunde
 match_id = 23400263
-video_path, path_timeline, path_output_jsonl, file_path_position, cut_h1, offset_h2, first_vh2 = helpFuctions.get_paths_by_match_id(match_id)
+video_path, path_timeline, path_output_jsonl, file_path_position, cut_h1, offset_h2, first_vh2,_ = helpFuctions.get_paths_by_match_id(match_id)
 
-first_timestamp_ms = helpFuctions.load_first_timestamp_and_offset(file_path_position)
+first_timestamp_ms = helpFuctions.load_first_timestamp_position(file_path_position)
 helpFuctions.reformatJson(path_timeline, path_output_jsonl, first_timestamp_ms, cut_h1, offset_h2, first_vh2, fps) 

@@ -1,6 +1,6 @@
 import json
 import pandas as pd
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import os
 import pytz
 from floodlight.io.kinexon import get_meta_data
@@ -12,7 +12,7 @@ Functions:
     get_paths_by_match_id(match_id)
     reformatJson(path_timeline, path_output_jsonl, first_timestamp_ms, offset, offset_h2, first_vh2, fps)
 """
-def load_first_timestamp_and_offset(file_path):
+def load_first_timestamp_position(file_path):
     """
     Loads the first timestamp from a CSV file and converts it to a formatted date-time string.
     Args:

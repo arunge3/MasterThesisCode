@@ -42,7 +42,7 @@ def plot_phases(match_id, event_name):
     phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.csv.npy"
     event_path = f"{base_path}HBL_Synchronization\\Annotationen\\{event_name}.jsonl"
     _, _, _, positions_path, cut_h1, _, _, match = helpFuctions.get_paths_by_match_id(match_id)
-    first_time_pos_str, first_time_pos_unix, fps_positional = helpFuctions.load_first_timestamp_and_offset(positions_path)
+    first_time_pos_str, first_time_pos_unix, fps_positional = helpFuctions.load_first_timestamp_position(positions_path)
 
     # Initialize an empty list to store events
     events = []

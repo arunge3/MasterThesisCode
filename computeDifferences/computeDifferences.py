@@ -2,7 +2,6 @@ import json
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from collections import defaultdict
 
 """
 This script compares event timestamps from two JSONL files and generates statistical summaries and visualizations.
@@ -134,38 +133,38 @@ boxplot_filename = os.path.join(output_dir_box, f'boxplot_differences_match_{mat
 plt.savefig(boxplot_filename)
 plt.close() 
 
-# Speichern der Änderungen in einer CSV-Datei
+# Save adjustments in a CSV-File
 csv_filename = os.path.join(output_dir_det, f'differences_details_match_{match_id}.csv')
 df_changes.to_csv(csv_filename, index=False)
 
 print(f"Boxplot saved here: {boxplot_filename}")
 print(f"Calculations saved here: {csv_filename}")
 
-# Berechnung der summary_statistics mit nur "substitution" und "suspension_over" als Ausschlüsse
+# Calculation of summary_statistics just without "substitution" and "suspension_over"
 excluded_events_summary = ["substitution", "suspension_over"]
 df_filtered_summary = df_changes[~df_changes['event_type'].isin(excluded_events_summary)]
 
-# Durchschnitt und Standardabweichung für Event-Typen berechnen
+# Calculate mean and standard deviation for event-types
 summary_stats = df_filtered_summary.groupby('event_type')['difference'].agg(['mean', 'std']).reset_index()
 
-# Benennen der Spalten für Klarheit
+# Naming of columns
 summary_stats.columns = ['event_type', 'average_difference', 'std_deviation']
 
-# Gesamtdurchschnitt und -standardabweichung berechnen
+# Calculate overall mean and standard deviation
 overall_mean = df_filtered_summary['difference'].mean()
 overall_std = df_filtered_summary['difference'].std()
 
-# Gesamtstatistiken in ein neues DataFrame einfügen
+# Overall statistics into a new DataFrame
 overall_stats = pd.DataFrame({
     'event_type': ['overall'],
     'average_difference': [overall_mean],
     'std_deviation': [overall_std]
 })
 
-# Gesamte Statistiken mit den Event-Typ-Statistiken zusammenfügen
+# Combine overall statistics with event type statistics
 final_summary_stats = pd.concat([summary_stats, overall_stats], ignore_index=True)
 
-# Speichern der zusammengefassten Statistiken in einer CSV-Datei
+# Save the summary statistics to a CSV file
 summary_csv_filename = os.path.join(output_dir_sum, f'summary_statistics_match_{match_id}.csv')
 final_summary_stats.to_csv(summary_csv_filename, index=False)
 

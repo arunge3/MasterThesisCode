@@ -1,12 +1,7 @@
-from datetime import datetime
 import matplotlib.pyplot as plt
-from floodlight import Code
-import numpy as np
-import pytz
-from existing_code.rolling_mode import rolling_mode
+import plot_functions.processing as processing
 import matplotlib
 matplotlib.use('TkAgg',force=True)
-import helpFunctions.reformatJson_Methods as helpFuctions
 
 def plot_phases(match_id):
     """
@@ -18,7 +13,7 @@ def plot_phases(match_id):
     This function performs the following steps:
     1. Loads paths and initial timestamps for the match.
     2. Converts event frame numbers to absolute timestamps.
-    3. Loads positional data and phase predictions.
+    3. Loads positional data and phasse predictions.
     4. Calculates sequences of game phases.
     5. Defines positions and labels for each phase.
     6. Defines event colors based on categories.
@@ -29,51 +24,10 @@ def plot_phases(match_id):
     Note:
         The function assumes the existence of several helper functions and modules such as `helpFuctions`, `np`, `plt`, and `Code`.
     """
-    
-    # Paths
-    base_path = "D:\\Handball\\"
-    season = "season_20_21"  
-    _, path_timeline, _, positions_path, cut_h1, offset_h2, first_vh2, match= helpFuctions.get_paths_by_match_id(match_id)
-    first_time_pos_str, first_time_pos_unix, fps_positional = helpFuctions.load_first_timestamp_and_offset(positions_path)
-    phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.csv.npy"
-    
-    # Framerate of the video
-    fps_video = 29.97
-
-    # Load event data and adjust timestamps
-    event_json = helpFuctions.reformatJson_Time_only(path_timeline, first_time_pos_str, cut_h1, offset_h2, first_vh2, fps_video)
-    events = event_json.get('timeline', [])
-
-    # Match start timestamp 
-    first_time_stamp_event = helpFuctions.getFirstTimeStampEvent(path_timeline)
-    print("match_start_datetime:", first_time_stamp_event)
-    
-    # timezone
-    utc_timezone = pytz.utc
-
-    # timestamp of the first positional data converting to datetime
-    positional_data_start_timestamp = first_time_pos_unix/1000 # Unix timestamp
-    positional_data_start_date = datetime.fromtimestamp(positional_data_start_timestamp).replace(tzinfo=utc_timezone)
-    print("positional_data_start_date:", positional_data_start_date)
-
-    # Change the time of the events to the timeframe of the positional data
-    for event in events:
-        t_start = event["time"]
-        event_time_seconds = (t_start-cut_h1) / fps_video
-        event_absolute_timestamp = positional_data_start_timestamp + event_time_seconds
-        event_timestamp_date = datetime.fromtimestamp(event_absolute_timestamp).replace(tzinfo=utc_timezone)
-        print("event_timestamp_date:", event_timestamp_date)
-        event_timeframe= (event_timestamp_date-positional_data_start_date).seconds*20
-        event["time"] = event_timeframe
-
-    # Load positional data and phase predictions
-    predictions = np.load(phase_predictions_path)
-    predictions = rolling_mode(predictions, 101)
-    slices = Code(predictions, "match_phases", {0: "inac", 1: "CATT-A", 2: "CATT-B", 3: "PATT-A", 4: "PATT-B"}, fps_positional)
-
-    # get Sequences of the game phases
-    sequences = slices.find_sequences(return_type="list")
-    sequences = [x for x in sequences if x[1] - x[0] > slices.framerate]
+ 
+    events, team_info = processing.adjustTimestamp(match_id)
+    sequences = processing.calculate_sequences(match_id)
+    events, sequences= processing.synchronize_events(events, sequences, team_info)
 
     # Define positions for each phase
     phase_positions = {
