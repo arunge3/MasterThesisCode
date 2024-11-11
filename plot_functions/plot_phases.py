@@ -103,7 +103,7 @@ def plot_phases(match_id):
     ax.set_title("Continuous Game phase Timeline")
 
     # Set x-axis limit to show only from 0 to 2000
-    ax.set_xlim(0, 20000)
+    ax.set_xlim(7500, 50000)
     # Show plot
     plt.show()
 
