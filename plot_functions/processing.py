@@ -47,8 +47,8 @@ def adjustTimestamp(match_id):
 
     # Change the time of the events to the timeframe of the positional data
     for event in events:
-        t_start = event["time"]
-        event_time_seconds = (t_start-cut_h1) / fps_video
+        time = add_threshold_to_time(event)
+        event_time_seconds = (time-cut_h1) / fps_video
         event_absolute_timestamp = positional_data_start_timestamp + event_time_seconds
         event_timestamp_date = dt.fromtimestamp(event_absolute_timestamp).replace(tzinfo=utc_timezone)
         print("event_timestamp_date:", event_timestamp_date)
@@ -117,14 +117,7 @@ def synchronize_events(events, sequences, team_info):
         team_a_location: "A",
         team_b_location: "B"
     }
-    # Define positions for each phase
-    phase_positions = {
-        0: 0,  # (inac)
-        1: 1,  # (CATT-A)
-        2: 2,  # (CATT-B)
-        3: 3,  # (PATT-A)
-        4: 4   # (PATT-B)
-    }
+    
     for event in events:
         competitor_location = event.get("competitor")
         if competitor_location in location_to_team:
@@ -186,6 +179,45 @@ def give_last_event(events, time):
                 return event
     return None
 
+def add_threshold_to_time(event):
+    """
+    Adjusts the event time by adding a predefined threshold based on the event type.
+    Parameters:
+    event (dict): A dictionary containing event details. It must have the keys:
+        - "type" (str): The type of the event.
+        - "time" (float): The original time of the event.
+    Returns:
+    float: The adjusted event time after adding the threshold.
+    Event types and their corresponding thresholds.
+    If the event type is not found in the predefined thresholds, a default threshold of 0 is used.
+    """
+    
+     # Define the time thresholds for each event type
+    thresholds = {
+        "break_start":-359.4,
+        "match_ended": -431.7,
+        "period_score": -412.5,
+        "red_card": -233.5,
+        "score_change": -108.76,
+        "seven_m_awarded": -468.59,
+        "seven_m_missed": -74.0,
+        "shot_blocked": -311.92,
+        "shot_off_target": -236.86,
+        "shot_saved": -251.31,
+        "steal": -256.58,
+        "substitution": -5.03,
+        "suspension": -385.53,
+        "suspension_over": -4.16,
+        "technical_ball_fault": -244.72,
+        "technical_rule_fault": -258.31,
+        "timeout": -283.09,
+        "timeout_over": -29.18,
+        "yellow_card": -267.82
+    }
+    
+    threshold = thresholds.get(event["type"], 0)
+    return event["time"] + threshold
+
 def calculate_correct_phase(time, sequences, team_ab, event):
     """
     Determines the correct phase for a given event based on the provided time, sequences, and team.
@@ -202,7 +234,10 @@ def calculate_correct_phase(time, sequences, team_ab, event):
     # TODO timeout genommen immer am ende einer Phase oder innerhalb einer inaktiven Phase
     # TODO timeout ende immer in inaktiver phase vermutlich gegen ende von inaktiver Phase 
     # TODO kann man anhand der Positionsdaten ermitteln, ob ein Ball im Tor war oder nicht? INlusive Zeitstempel?
+    # DID 7m awarded immer in einer aktiven Phase
+    # DID den mean error anwenden bei allen aktionen. Weil alle outliers liegen unter dem mean error 
     
+       
     # Find the y value on the continuous line for this event's time (t_start)
         # Define positions for each phase
     phase_positions = {
