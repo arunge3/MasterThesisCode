@@ -79,6 +79,7 @@ def plot_phases(match_id):
         x_vals.append(end)
         y_vals.append(phase_positions[phase])
 
+
     # Create the plot
     _, ax = plt.subplots(figsize=(14, 4))
 
