@@ -46,13 +46,22 @@ def plot_phases(match_id):
     }
     # Define event colors based on categories
     event_colors = {
-        "score_change": "blue",
-        "suspension": "purple", "suspension_over": "purple",
-        "technical_rule_fault": "orange", "technical_ball_fault": "orange",
-        "steal": "green",
-        "shot_saved": "dodgerblue", "shot_off_target": "lightcoral",
-        "shot_blocked": "lightcoral", "seven_m_awarded": "lightcoral", "seven_m_missed": "lightcoral",
-        "yellow_card": "yellow", "red_card": "red",
+        "score_change": "dodgerblue",
+        "suspension": "purple", 
+        "suspension_over": "darkviolet",
+        "technical_rule_fault": "gold", 
+        "technical_ball_fault": "orange",
+        "steal": "limegreen",
+        "shot_saved": "mediumblue", 
+        "shot_off_target": "crimson",
+        "shot_blocked": "red", 
+        "seven_m_awarded": "deeppink", 
+        "seven_m_missed": "hotpink",
+        "yellow_card": "yellow", 
+        "red_card": "darkred",
+        "timeout": "cyan",
+        "timeout_over": "cyan",
+        "subsitution": "black",
         # Default for all other events
         "default": "grey"
     }
@@ -71,10 +80,14 @@ def plot_phases(match_id):
         y_vals.append(phase_positions[phase])
 
     # Create the plot
-    fig, ax = plt.subplots(figsize=(14, 4))
+    _, ax = plt.subplots(figsize=(14, 4))
 
     # Plot the continuous line
     ax.plot(x_vals, y_vals, color="black", linewidth=2)
+    
+    # Track labels to avoid duplicates in the legend
+    added_labels = set()
+    
     # Add event markers with labels from `type`
     for event in events:
         t_start = event["time"]
@@ -90,11 +103,14 @@ def plot_phases(match_id):
         # Plot event marker
         # ax.axvline(t_start, color="red", linestyle="--", linewidth=1)  # Vertical line at event time
         if event_y is not None:
-            ax.plot(t_start, event_y, 'x', color=color, markersize=8)
+            ax.plot(t_start, event_y, 'x', color=color, markersize=8, label=event_type if event_type not in added_labels else "")
             print(t_start, event_y, event_type)
+            added_labels.add(event_type)
             # ax.plot(t_start, event_y, 2, color="red")  # Marker at centerline for event
-            ax.text(t_start +0.1, event_y + 0.1, event_type, color=color, rotation=90, ha="right", va="bottom")  # Label with event type
-
+            # ax.text(t_start +0.1, event_y + 0.1, event_type, color=color, rotation=90, ha="right", va="bottom")  # Label with event type
+    # Add legend
+    ax.legend(title="Event Types", loc="upper right", bbox_to_anchor=(1.15, 1))
+    
     # Customize the plot
     ax.axhline(0, color='grey', linewidth=0.5) 
     ax.set_yticks(sorted(set(phase_positions.values())))
@@ -103,7 +119,7 @@ def plot_phases(match_id):
     ax.set_title("Continuous Game phase Timeline")
 
     # Set x-axis limit to show only from 0 to 2000
-    ax.set_xlim(7500, 50000)
+    ax.set_xlim(6000, 50000)
     # Show plot
     plt.show()
 
