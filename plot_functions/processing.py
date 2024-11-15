@@ -130,10 +130,20 @@ def synchronize_events(events, sequences, team_info):
         time = event["time"]
         if type == "score_change": 
             if (give_last_event != "seven_m_awarded"):
-                calculate_correct_phase(time, sequences, team_ab, event)
+                event_calc = calculate_correct_phase(time, sequences, team_ab, event)
+                # event["time"] = event_calc["time"]
+            else:
+                event["time"] = calculate_inactive_phase(time, sequences)
+        elif type == "7m_missed":
+            event["time"] = calculate_inactive_phase(time, sequences)
+        elif type == "timeout":
+            event["time"] = calculate_timeouts(time, sequences, team_ab, event)
         elif type == "seven_m_awarded" or type == "shot_off_target" or type == "shot_saved" or type == "shot_blocked" or type == "technical_ball_fault" or type == "technical_rule_fault" or type == "steal":
-           calculate_correct_phase(time, sequences, team_ab, event)
+            event_calc = calculate_correct_phase(time, sequences, team_ab, event)
+            # event["time"] = event_calc["time"]
         # if type in ["yellow_card", "red_card", "suspension_over", "technical_rule_fault", "technical_ball_fault", "steal", "shot_saved", "shot_off_target", "shot_blocked", "seven_m_awarded", "seven_m_missed", "yellow_card", "red_card"]:
+        elif type == "timeout_over":
+            event["time"] = calculate_timeouts_over(sequences, event, events)
     return events, sequences
 
 def searchPhase(time, sequences, competitor):
@@ -174,7 +184,7 @@ def give_last_event(events, time):
     """
     
     for event in reversed(events):
-        if event["time"] <= time:
+        if event["time"] < time:
             if event["type"] not in ["suspension", "yellow_card", "red_card", "suspension_over"]:
                 return event
     return None
@@ -218,6 +228,78 @@ def add_threshold_to_time(event):
     threshold = thresholds.get(event["type"], 0)
     return event["time"] + threshold
 
+def calculate_inactive_phase(time, sequences):
+    phase = None
+    for start, end, phase in sequences:
+        if start <= time < end:
+            break
+    if (phase == 0):
+        print("correct Phase")  
+    else:
+        for _, end, phase in reversed(sequences):
+            if end <= time:
+                if phase == 0:
+                    return end-1 
+    return 0
+
+def calculate_timeouts(time, sequences, team_ab, event):
+    if event["type"] == "timeout":
+        phase_timeout = None
+        for start, end, phase in sequences:
+            if start <= time < end:
+                phase_timeout = phase
+                break
+        if (phase_timeout == 0):
+            print("correct Phase")
+            return time
+        elif (phase_timeout == 1 or phase_timeout == 3 and team_ab == "A") or (phase_timeout == 2 or phase_timeout == 4 and team_ab == "B"):
+            if time == end-1:
+                print("correct Phase")
+                return time
+            else: 
+                return end-1
+        else:          
+            # Go through sequences in reverse to find the last matching phase before `time`
+            for _, end, phase in reversed(sequences):
+                if end <= time:
+                    if (phase == 1 or phase == 3) and team_ab == "A":
+                        return end-1  # Return the end of this phase for competitor "A"
+                    elif (phase == 2 or phase == 4) and team_ab == "B":
+                        return end-1  # Return the end of this phase for competitor "B"
+    return None  # Return None if no valid phase was found before `time`
+
+def calculate_timeouts_over(sequences, event, events):
+    if event["type"] == "timeout_over":
+        time = event["time"]
+        for start, end, phase in sequences:
+            if start <= time < end:
+                break
+        if (phase == 0):
+            #TODO Ich möchte berechnen dass das letzte Event das Timeout war und das in der Zeit
+            # dazwischen nur inaktive phase war
+            # TODO ist noch flasch gibt das flasche event zurück 
+            lastevent= give_last_event(events, time)
+            if(lastevent["type"] == "timeout"):
+                return time
+            else:
+                raise ValueError("Events are in wrong order!")
+        else: 
+            time = calculate_inactive_phase(time, sequences)
+            lastevent= give_last_event(events, time)
+            if(lastevent["type"] == "timeout"):
+                return time
+    return None
+
+def checkSamePhase(startTime, endtime, sequences, phase):
+    for start, end, phaseAct in sequences:
+        if startTime >= start and endtime < end:
+            if(phase == phaseAct):
+                return endtime
+            else:
+                return None
+        elif startTime >= start and endtime >= end:
+            return end
+    return None
 def calculate_correct_phase(time, sequences, team_ab, event):
     """
     Determines the correct phase for a given event based on the provided time, sequences, and team.
@@ -230,32 +312,27 @@ def calculate_correct_phase(time, sequences, team_ab, event):
         None: The function modifies the event dictionary in place if the phase is incorrect.
     """
     
-    # TODO 7m missed in der Regel in einer inaktiven Phase 
+    # DID 7m missed oder Tor nach 7_m awareded in der Regel in einer inaktiven Phase 
     # TODO timeout genommen immer am ende einer Phase oder innerhalb einer inaktiven Phase
     # TODO timeout ende immer in inaktiver phase vermutlich gegen ende von inaktiver Phase 
     # TODO kann man anhand der Positionsdaten ermitteln, ob ein Ball im Tor war oder nicht? INlusive Zeitstempel?
-    # DID 7m awarded immer in einer aktiven Phase
+    # DID
+    # 7m awarded immer in einer aktiven Phase
     # DID den mean error anwenden bei allen aktionen. Weil alle outliers liegen unter dem mean error 
     
        
     # Find the y value on the continuous line for this event's time (t_start)
         # Define positions for each phase
-    phase_positions = {
-        0: 0,  # (inac)
-        1: 1,  # (CATT-A)
-        2: 2,  # (CATT-B)
-        3: 3,  # (PATT-A)
-        4: 4   # (PATT-B)
-    }
     phase = None
     for start, end, phase in sequences:
         if start <= time < end:
-            phase = phase_positions[phase]
             break
     if (phase == 1 or phase == 3 and team_ab == "A") or (phase == 2 or phase == 4 and team_ab == "B"):
         print("correct Phase")
+       
     else:
         new_time = searchPhase(time, sequences, team_ab)
         if new_time is not None:
             event["time"] = new_time
+            return event
 
