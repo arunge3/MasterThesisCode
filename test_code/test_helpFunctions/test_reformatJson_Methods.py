@@ -1,10 +1,9 @@
 import pytest
 from unittest.mock import patch, MagicMock
 import pandas as pd
-from ...code.helpFunctions.reformatJson_Methods import get_paths_by_match_id   
+from src.helpFunctions import reformatJson_Methods
 
-@patch("code.helpFunctions.reformatJson_Methods.pd.read_csv")
-@patch("code.helpFunctions.reformatJson_Methods.os.path.join")
+
 def test_get_paths_by_match_id(mock_join, mock_read_csv):
     # Mock data for CSV files
     mock_csv_data = pd.DataFrame({
@@ -28,7 +27,7 @@ def test_get_paths_by_match_id(mock_join, mock_read_csv):
     mock_join.side_effect = lambda *args: "/".join(args)
 
     # Call the function with a mock match_id
-    result = get_paths_by_match_id(1)
+    result = reformatJson_Methods.get_paths_by_match_id(1)
 
     # Assert the expected results
     assert result == (

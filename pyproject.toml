@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MasterThesisCode"
+version = "0.1.0"
+description = "A project for my master's thesis"
+authors = [{name = "Annabelle Runge", email = "arung3@smail.uni-koeln.de"}]
+license = {text = "MIT"}
+readme = "README.md"
+dependencies = ["pandas", "pytest"]
+requires-python = ">=3.8" 
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+testpaths = ["test_"]
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+[tool.flake8]
+max-line-length = 88
+exclude = ["build", "dist"]
+
+[tool.mypy]
+strict = true
+
+[tool.setuptools]
+packages = ["computeDifferences", "existing_code", "helpFunctions", "plot_functions"]
+package-dir = {"" = "src"}

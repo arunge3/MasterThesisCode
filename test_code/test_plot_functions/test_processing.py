@@ -1,6 +1,3 @@
-import pytest
-from plot_functions.processing import adjustTimestamp
-
 def test_adjustTimestamp():
     match_id = 12345
     # result = adjustTimestamp(match_id)
