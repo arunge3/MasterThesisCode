@@ -161,7 +161,7 @@ def get_paths_by_match_id(match_id: int
     )
 
 
-def getFirstTimeStampEvent(path_timeline: str) -> str:
+def getFirstTimeStampEvent(path_timeline: str) -> Optional[str]:
     """
     Extracts the timestamp of the first "match_started" event from
     a JSON timeline file.
@@ -178,18 +178,17 @@ def getFirstTimeStampEvent(path_timeline: str) -> str:
     for event in events:
         if event.get("type") == "match_started":
             return str(event.get("time"))
-    return ""
+    return None
 
 
 def calculateOffset(
-    first_event_time_str: str,
-    first_timestamp_pos: int,
-    fps_vid: int,
-    fps_pos: int,
-    offset_fr: int,
-    second_half: bool,
-    offseth2_fr: int,
-) -> int:
+        first_event_time_str: str,
+        first_timestamp_pos: int,
+        fps_vid: int,
+        fps_pos: int,
+        offset_fr: int,
+        second_half: bool,
+        offseth2_fr: int) -> int:
     """
     Information why I did the synchronisation like this:
     Das Event "matched_started" inklusive Zeitstempel wird verwendet,
@@ -228,8 +227,6 @@ def calculateOffset(
 
     delta = first_event_time - first_timestamp_pos_date
     delta_fr_pos = delta.seconds * fps_pos
-    # delta_fr_vid = delta.seconds * fps_vid
-    # return delta_fr
     synced_time = delta_fr_pos + offset_fr - delta_fr_pos
     if second_half:
         synced_time = synced_time + offseth2_fr
@@ -237,16 +234,13 @@ def calculateOffset(
 
 
 def reformatJson(
-    path_timeline: str,
-    path_output_jsonl: str,
-    first_timestamp_ms: Optional[Union[str, tuple[Any]]],
-    offset: int,
-    offset_h2: int,
-    first_vh2: int,
-    fps: int,
-
-
-) -> None:
+        path_timeline: str,
+        path_output_jsonl: str,
+        first_timestamp_ms: Optional[Union[str, tuple[Any]]],
+        offset: int,
+        offset_h2: int,
+        first_vh2: int,
+        fps: int) -> None:
     """
     Reformats a JSON timeline of events into a JSONL file with specific event
     details.

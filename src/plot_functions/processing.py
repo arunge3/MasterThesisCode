@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from typing import Any
+from typing import Any, Optional
 
 import numpy as np
 import pytz  # type: ignore
@@ -199,7 +199,8 @@ def synchronize_events(events: list[Any],
 
 
 def searchPhase(time: int,
-                sequences: list[tuple[int, int, str]], competitor: str) -> int:
+                sequences: list[tuple[int, int, str]], competitor: str
+                ) -> Optional[int]:
     """
     Searches for the last matching phase before a given time for a specified
     competitor.
@@ -227,11 +228,11 @@ def searchPhase(time: int,
             elif (phase == "2" or phase == "4") and competitor == "B":
                 return end - 1  # Return the end of this phase for
                 # competitor "B"
-    return 0  # Return 0 if no valid phase was found before `time`
+    return None  # Return None if no valid phase was found before `time`
 
 
 def give_last_event(events: list[Any],
-                    time: int) -> dict[Any, Any]:
+                    time: int) -> Any:
     """
     Returns the last event from the list of events that occurred
     before or at the given time, excluding certain types of events.
@@ -257,7 +258,7 @@ def give_last_event(events: list[Any],
                 "suspension_over",
             ]:
                 return event
-    return event
+    return None
 
 
 def add_threshold_to_time(event: dict[Any, Any]
@@ -307,7 +308,7 @@ def add_threshold_to_time(event: dict[Any, Any]
 
 
 def calculate_inactive_phase(time: int, sequences: list[tuple[int, int, str]]
-                             ) -> int:
+                             ) -> Optional[int]:
     """
     Calculate the inactive phase for a given time based on
     sequences. This function determines the inactive phase for
@@ -341,12 +342,12 @@ def calculate_inactive_phase(time: int, sequences: list[tuple[int, int, str]]
             if end <= time:
                 if phase == "0":
                     return end - 1
-    return 0
+    return None
 
 
 def calculate_timeouts(time: int, sequences: list[tuple[int, int, str]],
                        team_ab: str, event: dict[Any, Any]
-                       ) -> int:
+                       ) -> Optional[int]:
     """
     Calculate the appropriate timeout time based on the given
     event and sequences.
@@ -360,7 +361,7 @@ def calculate_timeouts(time: int, sequences: list[tuple[int, int, str]],
                     Must include a key
         "type" with value "timeout".
     Returns:
-        int: The calculated timeout time if a valid
+        int or NOne: The calculated timeout time if a valid
         phase is found, otherwise None.
     """
 
@@ -396,12 +397,12 @@ def calculate_timeouts(time: int, sequences: list[tuple[int, int, str]],
                         return (
                             end - 1
                         )  # Return the end of this phase for competitor "B"
-    return -1  # Return -1 if no valid phase was found before `time`
+    return None  # Return None if no valid phase was found before `time`
 
 
 def calculate_timeouts_over(sequences: list[tuple[int, int, str]],
                             event: dict[Any, Any], events: list[Any]
-                            ) -> int:
+                            ) -> Optional[int]:
     """
     Calculate the time of a timeout over event within given sequences.
     Args:
@@ -438,17 +439,18 @@ def calculate_timeouts_over(sequences: list[tuple[int, int, str]],
             else:
                 raise ValueError("Events are in wrong order!")
         else:
-            time = calculate_inactive_phase(time, sequences)
-            lastevent = give_last_event(events, time)
-            if lastevent["type"] == "timeout":
-                return time
-    return -1
+            time_inactive = calculate_inactive_phase(time, sequences)
+            if time_inactive is not None:
+                lastevent = give_last_event(events, time_inactive)
+                if lastevent["type"] == "timeout":
+                    return time_inactive
+    return None
 
 
 def checkSamePhase(
     startTime: int, endtime: int,
     sequences: list[tuple[int, int, str]], phase: str
-) -> int:
+) -> Optional[int]:
     """
     Check if a given time interval falls within a specific phase in a
     sequence of phases.
@@ -476,7 +478,7 @@ def checkSamePhase(
                 return -1
         elif startTime >= start and endtime >= end:
             return end
-    return -1
+    return None
 
 
 def calculate_correct_phase(
