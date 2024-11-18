@@ -44,11 +44,11 @@ python main.py
 
 ## Project Structure
 
-- `computeDifference/`: Contains code to calculate the differences between newly annotated and original events. 
-- `existingCode/`: Code that was already available from Manuel Bassek. 
+- `compute_difference/`: Contains code to calculate the differences between newly annotated and original events. 
+- `existing_code/`: Code that was already available from Manuel Bassek. 
 - `figures/`: Contains the generated plots that represent the synchronisation of the game progression phases and event data.
-- `helpFunctions/`: Auxiliary functions that are used for reformatted.
-- `plotFunctions/`: Contains code that performs the rule-based synchronisation and code that creates the graphics.
+- `help_functions/`: Auxiliary functions that are used for reformatted.
+- `plot_functions/`: Contains code that performs the rule-based synchronisation and code that creates the graphics.
 - `main.py`: This function must be executed so that the rule-based synchronisation is carried out for a game. 
 - `reformat_json`: The code was used to prepare the event data for the annotation module. 
 - `README.md`: Project documentation.
