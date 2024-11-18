@@ -1,2 +1,2 @@
-def test_plot_phases():
+def test_plot_phases() -> None:
     assert True

@@ -1,14 +1,12 @@
-
 import numpy as np
-
-from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist
 
 
 def scale_coords_from_zero_to_one(coords, aspect_x=1, aspect_y=0.5):
     """
-    scales coordinates in numpy array from zero to specific aspect ratio, e.g. x{0, 1}
-    and y{0, 0.5) for handball pitch.
+    scales coordinates in numpy array from zero to specific aspect ratio, e.g.
+    x{0, 1} and y{0, 0.5) for handball pitch.
     Parameters
     ----------
     coords
@@ -31,12 +29,14 @@ def scale_coords_from_zero_to_one(coords, aspect_x=1, aspect_y=0.5):
 
 def template_matching(coords, templates):
     """
-    Performs formation recognition with template matching. Note that the coordinates and the templates
-    have to be in the same playing direction, e.g. from left to right so the template matching makes sense
+    Performs formation recognition with template matching. Note that the
+    coordinates and the stemplates have to be in the same playing
+    direction, e.g. from left to right so the template matching makes sense
     Parameters
     ----------
     coords: xy object the template matching should be performed on
-    templates: dict with keys: names of the templates, values: lists of coordinates, like in xy.object
+    templates: dict with keys: names of the templates, values: lists
+    of coordinates, like in xy.object
 
     Returns
     -------
@@ -50,15 +50,19 @@ def template_matching(coords, templates):
         templates[key] = scale_coords_from_zero_to_one(templates[key])
         # plt.scatter(templates[key][:, ::2], templates[key][:, 1::2])
 
-    ### initial role assignment
+    # initial role assignment
     average_position = np.nanmean(coords.xy, axis=0)
 
     # solve for role swaps
-    # find and delete columns with nan because linear_sum_assignment() function is a pussy
+    # find and delete columns with nan because
+    # linear_sum_assignment()
+    # function is a pussy
     nan_cols = np.argwhere(np.isnan(coords).all(axis=0)).reshape(-1)
     coords_nonan = np.delete(coords, nan_cols, 1)
     average_position = np.delete(average_position, nan_cols, 0)
-    solved_pos = np.full((coords_nonan.shape[0], int(coords_nonan.shape[1]/2), 2), np.NaN)
+    solved_pos = np.full(
+        (coords_nonan.shape[0], int(coords_nonan.shape[1] / 2), 2), np.NaN
+    )
 
     # loop through frames and assign role for each frame
     for i, frame in enumerate(coords_nonan):
@@ -66,25 +70,34 @@ def template_matching(coords, templates):
         frame_nan = np.argwhere(np.isnan(frame)).reshape(-1)
         frame_nonan = np.delete(frame, frame_nan)
         # calculate cost_matrix between frame and initial role
-        cost_matrix = cdist(frame.reshape((-1, 2)), average_position.reshape((-1, 2)))
-        # set nans in cost matrix to high values so they are disregarded (hopefully)
-        cost_matrix = np.where(np.isnan(cost_matrix) == True, 1000000, cost_matrix)
+        cost_matrix = cdist(frame.reshape((-1, 2)),
+                            average_position.reshape((-1, 2)))
+        # set nans in cost matrix to high values so they are
+        # disregarded (hopefully)
+        cost_matrix = np.where(np.isnan(cost_matrix) ==
+                               True, 1000000, cost_matrix)
         # solve linear sum assignment
         row, col = linear_sum_assignment(cost_matrix)
         # sort coordinates into solved roles
-        solved_frame = np.full((int(coords_nonan.shape[1]/2), 2), np.NaN)
+        solved_frame = np.full((int(coords_nonan.shape[1] / 2), 2), np.NaN)
         solved_frame[row] = frame.reshape((-1, 2))[col]
         solved_pos[i] = solved_frame
 
     average_position_solved = np.nanmean(solved_pos, axis=0)
 
-
     # normalize coords from 0 to 1
-    average_position_scaled = scale_coords_from_zero_to_one(average_position_solved)
+    average_position_scaled = scale_coords_from_zero_to_one(
+        average_position_solved)
 
     fsims = {}
     for formation in templates:
-        cost_matrix = np.square(cdist(average_position_scaled, templates[formation].reshape(int(templates[formation].shape[1]/2), 2)))
+        cost_matrix = np.square(
+            cdist(
+                average_position_scaled,
+                templates[formation].reshape(
+                    int(templates[formation].shape[1] / 2), 2),
+            )
+        )
         row, col = linear_sum_assignment(cost_matrix)
         cost = cost_matrix[row, col].mean()
         fsim = 1 - cost * 3

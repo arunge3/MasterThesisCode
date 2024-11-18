@@ -1,103 +1,145 @@
 from datetime import datetime as dt
+from typing import Any
+
 import numpy as np
-import pytz
-import helpFunctions.reformatJson_Methods as helpFuctions
-from existing_code.rolling_mode import rolling_mode
+import pytz  # type: ignore
 from floodlight import Code
 
-def adjustTimestamp(match_id): 
+import helpFunctions.reformatJson_Methods as helpFuctions
+from existing_code.rolling_mode import rolling_mode
+
+
+def adjustTimestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
     """
-    Adjusts the timestamps of events in a match to align with the positional data timeframe.
+    Adjusts the timestamps of events in a match to align with the
+    positional data timeframe.
     Args:
         match_id (int): The unique identifier for the match.
     Returns:
-        None
+        Tuple
     This function performs the following steps:
-    1. Retrieves various paths and parameters related to the match using the match_id.
+    1. Retrieves various paths and parameters related to the match
+    using the match_id.
     2. Loads the first timestamp of the positional data.
-    3. Loads and reformats the event data to adjust timestamps based on the positional data.
+    3. Loads and reformats the event data to adjust timestamps based on
+    the positional data.
     4. Converts the first positional data timestamp to a datetime object.
-    5. Adjusts the timestamps of each event to align with the positional data timeframe.
+    5. Adjusts the timestamps of each event to align with the positional
+    data timeframe.
     """
     # Paths
-    _, path_timeline, _, positions_path, cut_h1, offset_h2, first_vh2, match= helpFuctions.get_paths_by_match_id(match_id)
-    first_time_pos_str, first_time_pos_unix, fps_positional = helpFuctions.load_first_timestamp_position(positions_path)    
-    
+    (
+        _, path_timeline, _, positions_path, cut_h1, offset_h2,
+        first_vh2, match
+    ) = helpFuctions.get_paths_by_match_id(match_id)
+    (
+        first_time_pos_str,
+        first_time_pos_unix,
+        fps_positional,
+    ) = helpFuctions.load_first_timestamp_position(positions_path)
+
     # Framerate of the video
     fps_video = 29.97
     # Load event data and adjust timestamps
-    event_json = helpFuctions.reformatJson_Time_only(path_timeline, first_time_pos_str, cut_h1, offset_h2, first_vh2, fps_video)
-    
+    event_json = helpFuctions.reformatJson_Time_only(
+        path_timeline, first_time_pos_str, cut_h1, offset_h2,
+        first_vh2, fps_video
+    )
+
     competitors = event_json["sport_event"]["competitors"]
     # Extract team names and qualifiers
     team_info = {team["name"]: team["qualifier"] for team in competitors}
-    events = event_json.get('timeline', [])
+    events = event_json.get("timeline", [])
 
-    # Match start timestamp 
+    # Match start timestamp
     first_time_stamp_event = helpFuctions.getFirstTimeStampEvent(path_timeline)
     print("match_start_datetime:", first_time_stamp_event)
-    
+
     # timezone
     utc_timezone = pytz.utc
 
     # timestamp of the first positional data converting to datetime
-    positional_data_start_timestamp = first_time_pos_unix/1000 # Unix timestamp
-    positional_data_start_date = dt.fromtimestamp(positional_data_start_timestamp).replace(tzinfo=utc_timezone)
+    positional_data_start_timestamp = first_time_pos_unix / 1000
+    positional_data_start_date = dt.fromtimestamp(
+        positional_data_start_timestamp
+    ).replace(tzinfo=utc_timezone)
     print("positional_data_start_date:", positional_data_start_date)
 
     # Change the time of the events to the timeframe of the positional data
     for event in events:
         time = add_threshold_to_time(event)
-        event_time_seconds = (time-cut_h1) / fps_video
-        event_absolute_timestamp = positional_data_start_timestamp + event_time_seconds
-        event_timestamp_date = dt.fromtimestamp(event_absolute_timestamp).replace(tzinfo=utc_timezone)
+        event_time_seconds = (time - cut_h1) / fps_video
+        event_absolute_timestamp = (
+            positional_data_start_timestamp + event_time_seconds)
+        event_timestamp_date = (dt.fromtimestamp(event_absolute_timestamp)
+                                .replace(tzinfo=utc_timezone))
         print("event_timestamp_date:", event_timestamp_date)
-        event_timeframe= (event_timestamp_date-positional_data_start_date).seconds*fps_positional
+        event_timeframe = (
+            event_timestamp_date - positional_data_start_date
+        ).seconds * fps_positional
         event["time"] = event_timeframe
-        
+
     return events, team_info
 
-def calculate_sequences(match_id):
+
+def calculate_sequences(match_id: int) -> list[Any]:
     """
     Calculate sequences of game phases for a given match.
     Args:
         match_id (str): The identifier for the match.
     Returns:
-        list: A list of sequences where each sequence is represented as a tuple (start_frame, end_frame).
+        list: A list of sequences where each sequence is represented as a
+        tuple (start_frame, end_frame).
               Only sequences longer than one frame duration are included.
     """
-    
+    sequences: list[Any]
     # Paths
     base_path = "D:\\Handball\\"
-    season = "season_20_21"  
-    _, _, _, positions_path, _, _, _, match= helpFuctions.get_paths_by_match_id(match_id)
-    _, _, fps_positional = helpFuctions.load_first_timestamp_position(positions_path)
+    season = "season_20_21"
+    _, _, _, positions_path, _, _, _, match = (
+        helpFuctions.get_paths_by_match_id(match_id))
+    _, _, fps_positional = helpFuctions.load_first_timestamp_position(
+        positions_path)
     phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.npy"
-    
+
     # Load positional data and phase predictions
     predictions = np.load(phase_predictions_path)
     predictions = rolling_mode(predictions, 101)
-    slices = Code(predictions, "match_phases", {0: "inac", 1: "CATT-A", 2: "CATT-B", 3: "PATT-A", 4: "PATT-B"}, fps_positional)
+    slices = Code(
+        predictions,
+        "match_phases",
+        {0: "inac", 1: "CATT-A", 2: "CATT-B", 3: "PATT-A", 4: "PATT-B"},
+        fps_positional,
+    )
 
     # get Sequences of the game phases
     sequences = slices.find_sequences(return_type="list")
     sequences = [x for x in sequences if x[1] - x[0] > slices.framerate]
-    
+
     return sequences
 
-def synchronize_events(events, sequences, team_info):
+
+def synchronize_events(events: list[Any],
+                       sequences: list[tuple[int, int, str]],
+                       team_info: dict[str, str]
+                       ) -> tuple[list[Any], list[Any]]:
     """
     Synchronize events with sequences and team information.
-    This function processes a list of events and sequences, and synchronizes them based on the provided team information.
-    It assigns teams based on alphabetical order, determines their locations (home or away), and maps events to the corresponding teams.
+    This function processes a list of events and sequences, and synchronizes
+    them based on the provided team information.
+    It assigns teams based on alphabetical order, determines their
+    locations (home or away), and maps events to the corresponding teams.
     Args:
-        events (list of dict): A list of event dictionaries, where each dictionary contains event details such as type, time, and competitor.
-        sequences (list): A list of sequences to be synchronized with the events.
-        team_info (dict): A dictionary containing team names as keys and their locations (home or away) as values.
+        events (list of dict): A list of event dictionaries, where each
+        dictionary contains event details such as type, time, and competitor.
+        sequences (list): A list of sequences to be synchronized with the
+        events.
+        team_info (dict): A dictionary containing team names as keys and
+        their locations (home or away) as values.
     Returns:
         tuple: A tuple containing the updated events and sequences.
     """
-    
+
     # Sort team names alphabetically
     team_names = list(team_info.keys())
     sorted_teams = sorted(team_names)
@@ -113,24 +155,26 @@ def synchronize_events(events, sequences, team_info):
     print(f"Team A: {team_a} ({team_a_location})")
     print(f"Team B: {team_b} ({team_b_location})")
     # Create a mapping of location to Team A or Team B
-    location_to_team = {
-        team_a_location: "A",
-        team_b_location: "B"
-    }
-    
+    location_to_team = {team_a_location: "A", team_b_location: "B"}
+
     for event in events:
         competitor_location = event.get("competitor")
         if competitor_location in location_to_team:
-            team_ab = location_to_team[competitor_location]  # Map "home"/"away" to "A" or "B"
-            print(f"Event Type: {event['type']}, Competitor: Team {team_ab} ({competitor_location})")
+            team_ab = location_to_team[
+                competitor_location
+            ]  # Map "home"/"away" to "A" or "B"
+            print(
+                f"Event Type: {event['type']}, Competitor: Team "
+                f"{team_ab}({competitor_location})")
         else:
             # Handle events without a competitor if necessary
             print(f"Event Type: {event['type']}, Competitor: None")
         type = event["type"]
         time = event["time"]
-        if type == "score_change": 
-            if (give_last_event != "seven_m_awarded"):
-                event_calc = calculate_correct_phase(time, sequences, team_ab, event)
+        if type == "score_change":
+            if str(give_last_event) != "seven_m_awarded":
+                calculate_correct_phase(
+                    time, sequences, team_ab, event)
                 # event["time"] = event_calc["time"]
             else:
                 event["time"] = calculate_inactive_phase(time, sequences)
@@ -138,73 +182,104 @@ def synchronize_events(events, sequences, team_info):
             event["time"] = calculate_inactive_phase(time, sequences)
         elif type == "timeout":
             event["time"] = calculate_timeouts(time, sequences, team_ab, event)
-        elif type == "seven_m_awarded" or type == "shot_off_target" or type == "shot_saved" or type == "shot_blocked" or type == "technical_ball_fault" or type == "technical_rule_fault" or type == "steal":
-            event_calc = calculate_correct_phase(time, sequences, team_ab, event)
-            # event["time"] = event_calc["time"]
-        # if type in ["yellow_card", "red_card", "suspension_over", "technical_rule_fault", "technical_ball_fault", "steal", "shot_saved", "shot_off_target", "shot_blocked", "seven_m_awarded", "seven_m_missed", "yellow_card", "red_card"]:
+        elif (
+            type == "seven_m_awarded"
+            or type == "shot_off_target"
+            or type == "shot_saved"
+            or type == "shot_blocked"
+            or type == "technical_ball_fault"
+            or type == "technical_rule_fault"
+            or type == "steal"
+        ):
+            calculate_correct_phase(
+                time, sequences, team_ab, event)
         elif type == "timeout_over":
             event["time"] = calculate_timeouts_over(sequences, event, events)
     return events, sequences
 
-def searchPhase(time, sequences, competitor):
+
+def searchPhase(time: int,
+                sequences: list[tuple[int, int, str]], competitor: str) -> int:
     """
-    Searches for the last matching phase before a given time for a specified competitor.
+    Searches for the last matching phase before a given time for a specified
+    competitor.
     Args:
         time (int): The time before which to search for the phase.
-        sequences (list of tuples): A list of tuples where each tuple contains 
+        sequences (list of tuples): A list of tuples where each tuple contains
                                     (start_time, end_time, phase).
-        competitor (str): The competitor for whom the phase is being searched. 
+        competitor (str): The competitor for whom the phase is being searched.
                           Should be either "A" or "B".
     Returns:
-        int or None: The end time of the last matching phase before the given time 
-                     for the specified competitor, or None if no valid phase is found.
+        int: The end time of the last matching phase before the given
+                    time for the specified competitor, or None if no valid
+                    phase is found.
     """
-    
-    # Go through sequences in reverse to find the last matching phase before `time`
-    for _, end, phase in reversed(sequences):
+    # Go through sequences in reverse to find the last matching
+    # phase before `time`
+    start: int
+    end: int
+    phase: str
+    for start, end, phase in reversed(sequences):
         if end <= time:
-            if (phase == 1 or phase == 3) and competitor == "A":
-                return end-1  # Return the end of this phase for competitor "A"
-            elif (phase == 2 or phase == 4) and competitor == "B":
-                return end-1  # Return the end of this phase for competitor "B"
-    return None  # Return None if no valid phase was found before `time`
+            if (phase == "1" or phase == "3") and competitor == "A":
+                return end - 1  # Return the end of this phase
+                # for competitor "A"
+            elif (phase == "2" or phase == "4") and competitor == "B":
+                return end - 1  # Return the end of this phase for
+                # competitor "B"
+    return 0  # Return 0 if no valid phase was found before `time`
 
-def give_last_event(events, time):
+
+def give_last_event(events: list[Any],
+                    time: int) -> dict[Any, Any]:
     """
-    Returns the last event from the list of events that occurred before or at the given time,
-    excluding certain types of events.
+    Returns the last event from the list of events that occurred
+    before or at the given time, excluding certain types of events.
     Args:
-        events (list of dict): A list of event dictionaries, where each dictionary contains
-                               information about an event, including a "time" key and a "type" key.
-        time (int or float): The time threshold to compare events against.
+        events (list of dict): A list of event dictionaries, where each
+                                dictionary contains information about an
+                                event, including a "time" key and a
+                                "type" key.
+        time (int): The time threshold to compare events against.
     Returns:
-        dict or None: The last event dictionary that occurred before or at the given time and is not
-                      of type "suspension", "yellow_card", "red_card", or "suspension_over". If no
-                      such event is found, returns None.
+        dict or None: The last event dictionary that occurred before or at the
+                    given time and is not of type "suspension", "yellow_card",
+                    "red_card", or "suspension_over". If no such event is
+                    found, returns None.
     """
-    
+    event: dict[Any, Any]
     for event in reversed(events):
         if event["time"] < time:
-            if event["type"] not in ["suspension", "yellow_card", "red_card", "suspension_over"]:
+            if event["type"] not in [
+                "suspension",
+                "yellow_card",
+                "red_card",
+                "suspension_over",
+            ]:
                 return event
-    return None
+    return event
 
-def add_threshold_to_time(event):
+
+def add_threshold_to_time(event: dict[Any, Any]
+                          ) -> int:
     """
-    Adjusts the event time by adding a predefined threshold based on the event type.
+    Adjusts the event time by adding a predefined threshold
+    based on the event type.
     Parameters:
-    event (dict): A dictionary containing event details. It must have the keys:
+    event (dict): A dictionary containing event details.
+    It must have the keys:
         - "type" (str): The type of the event.
-        - "time" (float): The original time of the event.
+        - "time" (int): The original time of the event.
     Returns:
-    float: The adjusted event time after adding the threshold.
+    int: The adjusted event time after adding the threshold.
     Event types and their corresponding thresholds.
-    If the event type is not found in the predefined thresholds, a default threshold of 0 is used.
+    If the event type is not found in the predefined thresholds,
+    a default threshold of 0 is used.
     """
-    
-     # Define the time thresholds for each event type
+
+    # Define the time thresholds for each event type
     thresholds = {
-        "break_start":-359.4,
+        "break_start": -359.4,
         "match_ended": -431.7,
         "period_score": -412.5,
         "red_card": -233.5,
@@ -222,117 +297,240 @@ def add_threshold_to_time(event):
         "technical_rule_fault": -258.31,
         "timeout": -283.09,
         "timeout_over": -29.18,
-        "yellow_card": -267.82
+        "yellow_card": -267.82,
     }
-    
-    threshold = thresholds.get(event["type"], 0)
-    return event["time"] + threshold
 
-def calculate_inactive_phase(time, sequences):
+    threshold = thresholds.get(str(event["type"]), 0)
+    returnTime: int
+    returnTime = event["time"] + threshold
+    return returnTime
+
+
+def calculate_inactive_phase(time: int, sequences: list[tuple[int, int, str]]
+                             ) -> int:
+    """
+    Calculate the inactive phase for a given time based on
+    sequences. This function determines the inactive phase for
+    a given time by checking the provided sequences of start
+    and end times with associated phases. If the time falls within
+    a sequence where the phase is 0, it prints "correct Phase".
+    Otherwise, it searches in reverse to find the last sequence
+    where the phase is 0 and returns the end time minus one.
+    If no such sequence is found, it returns 0.
+    Args:
+        time (int): The time to check against the sequences.
+        sequences (list of tuples): A list of tuples where each
+                                    tuple contains (start, end, phase)
+                                    representing the starttime,
+                                    end time, and phase respectively.
+    Returns:
+        int: The end time minus one of the last sequence where
+        the phase is 0 or 0 if no such sequence is found.
+    """
+
     phase = None
+    start: int
+    end: int
     for start, end, phase in sequences:
         if start <= time < end:
             break
-    if (phase == 0):
-        print("correct Phase")  
+    if phase == "0":
+        print("correct Phase")
     else:
         for _, end, phase in reversed(sequences):
             if end <= time:
-                if phase == 0:
-                    return end-1 
+                if phase == "0":
+                    return end - 1
     return 0
 
-def calculate_timeouts(time, sequences, team_ab, event):
+
+def calculate_timeouts(time: int, sequences: list[tuple[int, int, str]],
+                       team_ab: str, event: dict[Any, Any]
+                       ) -> int:
+    """
+    Calculate the appropriate timeout time based on the given
+    event and sequences.
+    Args:
+        time (int): The current time in the event.
+        sequences (list of tuples): A list of tuples where each
+        tuple contains (start, end, phase) representing the
+        start time, end time, and phase of a sequence.
+        team_ab (str): The team identifier, either "A" or "B".
+        event (dict): A dictionary containing event details.
+                    Must include a key
+        "type" with value "timeout".
+    Returns:
+        int: The calculated timeout time if a valid
+        phase is found, otherwise None.
+    """
+
     if event["type"] == "timeout":
         phase_timeout = None
+        start: int
+        end: int
         for start, end, phase in sequences:
             if start <= time < end:
                 phase_timeout = phase
                 break
-        if (phase_timeout == 0):
+        if phase_timeout == "0":
             print("correct Phase")
             return time
-        elif (phase_timeout == 1 or phase_timeout == 3 and team_ab == "A") or (phase_timeout == 2 or phase_timeout == 4 and team_ab == "B"):
-            if time == end-1:
+        elif ((phase_timeout == "1" or phase_timeout == "3" and team_ab == "A")
+              or (phase_timeout == "2" or phase_timeout == "4"
+                  and team_ab == "B")):
+            if int(time) == int(end - 1):
                 print("correct Phase")
                 return time
-            else: 
-                return end-1
-        else:          
-            # Go through sequences in reverse to find the last matching phase before `time`
+            else:
+                return end - 1
+        else:
+            # Go through sequences in reverse to find the last matching phase
+            # before `time`
             for _, end, phase in reversed(sequences):
                 if end <= time:
-                    if (phase == 1 or phase == 3) and team_ab == "A":
-                        return end-1  # Return the end of this phase for competitor "A"
-                    elif (phase == 2 or phase == 4) and team_ab == "B":
-                        return end-1  # Return the end of this phase for competitor "B"
-    return None  # Return None if no valid phase was found before `time`
+                    if (phase == "1" or phase == "3") and team_ab == "A":
+                        return (
+                            end - 1
+                        )  # Return the end of this phase for competitor "A"
+                    elif (phase == "2" or phase == "4") and team_ab == "B":
+                        return (
+                            end - 1
+                        )  # Return the end of this phase for competitor "B"
+    return -1  # Return -1 if no valid phase was found before `time`
 
-def calculate_timeouts_over(sequences, event, events):
+
+def calculate_timeouts_over(sequences: list[tuple[int, int, str]],
+                            event: dict[Any, Any], events: list[Any]
+                            ) -> int:
+    """
+    Calculate the time of a timeout over event within given sequences.
+    Args:
+        sequences (list of tuples): A list of tuples where each tuple contains
+            the start time, end time, and phase of a sequence.
+        event (dict): A dictionary representing the current event with keys
+            such as "type" and "time".
+        events (list of dicts): A list of dictionaries representing all events
+            with keys such as "type" and "time".
+    Returns:
+        int or None: The time of the timeout over event if
+                conditions are met, otherwise None.
+    Raises:
+        ValueError: If the events are in the wrong order.
+    """
+
     if event["type"] == "timeout_over":
+        time: int
         time = event["time"]
+        start: int
+        end: int
+        phase: str
         for start, end, phase in sequences:
             if start <= time < end:
                 break
-        if (phase == 0):
-            #TODO Ich möchte berechnen dass das letzte Event das Timeout war und das in der Zeit
-            # dazwischen nur inaktive phase war
-            # TODO ist noch flasch gibt das flasche event zurück 
-            lastevent= give_last_event(events, time)
-            if(lastevent["type"] == "timeout"):
+        if phase == "0":
+            # TODO Ich möchte berechnen dass das letzte Event
+            # das Timeout war und das in der Zeit dazwischen
+            # nur inaktive phase war
+            # TODO ist noch flasch gibt das flasche event zurück
+            lastevent = give_last_event(events, time)
+            if lastevent["type"] == "timeout":
                 return time
             else:
                 raise ValueError("Events are in wrong order!")
-        else: 
+        else:
             time = calculate_inactive_phase(time, sequences)
-            lastevent= give_last_event(events, time)
-            if(lastevent["type"] == "timeout"):
+            lastevent = give_last_event(events, time)
+            if lastevent["type"] == "timeout":
                 return time
-    return None
+    return -1
 
-def checkSamePhase(startTime, endtime, sequences, phase):
+
+def checkSamePhase(
+    startTime: int, endtime: int,
+    sequences: list[tuple[int, int, str]], phase: str
+) -> int:
+    """
+    Check if a given time interval falls within a specific phase in a
+    sequence of phases.
+    Args:
+        startTime (int): The start time of the interval to check.
+        endtime (int): The end time of the interval to check.
+        sequences (list of tuples): A list of tuples where each tuple
+                                contains (start, end, phase)
+                                representing the start time,
+                                end time, and phase of a
+                                sequence.
+        phase (str): The phase to check against.
+    Returns:
+        int or None: Returns the end time of the interval if it falls
+                    within the specified phase, otherwise returns None.
+    """
+    start: int
+    end: int
+    phaseAct: str
     for start, end, phaseAct in sequences:
         if startTime >= start and endtime < end:
-            if(phase == phaseAct):
+            if phase == phaseAct:
                 return endtime
             else:
-                return None
+                return -1
         elif startTime >= start and endtime >= end:
             return end
-    return None
-def calculate_correct_phase(time, sequences, team_ab, event):
+    return -1
+
+
+def calculate_correct_phase(
+    time: int, sequences: list[tuple[int, int, str]], team_ab: str,
+    event: dict[Any, Any]
+) -> dict[Any, Any]:
     """
-    Determines the correct phase for a given event based on the provided time, sequences, and team.
+    Determines the correct phase for a given event based on the provided time,
+    sequences, and team.
     Args:
-        time (float): The time of the event.
-        sequences (list of tuples): A list of tuples where each tuple contains the start time, end time, and phase.
+        time (int): The time of the event.
+        sequences (list of tuples): A list of tuples where each tuple
+            contains the start time, end time, and phase.
         team_ab (str): The team identifier, either "A" or "B".
-        event (dict): The event dictionary which may be modified with a new time if the phase is incorrect.
+        event (dict): The event dictionary which may be modified with a new
+            time if the phase is incorrect.
     Returns:
-        None: The function modifies the event dictionary in place if the phase is incorrect.
+        DIct: The event dictionary with the updated time if the phase is
+            incorrect.
+        None: The function modifies the event dictionary in place if the phase
+            is incorrect.
     """
-    
-    # DID 7m missed oder Tor nach 7_m awareded in der Regel in einer inaktiven Phase 
-    # TODO timeout genommen immer am ende einer Phase oder innerhalb einer inaktiven Phase
-    # TODO timeout ende immer in inaktiver phase vermutlich gegen ende von inaktiver Phase 
-    # TODO kann man anhand der Positionsdaten ermitteln, ob ein Ball im Tor war oder nicht? INlusive Zeitstempel?
+
+    # DID 7m missed oder Tor nach 7_m awareded in der Regel in einer
+    # inaktiven Phase
+    # TODO timeout genommen immer am ende einer Phase oder innerhalb
+    # einer inaktiven Phase
+    # TODO timeout ende immer in inaktiver phase vermutlich gegen ende
+    # von inaktiver Phase
+    # TODO kann man anhand der Positionsdaten ermitteln, ob ein Ball im
+    # Tor war oder nicht?
+    # INlusive Zeitstempel?
     # DID
     # 7m awarded immer in einer aktiven Phase
-    # DID den mean error anwenden bei allen aktionen. Weil alle outliers liegen unter dem mean error 
-    
-       
+    # DID den mean error anwenden bei allen aktionen. Weil alle outliers
+    # liegen unter dem
+    # mean error
+
     # Find the y value on the continuous line for this event's time (t_start)
-        # Define positions for each phase
+    # Define positions for each phase
     phase = None
+    start: int
+    end: int
     for start, end, phase in sequences:
         if start <= time < end:
             break
-    if (phase == 1 or phase == 3 and team_ab == "A") or (phase == 2 or phase == 4 and team_ab == "B"):
+    if (phase == "1" or phase == "3" and team_ab == "A") or (
+        phase == "2" or phase == "4" and team_ab == "B"
+    ):
         print("correct Phase")
-       
+
     else:
         new_time = searchPhase(time, sequences, team_ab)
         if new_time is not None:
             event["time"] = new_time
             return event
-
+    return event

@@ -1,19 +1,23 @@
-from floodlight.io.kinexon import read_position_data_csv, get_meta_data, create_links_from_meta_data
-from floodlight.io.sportradar import read_event_data_json
+from matplotlib import pyplot as plt
+import json
+
 import floodlight as fl
-from floodlight import Code
-from floodlight.core import pitch
+import matplotlib
 import numpy as np
 import pandas as pd
-import json
-from existing_code.rolling_mode import rolling_mode
+from floodlight import Code
+from floodlight.core import pitch
+from floodlight.io.kinexon import (create_links_from_meta_data, get_meta_data,
+                                   read_position_data_csv)
+from floodlight.io.sportradar import read_event_data_json
+from floodlight.models.kinematics import DistanceModel, VelocityModel
+
 import existing_code.template_matching as template_matching
-from floodlight.models.kinematics import DistanceModel
-from floodlight.models.kinematics import VelocityModel
-import matplotlib
-matplotlib.use('TkAgg',force=True)
-from matplotlib import pyplot as plt
-print("Switched to:",matplotlib.get_backend())
+from existing_code.rolling_mode import rolling_mode
+
+matplotlib.use("TkAgg", force=True)
+
+print("Switched to:", matplotlib.get_backend())
 base_path = "D:\\Handball\\"
 season = "season_20_21"  # season of the match
 match = "Bergischer HC_Die Eulen Ludwigshafen_16.12.2020_20-21"  # name of the match
@@ -25,13 +29,20 @@ positions_path = f"{base_path}HBL_Positions\\{season}\\{match}.csv"
 phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.csv.npy"
 lookup_path = f"{base_path}\\HBL_Events\\lookup\\lookup_matches{season[6:]}.csv"
 
-pitch = pitch.Pitch(xlim=(-20, 20), ylim=(-10, 10), unit="m", boundaries="fixed", sport="handball")
+pitch = pitch.Pitch(
+    xlim=(-20, 20), ylim=(-10, 10), unit="m", boundaries="fixed", sport="handball"
+)
 
 positions = read_position_data_csv(positions_path)
 predictions = np.load(phase_predictions_path)
 predictions = rolling_mode(predictions, 101)
 
-slices = Code(predictions, "match_phases", {0: "inac", 1: "CATT-A", 2: "CATT-B", 3: "PATT-A", 4: "PATT-B"}, framerate=20)
+slices = Code(
+    predictions,
+    "match_phases",
+    {0: "inac", 1: "CATT-A", 2: "CATT-B", 3: "PATT-A", 4: "PATT-B"},
+    framerate=20,
+)
 lookup = pd.read_csv(lookup_path)
 # id_spr = lookup.loc[lookup["file_name"] == match, "match_id"].item()[15:]
 matched_rows = lookup.loc[lookup["file_name"] == f"{match}.csv", "match_id"]
@@ -41,14 +52,20 @@ if len(matched_rows) == 1:
     id_spr = matched_rows.item()[15:]
 elif len(matched_rows) > 1:
     # Handle case with multiple matches
-    id_spr = matched_rows.iloc[0][15:]  # Take the first match and slice from index 15
+    # Take the first match and slice from index 15
+    id_spr = matched_rows.iloc[0][15:]
 else:
     # Handle case with no matches
     id_spr = None  # Or set to a default value, or raise a custom error
     print("No matching file name found.")
 
-match_id_sr = lookup.loc[lookup["file_name"] == f"{match}.csv", "match_id"].item().split(":")[-1]
-events_sr = pd.read_json(f"D:\\Handball\\HBL_Events\\{season}\\EventSummaries\\sport_events_{match_id_sr}_summary.json")
+match_id_sr = (
+    lookup.loc[lookup["file_name"] ==
+               f"{match}.csv", "match_id"].item().split(":")[-1]
+)
+events_sr = pd.read_json(
+    f"D:\\Handball\\HBL_Events\\{season}\\EventSummaries\\sport_events_{match_id_sr}_summary.json"
+)
 
 home_team_statistics = events_sr["statistics"]["totals"]["competitors"][0]
 away_team_statistics = events_sr["statistics"]["totals"]["competitors"][1]
@@ -69,22 +86,40 @@ ball_id = xy_ids.pop(ball_index)
 team_a_name, team_b_name = xy_ids
 
 # map team_a/b on home/away and extract player sr IDs
-if team_a_name == lookup.loc[lookup["file_name"] == f"{match}.csv", "home_team_name"].item():
-    team_a_id = lookup.loc[lookup["file_name"] == f"{match}.csv", "home_team_id"].item()
-    team_b_id = lookup.loc[lookup["file_name"] == f"{match}.csv", "away_team_id"].item()
-elif team_a_name == lookup.loc[lookup["file_name"] == f"{match}.csv", "away_team_name"].item():
-    team_a_id = lookup.loc[lookup["file_name"] == f"{match}.csv", "away_team_id"].item()
-    team_b_id = lookup.loc[lookup["file_name"] == f"{match}.csv", "home_team_id"].item()
+if (
+    team_a_name
+    == lookup.loc[lookup["file_name"] == f"{match}.csv", "home_team_name"].item()
+):
+    team_a_id = lookup.loc[lookup["file_name"]
+                           == f"{match}.csv", "home_team_id"].item()
+    team_b_id = lookup.loc[lookup["file_name"]
+                           == f"{match}.csv", "away_team_id"].item()
+elif (
+    team_a_name
+    == lookup.loc[lookup["file_name"] == f"{match}.csv", "away_team_name"].item()
+):
+    team_a_id = lookup.loc[lookup["file_name"]
+                           == f"{match}.csv", "away_team_id"].item()
+    team_b_id = lookup.loc[lookup["file_name"]
+                           == f"{match}.csv", "home_team_id"].item()
 else:
     raise ValueError("team names don't match")
 
 if team_a_id == home_team_statistics["id"]:
-    team_a_player_ids = [x["id"].split(":")[-1] for x in home_team_statistics["players"]]
-    team_b_player_ids = [x["id"].split(":")[-1] for x in away_team_statistics["players"]]
+    team_a_player_ids = [
+        x["id"].split(":")[-1] for x in home_team_statistics["players"]
+    ]
+    team_b_player_ids = [
+        x["id"].split(":")[-1] for x in away_team_statistics["players"]
+    ]
     home_team = "a"
 elif team_a_id == away_team_statistics["id"]:
-    team_a_player_ids = [x["id"].split(":")[-1] for x in away_team_statistics["players"]]
-    team_b_player_ids = [x["id"].split(":")[-1] for x in home_team_statistics["players"]]
+    team_a_player_ids = [
+        x["id"].split(":")[-1] for x in away_team_statistics["players"]
+    ]
+    team_b_player_ids = [
+        x["id"].split(":")[-1] for x in home_team_statistics["players"]
+    ]
     home_team = "b"
 else:
     raise ValueError("team ids dont match")
@@ -95,23 +130,27 @@ team_a_roles = {}
 for pID in team_a_player_ids:
     try:
         # Load JSON file using json library
-        with open(f"D:\\Handball\\HBL_Events\\general\\PlayerProfiles\\players_{pID}_profile.json", 'r') as file:
+        with open(
+            f"D:\\Handball\\HBL_Events\\general\\PlayerProfiles\\players_{pID}_profile.json",
+            "r",
+        ) as file:
             player_profile = json.load(file)
-        
+
         # Check if "player" and "type" keys exist and extract the role
         if "player" in player_profile and "type" in player_profile["player"]:
             player_role = player_profile["player"]["type"]
         else:
             player_role = "Unknown"
             print(f"Warning: 'type' not found for player {pID}")
-        
+
         # Update the dictionary with consistent data
         team_a_roles[pID] = player_role
 
     except (json.JSONDecodeError, FileNotFoundError) as e:
         # Handle JSON decoding errors or missing files
         print(f"Error loading profile for player {pID}: {e}")
-        team_a_roles[pID] = "Unknown"  # Assign default role if file is problematic
+        # Assign default role if file is problematic
+        team_a_roles[pID] = "Unknown"
 
 # for pID in team_a_player_ids:
 #     player_profile = pd.read_json(f"D:\\Handball\\HBL_Events\\general\\PlayerProfiles\\players_{pID}_profile.json")
@@ -123,42 +162,48 @@ team_b_roles = {}
 for pID in team_b_player_ids:
     try:
         # Load JSON file using json library
-        with open(f"D:\\Handball\\HBL_Events\\general\\PlayerProfiles\\players_{pID}_profile.json", 'r') as file:
+        with open(
+            f"D:\\Handball\\HBL_Events\\general\\PlayerProfiles\\players_{pID}_profile.json",
+            "r",
+        ) as file:
             player_profile = json.load(file)
-        
+
         # Check if "player" and "type" keys exist and extract the role
         if "player" in player_profile and "type" in player_profile["player"]:
             player_role = player_profile["player"]["type"]
         else:
             player_role = "Unknown"
             print(f"Warning: 'type' not found for player {pID}")
-        
+
         # Update the dictionary with consistent data
         team_b_roles[pID] = player_role
 
     except (json.JSONDecodeError, FileNotFoundError) as e:
         # Handle JSON decoding errors or missing files
         print(f"Error loading profile for player {pID}: {e}")
-        team_b_roles[pID] = "Unknown"  # Assign default role if file is problematic
+        # Assign default role if file is problematic
+        team_b_roles[pID] = "Unknown"
 
 
 role_df_a = pd.DataFrame(list(team_a_roles.items()), columns=["pID", "role"])
-column_df_a = pd.DataFrame(list(links[team_a_name].items()), columns=["pID", "xID"])
+column_df_a = pd.DataFrame(
+    list(links[team_a_name].items()), columns=["pID", "xID"])
 
 role_df_b = pd.DataFrame(list(team_b_roles.items()), columns=["pID", "role"])
-column_df_b = pd.DataFrame(list(links[team_b_name].items()), columns=["pID", "xID"])
+column_df_b = pd.DataFrame(
+    list(links[team_b_name].items()), columns=["pID", "xID"])
 
 teamsheet_a = pd.merge(role_df_a, column_df_a, on="pID")
 teamsheet_b = pd.merge(role_df_b, column_df_b, on="pID")
 
-gk_ids_a = teamsheet_a.loc[teamsheet_a["role"] == "G", 'xID']
-gk_ids_b = teamsheet_b.loc[teamsheet_b["role"] == "G", 'xID']
+gk_ids_a = teamsheet_a.loc[teamsheet_a["role"] == "G", "xID"]
+gk_ids_b = teamsheet_b.loc[teamsheet_b["role"] == "G", "xID"]
 
 # set goal keepers to nan
 for xID in gk_ids_a:
-    xy1.xy[:, 2*xID:2*xID + 2] = np.NaN
+    xy1.xy[:, 2 * xID: 2 * xID + 2] = np.NaN
 for xID in gk_ids_b:
-    xy2.xy[:, 2*xID:2*xID + 2] = np.NaN
+    xy2.xy[:, 2 * xID: 2 * xID + 2] = np.NaN
 
 xy_objects = {"a": xy1, "b": xy2}
 
