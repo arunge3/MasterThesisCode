@@ -1,0 +1,3 @@
+,match_id,date,home_team_name,away_team_name,home_team_id,away_team_id,file_name
+0,1234,01.10.2020,Heimteam,Auswärts Team,0123,0045,position_file_1234.csv
+1,5678,13.01.2021,Heim-team,AuswärtsTeam,0125,0345,position_file_5678.csv

@@ -88,7 +88,11 @@ def synchronize_time(
     return synced_time
 
 
-def get_paths_by_match_id(match_id: int
+def get_paths_by_match_id(match_id: int,
+                          video_base_path: str,
+                          annotation_base_path: str,
+                          output_base_path: str,
+                          position_base_path: str
                           ) -> (tuple[Optional[str], Optional[str],
                                       Optional[str], Optional[str],
                                       Optional[str], Optional[str],
@@ -97,6 +101,10 @@ def get_paths_by_match_id(match_id: int
     Retrieves various file paths and metadata associated with a given match ID.
     Args:
         match_id (int): The ID of the match to retrieve paths for.
+        video_base_path (str): Base path for the video files.
+        annotation_base_path (str): Base path for the annotation files.
+        output_base_path (str): Base path for the output files.
+        position_base_path (str): Base path for the position files.
     Returns:
         tuple: A tuple containing the following elements:
             - video_path (str or None): Path to the raw video file.
@@ -115,10 +123,6 @@ def get_paths_by_match_id(match_id: int
 
     csv_file = r"D:\Handball\HBL_Synchronization\mapping20_21.csv"
     lookup_file = r"D:\Handball\HBL_Events\lookup\lookup_matches_20_21.csv"
-    video_base_path = r"D:\Handball\HBL_Videos\season_2021"
-    annotation_base_path = r"D:\Handball\HBL_Events\season_20_21\EventTimeline"
-    output_base_path = r"D:\Handball\HBL_Events\season_20_21\EventJson"
-    position_base_path = r"D:\Handball\HBL_Positions\20-21"
 
     df = pd.read_csv(csv_file, delimiter=";")
     match_row = df[df["match_id"] == int(match_id)]
