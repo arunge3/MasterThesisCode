@@ -1,4 +1,4 @@
-import helpFunctions.reformatJson_Methods as helpFuctions
+import help_functions.reformatjson_methods as helpFuctions
 
 """
 This script reformats JSON data for a specific match video.
