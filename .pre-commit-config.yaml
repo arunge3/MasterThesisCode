@@ -5,18 +5,27 @@ repos:
       - id: flake8
         exclude: 'src/existing_code/getting_started\.py|src/existing_code/template_matching\.py|src/existing_code/rolling_mode\.py'
 
-
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.5.1
     hooks:
       - id: mypy
         exclude: 'src/existing_code/getting_started\.py|src/existing_code/template_matching\.py|src/existing_code/rolling_mode\.py'
 
-
   - repo: https://github.com/pre-commit/mirrors-isort
     rev: v5.10.0
     hooks:
       - id: isort
         exclude: 'src/existing_code/getting_started\.py'
-        
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: Run Pytest
+        entry: pytest --maxfail=1 --disable-warnings
+        language: system
+        types: [python]
+        files: ^test_code/.*\.py$
+        pass_filenames: false
+
+
 

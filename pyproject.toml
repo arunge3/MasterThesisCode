@@ -12,10 +12,6 @@ readme = "README.md"
 dependencies = ["pandas", "pytest"]
 requires-python = ">=3.8" 
 
-[tool.pytest.ini_options]
-addopts = "--strict-markers"
-testpaths = ["test_"]
-
 [tool.black]
 line-length = 88
 target-version = ["py39"]
@@ -30,3 +26,8 @@ strict = true
 [tool.setuptools]
 packages = ["computeDifferences", "existing_code", "helpFunctions", "plot_functions"]
 package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+testpaths = ["test_code"]
+addopts = "--disable-warnings --maxfail=1"
+
