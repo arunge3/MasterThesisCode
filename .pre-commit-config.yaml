@@ -17,4 +17,15 @@ repos:
       - id: isort
         exclude: 'src/existing_code/getting_started\.py'
 
- 
+  # - repo: local
+  #   hooks:
+  #     - id: pytest
+  #       name: Run Pytest
+  #       entry: pytest
+  #       language: system
+  #       types: [python]
+  #       files: ^test_code/.*\.py$
+  #       pass_filenames: false
+
+
+

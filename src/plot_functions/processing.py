@@ -5,7 +5,7 @@ import numpy as np
 import pytz  # type: ignore
 from floodlight import Code
 
-import helpFunctions.reformatJson_Methods as helpFuctions
+import help_functions.reformatJson_Methods as helpFuctions
 from existing_code.rolling_mode import rolling_mode
 
 

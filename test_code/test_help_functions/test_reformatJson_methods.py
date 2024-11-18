@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from helpFunctions.reformatJson_methods import get_paths_by_match_id
+from help_functions.reformatjson_methods import get_paths_by_match_id
 
 
 def test_get_paths_by_match_id() -> None:
