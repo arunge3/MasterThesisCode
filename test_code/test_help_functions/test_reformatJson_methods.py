@@ -106,6 +106,8 @@ class TestreformatJson_Methods:
         filename = "sport_events_1234_timeline_reformatted.jsonl"
         path_output_full = os.path.join(self.output_base_path, filename)
         first_timestamp_opt = ("2020-10-01 16:53:34", 1601571214400, 20)
+        path_expected_output = os.path.join(self.output_base_path,
+                                            "expected_output.jsonl")
         offset_fr = 44638
         offseth2_fr = 0
         first_vh2 = 0
@@ -113,4 +115,8 @@ class TestreformatJson_Methods:
         result = reformatJson(path_timeline_full, path_output_full,
                               first_timestamp_opt, offset_fr, offseth2_fr,
                               first_vh2, fps)
-        assert (result is not None)
+        assert (result is None)
+        with (open(path_output_full, 'r') as file1,
+              open(path_expected_output, 'r') as file2):
+            for line1, line2 in zip(file1, file2):
+                assert line1 == line2
