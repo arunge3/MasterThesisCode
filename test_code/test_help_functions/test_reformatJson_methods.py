@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pandas as pd
 
 from help_functions.reformatjson_methods import (get_paths_by_match_id,
+                                                 getFirstTimeStampEvent,
                                                  load_first_timestamp_position,
                                                  synchronize_time)
 
@@ -83,3 +84,12 @@ def test_synchronize_time() -> None:
                               first_timestamp_opt, offset_fr,
                               offseth2_fr, first_vh2, fps)
     assert result == 56536.09
+
+
+def test_getFirstTimeStampEvent() -> None:
+    base_dir = r"C:\Users\Annabelle\Masterthesis\Code\MasterThesisCode"
+    sub_dir = r"test_code\test_data\HBL_Events\EventTimeline"
+    filename = "sport_events_1234_timeline.json"
+    filepath = os.path.join(base_dir, sub_dir, filename)
+    result = getFirstTimeStampEvent(filepath)
+    assert result == '2020-10-01T17:00:11+00:00'
