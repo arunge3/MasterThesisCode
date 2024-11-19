@@ -5,7 +5,8 @@ from unittest.mock import patch
 import pandas as pd
 
 from help_functions.reformatjson_methods import (get_paths_by_match_id,
-                                                 load_first_timestamp_position)
+                                                 load_first_timestamp_position,
+                                                 synchronize_time)
 
 
 def test_load_first_timestamp_position() -> None:
@@ -68,3 +69,17 @@ def test_get_paths_by_match_id() -> None:
     assert offset_h2 == 47383
     assert first_vh2 == 0
     assert match_name == "match_1234_knx.csv"
+
+
+def test_synchronize_time() -> None:
+    event_time_str = "2020-10-01T17:00:11+00:00"
+    second_half = False
+    first_timestamp_opt = ("2020-10-01 16:53:34", 1601571214400, 20)
+    offset_fr = 44638
+    offseth2_fr = 0
+    first_vh2 = 0
+    fps = 29.97
+    result = synchronize_time(event_time_str, second_half,
+                              first_timestamp_opt, offset_fr,
+                              offseth2_fr, first_vh2, fps)
+    assert result == 56536.09
