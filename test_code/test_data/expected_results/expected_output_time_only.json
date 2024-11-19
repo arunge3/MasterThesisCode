@@ -1,0 +1,1355 @@
+{
+    "generated_at": "2020-10-01T16:47:13+00:00",
+    "sport_event": {
+        "id": "sr:sport_event:1234",
+        "start_time": "2020-10-01T17:00:00+00:00",
+        "start_time_confirmed": true,
+        "sport_event_context": {
+            "sport": {
+                "id": "sr:sport:6",
+                "name": "Handball"
+            },
+            "category": {
+                "id": "sr:category:53",
+                "name": "Germany",
+                "country_code": "DEU"
+            },
+            "competition": {
+                "id": "sr:competition:011",
+                "name": "Bundesliga",
+                "gender": "men"
+            },
+            "season": {
+                "id": "sr:season:8345",
+                "name": "Bundesliga 20/21",
+                "start_date": "2020-10-01",
+                "end_date": "2021-07-01",
+                "year": "20/21",
+                "competition_id": "sr:competition:011"
+            },
+            "stage": {
+                "order": 1,
+                "type": "league",
+                "phase": "regular season",
+                "start_date": "2020-10-01",
+                "end_date": "2021-06-28",
+                "year": "20/21"
+            },
+            "round": {
+                "number": 1
+            },
+            "groups": [
+                {
+                    "id": "sr:league:51763",
+                    "name": "Bundesliga 20/21"
+                }
+            ]
+        },
+        "coverage": {
+            "live": true
+        },
+        "competitors": [
+            {
+                "id": "sr:competitor:0123",
+                "name": "Heimteam",
+                "country": "Germany",
+                "country_code": "DEU",
+                "abbreviation": "HEI",
+                "qualifier": "home"
+            },
+            {
+                "id": "sr:competitor:0045",
+                "name": "Ausw\u00c3\u00a4rts Team",
+                "country": "Germany",
+                "country_code": "DEU",
+                "abbreviation": "AUS",
+                "qualifier": "away"
+            }
+        ],
+        "venue": {
+            "id": "sr:venue:7485",
+            "name": "Beispiel Arena",
+            "capacity": 10000,
+            "city_name": "Musterstadt",
+            "country_name": "Germany",
+            "map_coordinates": "52.322396,9.816261",
+            "country_code": "DEU"
+        },
+        "sport_event_conditions": {
+            "attendance": {
+                "count": 1209
+            },
+            "ground": {
+                "neutral": false
+            }
+        }
+    },
+    "sport_event_status": {
+        "status": "closed",
+        "match_status": "ended",
+        "home_score": 26,
+        "away_score": 25,
+        "winner_id": "sr:competitor:0123",
+        "period_scores": [
+            {
+                "home_score": 16,
+                "away_score": 11,
+                "type": "regular_period",
+                "number": 1
+            },
+            {
+                "home_score": 10,
+                "away_score": 14,
+                "type": "regular_period",
+                "number": 2
+            }
+        ]
+    },
+    "statistics": {
+        "totals": {
+            "competitors": [
+                {
+                    "id": "sr:competitor:0123",
+                    "name": "Heimteam",
+                    "abbreviation": "HEI",
+                    "qualifier": "home",
+                    "statistics": {
+                        "assists": 9,
+                        "blocks": 1,
+                        "field_goals": 22,
+                        "goals_conceded": 25,
+                        "goals_scored": 26,
+                        "red_cards": 0,
+                        "saves": 14,
+                        "seven_m_goals": 4,
+                        "shot_accuracy": 65,
+                        "shots": 40,
+                        "shots_against": 42,
+                        "shots_off_goal": 3,
+                        "shots_on_goal": 36,
+                        "steals": 4,
+                        "suspensions": 1,
+                        "technical_fouls": 5,
+                        "yellow_cards": 3
+                    },
+                    "players": [
+                        {
+                            "statistics": {
+                                "assists": 4,
+                                "blocks": 1,
+                                "field_goals": 5,
+                                "goals_scored": 5,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 71.43,
+                                "shots": 7,
+                                "shots_off_goal": 1,
+                                "shots_on_goal": 6,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 2,
+                                "yellow_cards": 1
+                            },
+                            "id": "sr:player:124859",
+                            "name": "Bohm, Fabian"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 2,
+                                "field_goals": 1,
+                                "goals_scored": 1,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 100,
+                                "shots": 1,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 1,
+                                "steals": 1,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:125146",
+                            "name": "Pevnov, Evgeni"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 2,
+                                "field_goals": 2,
+                                "goals_scored": 2,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 100,
+                                "shots": 2,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 2,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 1
+                            },
+                            "id": "sr:player:876102",
+                            "name": "Brozovic, Ilija"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 2,
+                                "blocks": 0,
+                                "field_goals": 3,
+                                "goals_scored": 3,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 100,
+                                "shots": 3,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 3,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 1,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:905894",
+                            "name": "Jonsson, Alfred"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 1
+                            },
+                            "id": "sr:player:975877",
+                            "name": "Donker, Malte"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goalkeeper_minutes_played": "00:10",
+                                "goals_conceded": 1,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "save_accuracy": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_against": 1,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1027241",
+                            "name": "Ebner, Domenico"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 1,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 0,
+                                "shots": 1,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 1,
+                                "steals": 2,
+                                "suspensions": 0,
+                                "technical_fouls": 1,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1104103",
+                            "name": "Feise, Hannes"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1262012",
+                            "name": "Krone, Jannes"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 2,
+                                "goals_scored": 2,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 50,
+                                "shots": 4,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 4,
+                                "steals": 0,
+                                "suspensions": 1,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1262014",
+                            "name": "Buchner, Vincent"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goalkeeper_minutes_played": "59:02",
+                                "goals_conceded": 24,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "save_accuracy": 36.84,
+                                "saves": 14,
+                                "seven_m_goals": 0,
+                                "seven_m_saves": 1,
+                                "shots": 0,
+                                "shots_against": 38,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1290992",
+                            "name": "Lesjak, Urban"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1291470",
+                            "name": "Cehte, Nejc"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 0,
+                                "shots": 1,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 1,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1293646",
+                            "name": "Kuzmanovski, Filip"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 2,
+                                "goals_scored": 6,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 4,
+                                "shot_accuracy": 75,
+                                "shots": 8,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 8,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1340010",
+                            "name": "Hansen, Johan"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 3,
+                                "blocks": 0,
+                                "field_goals": 7,
+                                "goals_scored": 7,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 53.85,
+                                "shots": 13,
+                                "shots_off_goal": 2,
+                                "shots_on_goal": 10,
+                                "steals": 1,
+                                "suspensions": 0,
+                                "technical_fouls": 1,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1514831",
+                            "name": "Martinovic, Ivan"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1560008",
+                            "name": "Mavers, Veit"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1652709",
+                            "name": "Hanne, Martin"
+                        }
+                    ]
+                },
+                {
+                    "id": "sr:competitor:0045",
+                    "name": "Ausw\u00c3\u00a4rts Team",
+                    "abbreviation": "AUS",
+                    "qualifier": "away",
+                    "statistics": {
+                        "assists": 4,
+                        "blocks": 6,
+                        "field_goals": 23,
+                        "goals_conceded": 26,
+                        "goals_scored": 25,
+                        "red_cards": 0,
+                        "saves": 10,
+                        "seven_m_goals": 2,
+                        "shot_accuracy": 49.02,
+                        "shots": 51,
+                        "shots_against": 42,
+                        "shots_off_goal": 6,
+                        "shots_on_goal": 39,
+                        "steals": 4,
+                        "suspensions": 4,
+                        "technical_fouls": 6,
+                        "yellow_cards": 3
+                    },
+                    "players": [
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goalkeeper_minutes_played": "28:37",
+                                "goals_conceded": 10,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "save_accuracy": 28.57,
+                                "saves": 4,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_against": 14,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:124925",
+                            "name": "Lichtlein, Carsten"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goalkeeper_minutes_played": "28:27",
+                                "goals_conceded": 16,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "save_accuracy": 27.27,
+                                "saves": 6,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_against": 22,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:125160",
+                            "name": "Semisch, Malte"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:290117",
+                            "name": "Ritterbach, Joscha"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 9,
+                                "goals_scored": 9,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 60,
+                                "shots": 15,
+                                "shots_off_goal": 2,
+                                "shots_on_goal": 11,
+                                "steals": 2,
+                                "suspensions": 1,
+                                "technical_fouls": 3,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:364524",
+                            "name": "Rambo, Christoffer"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 3,
+                                "goals_scored": 3,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 60,
+                                "shots": 5,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 5,
+                                "steals": 1,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:913070",
+                            "name": "Korte, Mats"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 1,
+                                "goals_scored": 1,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 50,
+                                "shots": 2,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 2,
+                                "steals": 1,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:930986",
+                            "name": "Staar, Max"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1108891",
+                            "name": "Richtzenhain, Justus Nicolas"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 0,
+                                "shots": 3,
+                                "shots_off_goal": 1,
+                                "shots_on_goal": 1,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 1
+                            },
+                            "id": "sr:player:1262212",
+                            "name": "Pusica, Miljan"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 1,
+                                "field_goals": 1,
+                                "goals_scored": 1,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 100,
+                                "shots": 1,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 1,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1262462",
+                            "name": "Thiele, Joshua"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shots": 0,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 0,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1290216",
+                            "name": "Gulliksen, Kevin Maageroe"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 1,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 0,
+                                "shots": 1,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 1,
+                                "steals": 0,
+                                "suspensions": 1,
+                                "technical_fouls": 0,
+                                "yellow_cards": 1
+                            },
+                            "id": "sr:player:1293714",
+                            "name": "Meister, Lucas"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 1,
+                                "blocks": 0,
+                                "field_goals": 0,
+                                "goals_scored": 0,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 0,
+                                "shots": 4,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 2,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 1,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1304426",
+                            "name": "Padshyvalau, Aliaksandr"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 1,
+                                "blocks": 0,
+                                "field_goals": 2,
+                                "goals_scored": 2,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 33.33,
+                                "shots": 6,
+                                "shots_off_goal": 2,
+                                "shots_on_goal": 4,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1341258",
+                            "name": "Pehlivan, Doruk"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 0,
+                                "blocks": 0,
+                                "field_goals": 1,
+                                "goals_scored": 1,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 0,
+                                "shot_accuracy": 100,
+                                "shots": 1,
+                                "shots_off_goal": 0,
+                                "shots_on_goal": 1,
+                                "steals": 0,
+                                "suspensions": 0,
+                                "technical_fouls": 0,
+                                "yellow_cards": 0
+                            },
+                            "id": "sr:player:1554847",
+                            "name": "Strakeljahn, Simon"
+                        },
+                        {
+                            "statistics": {
+                                "assists": 1,
+                                "blocks": 0,
+                                "field_goals": 6,
+                                "goals_scored": 8,
+                                "red_cards": 0,
+                                "saves": 0,
+                                "seven_m_goals": 2,
+                                "shot_accuracy": 61.54,
+                                "shots": 13,
+                                "shots_off_goal": 1,
+                                "shots_on_goal": 11,
+                                "steals": 0,
+                                "suspensions": 2,
+                                "technical_fouls": 2,
+                                "yellow_cards": 1
+                            },
+                            "id": "sr:player:1560004",
+                            "name": "Knorr, Juri"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "timeline": [
+        {
+            "id": 756445493,
+            "type": "match_started",
+            "time": 56536
+        },
+        {
+            "id": 756445501,
+            "type": "period_start",
+            "time": 56536,
+            "period_name": "1st_half"
+        },
+        {
+            "id": 756446141,
+            "type": "technical_ball_fault",
+            "time": 57914,
+            "match_time": 1,
+            "match_clock": "0:46",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:124859",
+                "name": "Bohm, Fabian"
+            }
+        },
+        {
+            "id": 756446777,
+            "type": "shot_off_target",
+            "time": 59023,
+            "match_time": 2,
+            "match_clock": "1:22",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1262212",
+                "name": "Pusica, Miljan",
+                "type": "shot"
+            },
+            "outcome": "miss",
+            "players": [
+                {
+                    "id": "sr:player:1262212",
+                    "name": "Pusica, Miljan",
+                    "type": "shot"
+                },
+                {
+                    "id": "sr:player:1290992",
+                    "name": "Lesjak, Urban",
+                    "type": "goalkeeper"
+                }
+            ]
+        },
+        {
+            "id": 756446809,
+            "type": "score_change",
+            "time": 59113,
+            "match_time": 2,
+            "match_clock": "1:27",
+            "competitor": "home",
+            "home_score": 1,
+            "away_score": 0,
+            "scorer": {
+                "id": "sr:player:1262014",
+                "name": "Buchner, Vincent"
+            },
+            "assists": [
+                {
+                    "id": "sr:player:905894",
+                    "name": "Jonsson, Alfred",
+                    "type": "primary"
+                }
+            ],
+            "zone": "wing_left",
+            "players": [
+                {
+                    "id": "sr:player:125160",
+                    "name": "Semisch, Malte",
+                    "type": "goalkeeper"
+                }
+            ]
+        },
+        {
+            "id": 756447577,
+            "type": "shot_blocked",
+            "time": 61121,
+            "match_time": 3,
+            "match_clock": "2:32",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:364524",
+                "name": "Rambo, Christoffer",
+                "type": "shot"
+            },
+            "players": [
+                {
+                    "id": "sr:player:364524",
+                    "name": "Rambo, Christoffer",
+                    "type": "shot"
+                },
+                {
+                    "id": "sr:player:124859",
+                    "name": "Bohm, Fabian",
+                    "type": "blocked"
+                }
+            ]
+        },
+        {
+            "id": 756447641,
+            "type": "technical_ball_fault",
+            "time": 61271,
+            "match_time": 3,
+            "match_clock": "2:38",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1560004",
+                "name": "Knorr, Juri"
+            }
+        },
+        {
+            "id": 756447685,
+            "type": "score_change",
+            "time": 61391,
+            "match_time": 3,
+            "match_clock": "2:42",
+            "competitor": "home",
+            "home_score": 2,
+            "away_score": 0,
+            "scorer": {
+                "id": "sr:player:905894",
+                "name": "Jonsson, Alfred"
+            },
+            "zone": "six_meter_centre",
+            "players": [
+                {
+                    "id": "sr:player:125160",
+                    "name": "Semisch, Malte",
+                    "type": "goalkeeper"
+                }
+            ],
+            "shot_type": "fast_break"
+        },
+        {
+            "id": 756448361,
+            "type": "yellow_card",
+            "time": 63099,
+            "match_time": 4,
+            "match_clock": "3:30",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:876102",
+                "name": "Brozovic, Ilija"
+            }
+        },
+        {
+            "id": 756448961,
+            "type": "shot_saved",
+            "time": 64568,
+            "match_time": 4,
+            "match_clock": "3:54",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:124859",
+                "name": "Bohm, Fabian"
+            }
+        },
+        {
+            "id": 756449227,
+            "type": "steal",
+            "time": 65317,
+            "match_time": 5,
+            "match_clock": "4:19",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:364524",
+                "name": "Rambo, Christoffer"
+            }
+        },
+        {
+            "id": 756450959,
+            "type": "seven_m_awarded",
+            "time": 69782,
+            "match_time": 6,
+            "match_clock": "5:05",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:930986",
+                "name": "Staar, Max",
+                "type": "fouled"
+            },
+            "players": [
+                {
+                    "id": "sr:player:930986",
+                    "name": "Staar, Max",
+                    "type": "fouled"
+                },
+                {
+                    "id": "sr:player:1262014",
+                    "name": "Buchner, Vincent",
+                    "type": "foul"
+                }
+            ]
+        },
+        {
+            "id": 756450739,
+            "type": "suspension",
+            "time": 69213,
+            "match_time": 6,
+            "match_clock": "5:06",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:1262014",
+                "name": "Buchner, Vincent"
+            },
+            "suspension_minutes": 2
+        },
+        {
+            "id": 756451037,
+            "type": "seven_m_missed",
+            "time": 69962,
+            "match_time": 6,
+            "match_clock": "5:16",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:913070",
+                "name": "Korte, Mats",
+                "type": "shot"
+            },
+            "players": [
+                {
+                    "id": "sr:player:913070",
+                    "name": "Korte, Mats",
+                    "type": "shot"
+                },
+                {
+                    "id": "sr:player:1290992",
+                    "name": "Lesjak, Urban",
+                    "type": "saved"
+                }
+            ]
+        },
+        {
+            "id": 756453017,
+            "type": "technical_rule_fault",
+            "time": 72000,
+            "match_time": 7,
+            "match_clock": "6:17",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:1104103",
+                "name": "Feise, Hannes"
+            }
+        },
+        {
+            "id": 756453131,
+            "type": "score_change",
+            "time": 72300,
+            "match_time": 7,
+            "match_clock": "6:20",
+            "competitor": "away",
+            "home_score": 3,
+            "away_score": 1,
+            "scorer": {
+                "id": "sr:player:1560004",
+                "name": "Knorr, Juri"
+            },
+            "zone": "back_court",
+            "players": [
+                {
+                    "id": "sr:player:1290992",
+                    "name": "Lesjak, Urban",
+                    "type": "goalkeeper"
+                }
+            ]
+        },
+        {
+            "id": 756453597,
+            "type": "suspension_over",
+            "time": 73499,
+            "match_time": 8,
+            "match_clock": "7:07",
+            "competitor": "home"
+        },
+        {
+            "id": 756464833,
+            "type": "suspension",
+            "time": 100562,
+            "match_time": 19,
+            "match_clock": "18:34",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1560004",
+                "name": "Knorr, Juri"
+            },
+            "suspension_minutes": 2
+        },
+        {
+            "id": 756466533,
+            "type": "shot_saved",
+            "time": 104398,
+            "match_time": 20,
+            "match_clock": "19:30",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:1262014",
+                "name": "Buchner, Vincent"
+            }
+        },
+        {
+            "id": 756466975,
+            "type": "score_change",
+            "time": 105357,
+            "match_time": 21,
+            "match_clock": "20:04",
+            "competitor": "away",
+            "home_score": 10,
+            "away_score": 9,
+            "scorer": {
+                "id": "sr:player:1262462",
+                "name": "Thiele, Joshua"
+            },
+            "assists": [
+                {
+                    "id": "sr:player:1341258",
+                    "name": "Pehlivan, Doruk",
+                    "type": "primary"
+                }
+            ],
+            "zone": "six_meter_left",
+            "players": [
+                {
+                    "id": "sr:player:1290992",
+                    "name": "Lesjak, Urban",
+                    "type": "goalkeeper"
+                }
+            ],
+            "shot_type": "pivot"
+        },
+        {
+            "id": 756467171,
+            "type": "yellow_card",
+            "time": 105806,
+            "match_time": 21,
+            "match_clock": "20:12",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:975877",
+                "name": "Donker, Malte"
+            }
+        },
+        {
+            "id": 756467251,
+            "type": "score_change",
+            "time": 106106,
+            "match_time": 21,
+            "match_clock": "20:31",
+            "competitor": "home",
+            "home_score": 11,
+            "away_score": 9,
+            "scorer": {
+                "id": "sr:player:125146",
+                "name": "Pevnov, Evgeni"
+            },
+            "assists": [
+                {
+                    "id": "sr:player:905894",
+                    "name": "Jonsson, Alfred",
+                    "type": "primary"
+                }
+            ],
+            "zone": "six_meter_centre",
+            "players": [
+                {
+                    "id": "sr:player:125160",
+                    "name": "Semisch, Malte",
+                    "type": "goalkeeper"
+                }
+            ],
+            "shot_type": "pivot"
+        },
+        {
+            "id": 756467347,
+            "type": "suspension_over",
+            "time": 106346,
+            "match_time": 21,
+            "match_clock": "20:35",
+            "competitor": "away"
+        },
+        {
+            "id": 756475643,
+            "type": "shot_blocked",
+            "time": 128014,
+            "match_time": 30,
+            "match_clock": "29:59",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1262212",
+                "name": "Pusica, Miljan",
+                "type": "shot"
+            },
+            "players": [
+                {
+                    "id": "sr:player:1262212",
+                    "name": "Pusica, Miljan",
+                    "type": "shot"
+                },
+                {
+                    "id": "sr:player:1104103",
+                    "name": "Feise, Hannes",
+                    "type": "blocked"
+                }
+            ]
+        },
+        {
+            "id": 756475739,
+            "type": "period_score",
+            "time": 128254,
+            "match_clock": "30:00",
+            "period": "1",
+            "home_score": 16,
+            "away_score": 11
+        },
+        {
+            "id": 756475741,
+            "type": "break_start",
+            "time": 128254,
+            "break_name": "pause"
+        },
+        {
+            "id": 756485619,
+            "type": "period_start",
+            "time": 155197,
+            "period_name": "2nd_half"
+        },
+        {
+            "id": 756485669,
+            "type": "substitution",
+            "time": 155347,
+            "match_time": 31,
+            "match_clock": "30:06",
+            "competitor": "away",
+            "players": [
+                {
+                    "id": "sr:player:125160",
+                    "name": "Semisch, Malte",
+                    "type": "substituted_out"
+                },
+                {
+                    "id": "sr:player:124925",
+                    "name": "Lichtlein, Carsten",
+                    "type": "substituted_in"
+                }
+            ]
+        },
+        {
+            "id": 756497931,
+            "type": "seven_m_awarded",
+            "time": 188793,
+            "match_time": 45,
+            "match_clock": "44:41",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:1514831",
+                "name": "Martinovic, Ivan",
+                "type": "fouled"
+            },
+            "players": [
+                {
+                    "id": "sr:player:1514831",
+                    "name": "Martinovic, Ivan",
+                    "type": "fouled"
+                },
+                {
+                    "id": "sr:player:364524",
+                    "name": "Rambo, Christoffer",
+                    "type": "foul"
+                }
+            ]
+        },
+        {
+            "id": 768696037,
+            "type": "suspension",
+            "time": 2049481,
+            "match_time": 45,
+            "match_clock": "44:43",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1560004",
+                "name": "Knorr, Juri"
+            },
+            "suspension_minutes": 2
+        },
+        {
+            "id": 756498047,
+            "type": "score_change",
+            "time": 189093,
+            "match_time": 45,
+            "match_clock": "44:49",
+            "competitor": "home",
+            "home_score": 21,
+            "away_score": 18,
+            "scorer": {
+                "id": "sr:player:1340010",
+                "name": "Hansen, Johan"
+            },
+            "method": "penalty",
+            "zone": "six_meter_centre",
+            "players": [
+                {
+                    "id": "sr:player:124925",
+                    "name": "Lichtlein, Carsten",
+                    "type": "goalkeeper"
+                }
+            ]
+        },
+        {
+            "id": 756498581,
+            "type": "shot_saved",
+            "time": 190531,
+            "match_time": 46,
+            "match_clock": "45:32",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1341258",
+                "name": "Pehlivan, Doruk"
+            }
+        },
+        {
+            "id": 756512415,
+            "type": "match_ended",
+            "time": 230631,
+            "match_clock": "60:00"
+        }
+    ]
+}

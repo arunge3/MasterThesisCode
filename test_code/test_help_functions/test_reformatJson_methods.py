@@ -1,4 +1,5 @@
 
+import json
 import os
 from unittest.mock import patch
 
@@ -8,6 +9,7 @@ from help_functions.reformatjson_methods import (get_paths_by_match_id,
                                                  getFirstTimeStampEvent,
                                                  load_first_timestamp_position,
                                                  reformatJson,
+                                                 reformatJson_Time_only,
                                                  synchronize_time)
 
 
@@ -21,6 +23,8 @@ class TestreformatJson_Methods:
     timeline_base_path = os.path.join(base_dir, sub_dir_timeline)
     output_base_path = os.path.join(base_dir, sub_dir_output)
     position_base_path = os.path.join(base_dir, sub_dir_position)
+    expected_path = os.path.join(
+        base_dir, r"test_code\test_data\expected_results")
 
     def test_load_first_timestamp_position(self) -> None:
         filename = "position_file_1234.csv"
@@ -106,7 +110,7 @@ class TestreformatJson_Methods:
         filename = "sport_events_1234_timeline_reformatted.jsonl"
         path_output_full = os.path.join(self.output_base_path, filename)
         first_timestamp_opt = ("2020-10-01 16:53:34", 1601571214400, 20)
-        path_expected_output = os.path.join(self.output_base_path,
+        path_expected_output = os.path.join(self.expected_path,
                                             "expected_output.jsonl")
         offset_fr = 44638
         offseth2_fr = 0
@@ -120,3 +124,24 @@ class TestreformatJson_Methods:
               open(path_expected_output, 'r') as file2):
             for line1, line2 in zip(file1, file2):
                 assert line1 == line2
+
+    def test_reformatJson_Time_only(self) -> None:
+        filename = "sport_events_1234_timeline.json"
+        path_timeline_full = os.path.join(self.timeline_base_path, filename)
+        first_timestamp_ms = str("2020-10-01 16:53:34")
+        offset = int(44638)
+        offseth2 = int(0)
+        first_vh2 = int(0)
+        fps = 29.97
+        result = reformatJson_Time_only(
+            path_timeline_full, first_timestamp_ms, offset, offseth2,
+            first_vh2, fps)
+        path_expected_output = os.path.join(self.expected_path,
+                                            "expected_output_time_only.json")
+        # Read the text file (assuming it's JSON)
+        with open(path_expected_output, 'r') as file:
+            file_content = json.load(file)
+
+        # Compare the file content with the variable
+        assert file_content == result
+        assert (result is not None)

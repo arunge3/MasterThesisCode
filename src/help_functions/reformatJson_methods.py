@@ -48,8 +48,8 @@ def synchronize_time(
     offset_fr: int,
     offseth2_fr: int,
     first_vh2: int,
-    fps: int,
-) -> int:
+    fps: float,
+) -> float:
     """
     Synchronizes the event time with the first timestamp and calculates
     the synchronized time in frames.
@@ -461,11 +461,11 @@ def reformatJson(
 
 def reformatJson_Time_only(
     path_timeline: str,
-    first_timestamp_ms: int,
+    first_timestamp_ms: str,
     offset: int,
     offset_h2: int,
     first_vh2: int,
-    fps: int,
+    fps: float,
 ) -> dict[Any, Any]:
     """
     Reformats the timestamps in a JSON timeline file.
