@@ -186,56 +186,56 @@ def getFirstTimeStampEvent(path_timeline: str) -> Optional[str]:
     return None
 
 
-def calculateOffset(
-        first_event_time_str: str,
-        first_timestamp_pos: int,
-        fps_vid: int,
-        fps_pos: int,
-        offset_fr: int,
-        second_half: bool,
-        offseth2_fr: int) -> int:
-    """
-    Information why I did the synchronisation like this:
-    Das Event "matched_started" inklusive Zeitstempel wird verwendet,
-    Anschließend wird noch das erste Event aus der Positional
-    Data genommen und dessen Zeitstempel. Von diesen beiden
-    wird der Unterschied berechnet. Der UNterschied wird in
-    sekunden angegeben. Im Video sind das 29.97 Frames pro Sekunde,
-    in der Positional Data 20 Frames pro Sekunde. Das bedeuted,
-    dass 1 Sekunde in der Positional Data 1.5 Sekunden im Video sind.
-    Somit wird der Unterschied in Sekunden mit der Frame Rate des
-    Videos multipliziert und der Offset der Positional Data addiert.
-    Damit der Unterschied zwischen den Framerates noch beglichen
-    werden kann wird die Framerate der Positional Data mit dem Unterschied
-    multipliziert abgezogen.
+# def calculateOffset(
+#         first_event_time_str: str,
+#         first_timestamp_pos: int,
+#         fps_vid: int,
+#         fps_pos: int,
+#         offset_fr: int,
+#         second_half: bool,
+#         offseth2_fr: int) -> int:
+#     """
+#     Information why I did the synchronisation like this:
+#     Das Event "matched_started" inklusive Zeitstempel wird verwendet,
+#     Anschließend wird noch das erste Event aus der Positional
+#     Data genommen und dessen Zeitstempel. Von diesen beiden
+#     wird der Unterschied berechnet. Der UNterschied wird in
+#     sekunden angegeben. Im Video sind das 29.97 Frames pro Sekunde,
+#     in der Positional Data 20 Frames pro Sekunde. Das bedeuted,
+#     dass 1 Sekunde in der Positional Data 1.5 Sekunden im Video sind.
+#     Somit wird der Unterschied in Sekunden mit der Frame Rate des
+#     Videos multipliziert und der Offset der Positional Data addiert.
+#     Damit der Unterschied zwischen den Framerates noch beglichen
+#     werden kann wird die Framerate der Positional Data mit dem Unterschied
+#     multipliziert abgezogen.
 
-    Args:
-        first_event_time_str (_type_): _description_
-        first_timestamp_pos (_type_): _description_
-        fps_vid (_type_): _description_
-        fps_pos (_type_): _description_
-        offset_fr (_type_): _description_
-        second_half (_type_): _description_
-        offseth2_fr (_type_): _description_
+#     Args:
+#         first_event_time_str (_type_): _description_
+#         first_timestamp_pos (_type_): _description_
+#         fps_vid (_type_): _description_
+#         fps_pos (_type_): _description_
+#         offset_fr (_type_): _description_
+#         second_half (_type_): _description_
+#         offseth2_fr (_type_): _description_
 
-    Returns:
-        _type_: _description_
-    """
-    first_timestamp_pos_date: datetime
-    synced_time: int
-    utc_timezone = pytz.utc
-    first_event_time = (datetime.fromisoformat(
-        first_event_time_str).replace(tzinfo=utc_timezone))
-    first_timestamp_pos_date = datetime.fromtimestamp(
-        (first_timestamp_pos / 1000), tz=timezone.utc
-    )
+#     Returns:
+#         _type_: _description_
+#     """
+#     first_timestamp_pos_date: datetime
+#     synced_time: int
+#     utc_timezone = pytz.utc
+#     first_event_time = (datetime.fromisoformat(
+#         first_event_time_str).replace(tzinfo=utc_timezone))
+#     first_timestamp_pos_date = datetime.fromtimestamp(
+#         (first_timestamp_pos / 1000), tz=timezone.utc
+#     )
 
-    delta = first_event_time - first_timestamp_pos_date
-    delta_fr_pos = delta.seconds * fps_pos
-    synced_time = delta_fr_pos + offset_fr - delta_fr_pos
-    if second_half:
-        synced_time = synced_time + offseth2_fr
-    return synced_time
+#     delta = first_event_time - first_timestamp_pos_date
+#     delta_fr_pos = delta.seconds * fps_pos
+#     synced_time = delta_fr_pos + offset_fr - delta_fr_pos
+#     if second_half:
+#         synced_time = synced_time + offseth2_fr
+#     return synced_time
 
 
 def reformatJson(

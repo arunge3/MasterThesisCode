@@ -93,7 +93,3 @@ def test_getFirstTimeStampEvent() -> None:
     filepath = os.path.join(base_dir, sub_dir, filename)
     result = getFirstTimeStampEvent(filepath)
     assert result == '2020-10-01T17:00:11+00:00'
-
-
-def test_calculateOffset() -> None:
-    assert True
