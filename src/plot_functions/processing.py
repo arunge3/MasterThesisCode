@@ -1,11 +1,11 @@
 from datetime import datetime as dt
-from typing import Any, Optional
+from typing import Any, List, Optional, Tuple
 
 import numpy as np
 import pytz  # type: ignore
 from floodlight import Code
 
-import help_functions.reformatJson_Methods as helpFuctions
+import help_functions.reformatjson_methods as helpFuctions
 from existing_code.rolling_mode import rolling_mode
 
 
@@ -120,7 +120,7 @@ def calculate_sequences(match_id: int) -> list[Any]:
 
 
 def synchronize_events(events: list[Any],
-                       sequences: list[tuple[int, int, str]],
+                       sequences: list[tuple[int, int, int]],
                        team_info: dict[str, str]
                        ) -> tuple[list[Any], list[Any]]:
     """
@@ -199,7 +199,7 @@ def synchronize_events(events: list[Any],
 
 
 def searchPhase(time: int,
-                sequences: list[tuple[int, int, str]], competitor: str
+                sequences: list[tuple[int, int, int]], competitor: str
                 ) -> Optional[int]:
     """
     Searches for the last matching phase before a given time for a specified
@@ -219,13 +219,13 @@ def searchPhase(time: int,
     # phase before `time`
     start: int
     end: int
-    phase: str
+    phase: int
     for start, end, phase in reversed(sequences):
         if end <= time:
-            if (phase == "1" or phase == "3") and competitor == "A":
+            if (phase == 1 or phase == 3) and competitor == "A":
                 return end - 1  # Return the end of this phase
                 # for competitor "A"
-            elif (phase == "2" or phase == "4") and competitor == "B":
+            elif (phase == 2 or phase == 4) and competitor == "B":
                 return end - 1  # Return the end of this phase for
                 # competitor "B"
     return None  # Return None if no valid phase was found before `time`
@@ -307,45 +307,42 @@ def add_threshold_to_time(event: dict[Any, Any]
     return returnTime
 
 
-def calculate_inactive_phase(time: int, sequences: list[tuple[int, int, str]]
-                             ) -> Optional[int]:
+def calculate_inactive_phase(
+    time: int, sequences: List[Tuple[int, int, int]]
+) -> Optional[int]:
     """
-    Calculate the inactive phase for a given time based on
-    sequences. This function determines the inactive phase for
-    a given time by checking the provided sequences of start
-    and end times with associated phases. If the time falls within
-    a sequence where the phase is 0, it prints "correct Phase".
-    Otherwise, it searches in reverse to find the last sequence
-    where the phase is 0 and returns the end time minus one.
-    If no such sequence is found, it returns 0.
+    Calculate the inactive phase for a given time based on sequences.
+    Determines the inactive phase for a given time by checking the
+    provided sequences of start and end times with associated phases.
     Args:
         time (int): The time to check against the sequences.
-        sequences (list of tuples): A list of tuples where each
-                                    tuple contains (start, end, phase)
-                                    representing the starttime,
-                                    end time, and phase respectively.
-    Returns:
-        int: The end time minus one of the last sequence where
-        the phase is 0 or 0 if no such sequence is found.
-    """
+        sequences (List[Tuple[int, int, int]]): A list of tuples where each
+            tuple contains (start, end, phase) representing the start time,
+            end time, and phase respectively.
 
-    phase = None
-    start: int
-    end: int
+    Returns:
+        Optional[int]: The end time minus one of the last sequence where
+            the phase is 0, or 0 if no such sequence is found, or None
+            if sequences are empty or no valid match is found.
+    """
     for start, end, phase in sequences:
         if start <= time < end:
+            if phase == 0:
+                print("correct Phase")
+                return None  # Indicates phase is active and valid.
             break
-    if phase == "0":
-        print("correct Phase")
-    else:
-        for _, end, phase in reversed(sequences):
-            if end <= time:
-                if phase == "0":
-                    return end - 1
+
+    # Reverse lookup if phase is not 0
+    for _, end, phase in reversed(sequences):
+        if end <= time:
+            if phase == 0:
+                return end - 1
+
+    # Default return value if no match found
     return None
 
 
-def calculate_timeouts(time: int, sequences: list[tuple[int, int, str]],
+def calculate_timeouts(time: int, sequences: list[tuple[int, int, int]],
                        team_ab: str, event: dict[Any, Any]
                        ) -> Optional[int]:
     """
@@ -366,18 +363,18 @@ def calculate_timeouts(time: int, sequences: list[tuple[int, int, str]],
     """
 
     if event["type"] == "timeout":
-        phase_timeout = None
+        phase_timeout: int
         start: int
         end: int
         for start, end, phase in sequences:
             if start <= time < end:
                 phase_timeout = phase
                 break
-        if phase_timeout == "0":
+        if phase_timeout == 0:
             print("correct Phase")
             return time
-        elif ((phase_timeout == "1" or phase_timeout == "3" and team_ab == "A")
-              or (phase_timeout == "2" or phase_timeout == "4"
+        elif ((phase_timeout == 1 or phase_timeout == 3 and team_ab == "A")
+              or (phase_timeout == 2 or phase_timeout == 4
                   and team_ab == "B")):
             if int(time) == int(end - 1):
                 print("correct Phase")
@@ -389,18 +386,18 @@ def calculate_timeouts(time: int, sequences: list[tuple[int, int, str]],
             # before `time`
             for _, end, phase in reversed(sequences):
                 if end <= time:
-                    if (phase == "1" or phase == "3") and team_ab == "A":
+                    if (phase == 1 or phase == 3) and team_ab == "A":
                         return (
                             end - 1
                         )  # Return the end of this phase for competitor "A"
-                    elif (phase == "2" or phase == "4") and team_ab == "B":
+                    elif (phase == 2 or phase == 4) and team_ab == "B":
                         return (
                             end - 1
                         )  # Return the end of this phase for competitor "B"
     return None  # Return None if no valid phase was found before `time`
 
 
-def calculate_timeouts_over(sequences: list[tuple[int, int, str]],
+def calculate_timeouts_over(sequences: list[tuple[int, int, int]],
                             event: dict[Any, Any], events: list[Any]
                             ) -> Optional[int]:
     """
@@ -424,11 +421,11 @@ def calculate_timeouts_over(sequences: list[tuple[int, int, str]],
         time = event["time"]
         start: int
         end: int
-        phase: str
+        phase: int
         for start, end, phase in sequences:
             if start <= time < end:
                 break
-        if phase == "0":
+        if phase == 0:
             # TODO Ich möchte berechnen dass das letzte Event
             # das Timeout war und das in der Zeit dazwischen
             # nur inaktive phase war
@@ -449,7 +446,7 @@ def calculate_timeouts_over(sequences: list[tuple[int, int, str]],
 
 def checkSamePhase(
     startTime: int, endtime: int,
-    sequences: list[tuple[int, int, str]], phase: str
+    sequences: list[tuple[int, int, int]], phase: int
 ) -> Optional[int]:
     """
     Check if a given time interval falls within a specific phase in a
@@ -469,7 +466,7 @@ def checkSamePhase(
     """
     start: int
     end: int
-    phaseAct: str
+    phaseAct: int
     for start, end, phaseAct in sequences:
         if startTime >= start and endtime < end:
             if phase == phaseAct:
@@ -482,7 +479,7 @@ def checkSamePhase(
 
 
 def calculate_correct_phase(
-    time: int, sequences: list[tuple[int, int, str]], team_ab: str,
+    time: int, sequences: list[tuple[int, int, int]], team_ab: str,
     event: dict[Any, Any]
 ) -> dict[Any, Any]:
     """
@@ -519,14 +516,14 @@ def calculate_correct_phase(
 
     # Find the y value on the continuous line for this event's time (t_start)
     # Define positions for each phase
-    phase = None
+    phase: int
     start: int
     end: int
     for start, end, phase in sequences:
         if start <= time < end:
             break
-    if (phase == "1" or phase == "3" and team_ab == "A") or (
-        phase == "2" or phase == "4" and team_ab == "B"
+    if ((phase == 1 or phase == 3) and team_ab == "A") or (
+        (phase == 2 or phase == 4) and team_ab == "B"
     ):
         print("correct Phase")
 
