@@ -1,9 +1,11 @@
+import json
 import os
 from typing import Any
 from unittest import TestCase
 from unittest.mock import patch
 
-from plot_functions.processing import adjustTimestamp, calculate_sequences
+from plot_functions.processing import (adjustTimestamp, calculate_sequences,
+                                       synchronize_events)
 
 
 class TestProcessing(TestCase):
@@ -29,15 +31,24 @@ class TestProcessing(TestCase):
     lookup_file = os.path.join(
         base_dir, r"HBL_Events\lookup\lookup_matches_20_21.csv")
 
+    team_info = {'Heimteam': 'home', 'Auswaerts Team': 'away'}
+    sequences = [(0, 7942, 0), (7942, 8664, 4), (8664, 8735, 1),
+                 (8735, 8877, 0), (8877, 9356, 3), (9356, 9430, 0),
+                 (9430, 9525, 4), (9525, 9703, 0), (9703, 9827, 3),
+                 (9827, 10008, 0), (10008, 10384, 3), (10384, 10511, 0),
+                 (10511, 10980, 3), (10980, 11079, 2), (11079, 11232, 0),
+                 (11232, 11671, 3), (11671, 11868, 0), (11868, 11930, 3),
+                 (11930, 12808, 0), (12808, 12917, 3), (12917, 13000, 0),
+                 (13000, 15000, 1), (230536, 230690, 0)]
+
     @patch('help_functions.reformatjson_methods.get_paths_by_match_id',
            autospec=True)
     def test_adjust_timestamp(self: Any, mock_get_paths: Any) -> None:
-        # Mock-Wert definieren
+        # Mock-Value definition
         expected_value = (self.video_base_path, self.timeline_base_path,
                           self.output_base_path, self.position_base_path,
                           9345, 0, 0, "")
 
-        # Mock konfigurieren
         mock_get_paths.return_value = expected_value
         # Call the method under test
         match_id = 1234
@@ -60,22 +71,33 @@ class TestProcessing(TestCase):
                           self.output_base_path, self.position_base_path,
                           9345, 0, 0,
                           r"Heimteam_Auswaert Team_01.10.2020_20-21.csv")
-        # Mock konfigurieren
+
         mock_get_paths.return_value = expected_value
 
         results = calculate_sequences(1234, self.base_dir_str)
-        results = results[:20]
-        expected = [(0, 7942, 0), (7942, 8664, 4), (8664, 8735, 1),
-                    (8735, 8877, 0), (8877, 9356, 3), (9356, 9430, 0),
-                    (9430, 9525, 4), (9525, 9703, 0), (9703, 9827, 3),
-                    (9827, 10008, 0), (10008, 10384, 3), (10384, 10511, 0),
-                    (10511, 10980, 3), (10980, 11079, 2), (11079, 11232, 0),
-                    (11232, 11671, 3), (11671, 11868, 0), (11868, 11930, 3),
-                    (11930, 12808, 0), (12808, 12917, 3)]
-        assert results == expected
+        assert results[:20] == self.sequences[:20]
 
     def test_synchronize_events(self: Any) -> None:
-        assert True
+
+        path_expected_output = os.path.join(self.expected_path,
+                                            "expected_output_time_only.json")
+        path_expected_synchronize_events = os.path.join(
+            self.expected_path, "expected_events_synchronize.json")
+
+        with open(path_expected_output, 'r') as file:
+            event_json = json.load(file)
+        events = event_json.get("timeline", [])
+        results = synchronize_events(events, self.sequences, self.team_info)
+
+        with open(path_expected_synchronize_events, "r",
+                  encoding="utf-8") as file:
+            loaded_variables = json.load(file)
+
+        loaded_variables = (
+            loaded_variables[0],
+            [tuple(item) for item in loaded_variables[1]]
+        )
+        assert results == loaded_variables
 
     def test_searchPhase(self: Any) -> None:
         assert True
