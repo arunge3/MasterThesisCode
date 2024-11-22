@@ -30,7 +30,7 @@ def adjustTimestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
     # Paths
     (
         _, path_timeline, _, positions_path, cut_h1, offset_h2,
-        first_vh2, match
+        first_vh2, _
     ) = helpFuctions.get_paths_by_match_id(match_id)
     (
         first_time_pos_str,
