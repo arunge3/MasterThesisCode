@@ -74,38 +74,29 @@ class TestProcessing(TestCase):
                     (11930, 12808, 0), (12808, 12917, 3)]
         assert results == expected
 
+    def test_synchronize_events(self: Any) -> None:
+        assert True
 
-def test_synchronize_events() -> None:
-    assert True
+    def test_searchPhase(self: Any) -> None:
+        assert True
 
+    def test_give_last_event(self: Any) -> None:
+        assert True
 
-def test_searchPhase() -> None:
-    assert True
+    def test_add_threshold_to_time(self: Any) -> None:
+        assert True
 
+    def test_calculate_inactive_phase(self: Any) -> None:
+        assert True
 
-def test_give_last_event() -> None:
-    assert True
+    def test_calculate_timeouts(self: Any) -> None:
+        assert True
 
+    def test_calculate_timeouts_over(self: Any) -> None:
+        assert True
 
-def test_add_threshold_to_time() -> None:
-    assert True
+    def test_checkSamePhase(self: Any) -> None:
+        assert True
 
-
-def test_calculate_inactive_phase() -> None:
-    assert True
-
-
-def test_calculate_timeouts() -> None:
-    assert True
-
-
-def test_calculate_timeouts_over() -> None:
-    assert True
-
-
-def test_checkSamePhase() -> None:
-    assert True
-
-
-def test_calculate_correct_phase() -> None:
-    assert True
+    def test_calculate_correct_phase(self: Any) -> None:
+        assert True
