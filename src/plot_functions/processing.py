@@ -82,7 +82,8 @@ def adjustTimestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
     return events, team_info
 
 
-def calculate_sequences(match_id: int) -> list[Any]:
+def calculate_sequences(match_id: int, base_path: str = "D:\\Handball\\",
+                        season: str = "season_20_21") -> list[Any]:
     """
     Calculate sequences of game phases for a given match.
     Args:
@@ -94,8 +95,6 @@ def calculate_sequences(match_id: int) -> list[Any]:
     """
     sequences: list[Any]
     # Paths
-    base_path = "D:\\Handball\\"
-    season = "season_20_21"
     _, _, _, positions_path, _, _, _, match = (
         helpFuctions.get_paths_by_match_id(match_id))
     _, _, fps_positional = helpFuctions.load_first_timestamp_position(
