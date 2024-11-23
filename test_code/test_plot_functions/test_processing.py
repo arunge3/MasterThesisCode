@@ -5,7 +5,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from plot_functions.processing import (adjustTimestamp, calculate_sequences,
-                                       synchronize_events)
+                                       searchPhase, synchronize_events)
 
 
 class TestProcessing(TestCase):
@@ -100,7 +100,10 @@ class TestProcessing(TestCase):
         assert results == loaded_variables
 
     def test_searchPhase(self: Any) -> None:
-        assert True
+        results = searchPhase(13865, self.sequences, "A")
+        assert results == 12916
+        results = searchPhase(13865, self.sequences, "B")
+        assert results == 11078
 
     def test_give_last_event(self: Any) -> None:
         assert True

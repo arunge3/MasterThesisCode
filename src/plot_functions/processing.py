@@ -216,10 +216,9 @@ def searchPhase(time: int,
     """
     # Go through sequences in reverse to find the last matching
     # phase before `time`
-    start: int
     end: int
     phase: int
-    for start, end, phase in reversed(sequences):
+    for _, end, phase in reversed(sequences):
         if end <= time:
             if (phase == 1 or phase == 3) and competitor == "A":
                 return end - 1  # Return the end of this phase
