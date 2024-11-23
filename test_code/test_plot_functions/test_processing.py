@@ -5,7 +5,8 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from plot_functions.processing import (adjustTimestamp, calculate_sequences,
-                                       searchPhase, synchronize_events)
+                                       give_last_event, searchPhase,
+                                       synchronize_events)
 
 
 class TestProcessing(TestCase):
@@ -106,9 +107,37 @@ class TestProcessing(TestCase):
         assert results == 11078
 
     def test_give_last_event(self: Any) -> None:
-        assert True
+        path_expected_output = os.path.join(self.expected_path,
+                                            "expected_output_time_only.json")
+
+        event = {
+            'id': 756467251,
+            'type': 'score_change',
+            'time': 106106,
+            'match_time': 21,
+            'match_clock': '20:31',
+            'competitor': 'home',
+            'home_score': 11,
+            'away_score': 9,
+            'scorer': {
+                'id': 'sr:player:125146',
+                'name': 'Pevnov, Evgeni'
+            },
+            'assists': [{'id': 'sr:player:905894',
+                         'name': 'Jonsson, Alfred', 'type': 'primary'}],
+            'zone': 'six_meter_centre',
+            'players': [{'id': 'sr:player:125160',
+                         'name': 'Semisch, Malte', 'type': 'goalkeeper'}],
+            'shot_type': 'pivot'
+        }
+        with open(path_expected_output, 'r') as file:
+            event_json = json.load(file)
+        events = event_json.get("timeline", [])
+        result = give_last_event(events, 113865)
+        assert result == event
 
     def test_add_threshold_to_time(self: Any) -> None:
+        # result = add_threshold_to_time(0, 0, 0)
         assert True
 
     def test_calculate_inactive_phase(self: Any) -> None:
