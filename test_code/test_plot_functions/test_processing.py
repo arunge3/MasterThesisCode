@@ -7,6 +7,7 @@ from unittest.mock import patch
 from plot_functions.processing import (add_threshold_to_time, adjustTimestamp,
                                        calculate_inactive_phase,
                                        calculate_sequences, calculate_timeouts,
+                                       calculate_timeouts_over,
                                        give_last_event, searchPhase,
                                        synchronize_events)
 
@@ -162,7 +163,21 @@ class TestProcessing(TestCase):
         assert result == 209952
 
     def test_calculate_timeouts_over(self: Any) -> None:
-        assert True
+        path_expected_output = os.path.join(self.expected_path,
+                                            "expected_output_time_only.json")
+
+        with open(path_expected_output, 'r') as file:
+            event_json = json.load(file)
+        events = event_json.get("timeline", [])
+        event = {
+            "id": 756506263,
+            "type": "timeout_over",
+            "time": 211570,
+            "match_time": 54,
+            "match_clock": "53:23"
+        }
+        result = calculate_timeouts_over(self.sequences, event, events)
+        assert result == 211570
 
     def test_checkSamePhase(self: Any) -> None:
         assert True
