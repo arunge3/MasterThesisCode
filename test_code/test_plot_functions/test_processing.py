@@ -5,6 +5,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from plot_functions.processing import (add_threshold_to_time, adjustTimestamp,
+                                       calculate_correct_phase,
                                        calculate_inactive_phase,
                                        calculate_sequences, calculate_timeouts,
                                        calculate_timeouts_over, checkSamePhase,
@@ -45,7 +46,7 @@ class TestProcessing(TestCase):
                  (11930, 12808, 0), (12808, 12917, 3), (12917, 13000, 0),
                  (13000, 15000, 1), (15000, 220100, 0), (220100, 230536, 1),
                  (230536, 230690, 0)]
-    event = {
+    event_only = {
         'id': 756467251,
         'type': 'score_change',
         'time': 106106,
@@ -136,12 +137,32 @@ class TestProcessing(TestCase):
 
         with open(path_expected_output, 'r') as file:
             event_json = json.load(file)
+        last_event = {
+            'id': 756467251,
+            'type': 'score_change',
+            'time': 106106,
+            'match_time': 21,
+            'match_clock': '20:31',
+            'competitor': 'home',
+            'home_score': 11,
+            'away_score': 9,
+            'scorer': {
+                    'id': 'sr:player:125146',
+                    'name': 'Pevnov, Evgeni'
+            },
+            'assists': [{'id': 'sr:player:905894',
+                        'name': 'Jonsson, Alfred', 'type': 'primary'}],
+            'zone': 'six_meter_centre',
+            'players': [{'id': 'sr:player:125160',
+                        'name': 'Semisch, Malte', 'type': 'goalkeeper'}],
+            'shot_type': 'pivot'
+        }
         events = event_json.get("timeline", [])
         result = give_last_event(events, 106346)
-        assert result == self.event
+        assert result == last_event
 
     def test_add_threshold_to_time(self: Any) -> None:
-        result = add_threshold_to_time(self.event)
+        result = add_threshold_to_time(self.event_only)
         assert result == 105997.24
 
     def test_calculate_inactive_phase(self: Any) -> None:
@@ -186,4 +207,22 @@ class TestProcessing(TestCase):
         assert result is None
 
     def test_calculate_correct_phase(self: Any) -> None:
-        assert True
+        event_new = self.event_only
+        result = calculate_correct_phase(
+            106106, self.sequences, "A", event_new)
+        assert result["time"] == 14999
+        assert result["type"] == self.event_only["type"]
+        result = calculate_correct_phase(
+            106106, self.sequences, "B", event_new)
+        assert result["time"] == 11078
+        assert result["type"] == self.event_only["type"]
+        event_new["time"] = 7950
+        result = calculate_correct_phase(
+            7950, self.sequences, "B", event_new)
+        assert result["time"] == 7950
+        assert result["type"] == event_new["type"]
+        event_new['time'] = 8670
+        result = calculate_correct_phase(
+            8670, self.sequences, "A", event_new)
+        assert result["time"] == 8670
+        assert result["type"] == event_new["type"]
