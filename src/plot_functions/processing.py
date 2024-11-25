@@ -455,7 +455,7 @@ def checkSamePhase(
                                 representing the start time,
                                 end time, and phase of a
                                 sequence.
-        phase (str): The phase to check against.
+        phase (int): The phase to check against.
     Returns:
         int or None: Returns the end time of the interval if it falls
                     within the specified phase, otherwise returns None.
@@ -469,7 +469,7 @@ def checkSamePhase(
                 return endtime
             else:
                 return -1
-        elif startTime >= start and endtime >= end:
+        elif startTime <= start and endtime >= end:
             return end
     return None
 

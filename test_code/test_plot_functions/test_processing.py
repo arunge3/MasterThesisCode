@@ -7,7 +7,7 @@ from unittest.mock import patch
 from plot_functions.processing import (add_threshold_to_time, adjustTimestamp,
                                        calculate_inactive_phase,
                                        calculate_sequences, calculate_timeouts,
-                                       calculate_timeouts_over,
+                                       calculate_timeouts_over, checkSamePhase,
                                        give_last_event, searchPhase,
                                        synchronize_events)
 
@@ -180,7 +180,10 @@ class TestProcessing(TestCase):
         assert result == 211570
 
     def test_checkSamePhase(self: Any) -> None:
-        assert True
+        result = checkSamePhase(209952, 211570, self.sequences, 0)
+        assert 211570 == result
+        result = checkSamePhase(209952, 230234, self.sequences, 1)
+        assert result is None
 
     def test_calculate_correct_phase(self: Any) -> None:
         assert True
