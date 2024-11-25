@@ -6,8 +6,9 @@ from unittest.mock import patch
 
 from plot_functions.processing import (add_threshold_to_time, adjustTimestamp,
                                        calculate_inactive_phase,
-                                       calculate_sequences, give_last_event,
-                                       searchPhase, synchronize_events)
+                                       calculate_sequences, calculate_timeouts,
+                                       give_last_event, searchPhase,
+                                       synchronize_events)
 
 
 class TestProcessing(TestCase):
@@ -41,7 +42,8 @@ class TestProcessing(TestCase):
                  (10511, 10980, 3), (10980, 11079, 2), (11079, 11232, 0),
                  (11232, 11671, 3), (11671, 11868, 0), (11868, 11930, 3),
                  (11930, 12808, 0), (12808, 12917, 3), (12917, 13000, 0),
-                 (13000, 15000, 1), (230536, 230690, 0)]
+                 (13000, 15000, 1), (15000, 220100, 0), (220100, 230536, 1),
+                 (230536, 230690, 0)]
     event = {
         'id': 756467251,
         'type': 'score_change',
@@ -78,7 +80,7 @@ class TestProcessing(TestCase):
 
         # Assertions
         mock_get_paths.assert_called_once_with(match_id)
-        self.assertEqual(len(events), 33)
+        self.assertEqual(len(events), 35)
         self.assertIn("Heimteam", team_info)
         self.assertIn("Auswaerts Team", team_info)
 
@@ -134,7 +136,7 @@ class TestProcessing(TestCase):
         with open(path_expected_output, 'r') as file:
             event_json = json.load(file)
         events = event_json.get("timeline", [])
-        result = give_last_event(events, 113865)
+        result = give_last_event(events, 106346)
         assert result == self.event
 
     def test_add_threshold_to_time(self: Any) -> None:
@@ -148,7 +150,16 @@ class TestProcessing(TestCase):
         assert result == 9429
 
     def test_calculate_timeouts(self: Any) -> None:
-        assert True
+        timeout = {
+            "id": 756505775,
+            "type": "timeout",
+            "time": "2020-10-01T18:25:30+00:00",
+            "match_time": 54,
+            "match_clock": "53:23",
+            "competitor": "away"
+        }
+        result = calculate_timeouts(209952, self.sequences, "A", timeout)
+        assert result == 209952
 
     def test_calculate_timeouts_over(self: Any) -> None:
         assert True

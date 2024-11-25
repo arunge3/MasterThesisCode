@@ -1346,6 +1346,21 @@
             }
         },
         {
+            "id": 756505775,
+            "type": "timeout",
+            "time": "2020-10-01T18:25:30+00:00",
+            "match_time": 54,
+            "match_clock": "53:23",
+            "competitor": "away"
+        },
+        {
+            "id": 756506263,
+            "type": "timeout_over",
+            "time": "2020-10-01T18:26:24+00:00",
+            "match_time": 54,
+            "match_clock": "53:23"
+        },
+        {
             "id": 756512415,
             "type": "match_ended",
             "time": "2020-10-01T18:37:00+00:00",

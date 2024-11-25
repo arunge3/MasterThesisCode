@@ -1,1 +1,675 @@
-[[{"id": 756445493, "type": "match_started", "time": 56536}, {"id": 756445501, "type": "period_start", "time": 56536, "period_name": "1st_half"}, {"id": 756446141, "type": "technical_ball_fault", "time": 11078, "match_time": 1, "match_clock": "0:46", "competitor": "home", "player": {"id": "sr:player:124859", "name": "Bohm, Fabian"}}, {"id": 756446777, "type": "shot_off_target", "time": 14999, "match_time": 2, "match_clock": "1:22", "competitor": "away", "player": {"id": "sr:player:1262212", "name": "Pusica, Miljan", "type": "shot"}, "outcome": "miss", "players": [{"id": "sr:player:1262212", "name": "Pusica, Miljan", "type": "shot"}, {"id": "sr:player:1290992", "name": "Lesjak, Urban", "type": "goalkeeper"}]}, {"id": 756446809, "type": "score_change", "time": 11078, "match_time": 2, "match_clock": "1:27", "competitor": "home", "home_score": 1, "away_score": 0, "scorer": {"id": "sr:player:1262014", "name": "Buchner, Vincent"}, "assists": [{"id": "sr:player:905894", "name": "Jonsson, Alfred", "type": "primary"}], "zone": "wing_left", "players": [{"id": "sr:player:125160", "name": "Semisch, Malte", "type": "goalkeeper"}]}, {"id": 756447577, "type": "shot_blocked", "time": 14999, "match_time": 3, "match_clock": "2:32", "competitor": "away", "player": {"id": "sr:player:364524", "name": "Rambo, Christoffer", "type": "shot"}, "players": [{"id": "sr:player:364524", "name": "Rambo, Christoffer", "type": "shot"}, {"id": "sr:player:124859", "name": "Bohm, Fabian", "type": "blocked"}]}, {"id": 756447641, "type": "technical_ball_fault", "time": 14999, "match_time": 3, "match_clock": "2:38", "competitor": "away", "player": {"id": "sr:player:1560004", "name": "Knorr, Juri"}}, {"id": 756447685, "type": "score_change", "time": 11078, "match_time": 3, "match_clock": "2:42", "competitor": "home", "home_score": 2, "away_score": 0, "scorer": {"id": "sr:player:905894", "name": "Jonsson, Alfred"}, "zone": "six_meter_centre", "players": [{"id": "sr:player:125160", "name": "Semisch, Malte", "type": "goalkeeper"}], "shot_type": "fast_break"}, {"id": 756448361, "type": "yellow_card", "time": 63099, "match_time": 4, "match_clock": "3:30", "competitor": "home", "player": {"id": "sr:player:876102", "name": "Brozovic, Ilija"}}, {"id": 756448961, "type": "shot_saved", "time": 11078, "match_time": 4, "match_clock": "3:54", "competitor": "home", "player": {"id": "sr:player:124859", "name": "Bohm, Fabian"}}, {"id": 756449227, "type": "steal", "time": 14999, "match_time": 5, "match_clock": "4:19", "competitor": "away", "player": {"id": "sr:player:364524", "name": "Rambo, Christoffer"}}, {"id": 756450959, "type": "seven_m_awarded", "time": 14999, "match_time": 6, "match_clock": "5:05", "competitor": "away", "player": {"id": "sr:player:930986", "name": "Staar, Max", "type": "fouled"}, "players": [{"id": "sr:player:930986", "name": "Staar, Max", "type": "fouled"}, {"id": "sr:player:1262014", "name": "Buchner, Vincent", "type": "foul"}]}, {"id": 756450739, "type": "suspension", "time": 69213, "match_time": 6, "match_clock": "5:06", "competitor": "home", "player": {"id": "sr:player:1262014", "name": "Buchner, Vincent"}, "suspension_minutes": 2}, {"id": 756451037, "type": "seven_m_missed", "time": 69962, "match_time": 6, "match_clock": "5:16", "competitor": "away", "player": {"id": "sr:player:913070", "name": "Korte, Mats", "type": "shot"}, "players": [{"id": "sr:player:913070", "name": "Korte, Mats", "type": "shot"}, {"id": "sr:player:1290992", "name": "Lesjak, Urban", "type": "saved"}]}, {"id": 756453017, "type": "technical_rule_fault", "time": 11078, "match_time": 7, "match_clock": "6:17", "competitor": "home", "player": {"id": "sr:player:1104103", "name": "Feise, Hannes"}}, {"id": 756453131, "type": "score_change", "time": 14999, "match_time": 7, "match_clock": "6:20", "competitor": "away", "home_score": 3, "away_score": 1, "scorer": {"id": "sr:player:1560004", "name": "Knorr, Juri"}, "zone": "back_court", "players": [{"id": "sr:player:1290992", "name": "Lesjak, Urban", "type": "goalkeeper"}]}, {"id": 756453597, "type": "suspension_over", "time": 73499, "match_time": 8, "match_clock": "7:07", "competitor": "home"}, {"id": 756464833, "type": "suspension", "time": 100562, "match_time": 19, "match_clock": "18:34", "competitor": "away", "player": {"id": "sr:player:1560004", "name": "Knorr, Juri"}, "suspension_minutes": 2}, {"id": 756466533, "type": "shot_saved", "time": 11078, "match_time": 20, "match_clock": "19:30", "competitor": "home", "player": {"id": "sr:player:1262014", "name": "Buchner, Vincent"}}, {"id": 756466975, "type": "score_change", "time": 14999, "match_time": 21, "match_clock": "20:04", "competitor": "away", "home_score": 10, "away_score": 9, "scorer": {"id": "sr:player:1262462", "name": "Thiele, Joshua"}, "assists": [{"id": "sr:player:1341258", "name": "Pehlivan, Doruk", "type": "primary"}], "zone": "six_meter_left", "players": [{"id": "sr:player:1290992", "name": "Lesjak, Urban", "type": "goalkeeper"}], "shot_type": "pivot"}, {"id": 756467171, "type": "yellow_card", "time": 105806, "match_time": 21, "match_clock": "20:12", "competitor": "home", "player": {"id": "sr:player:975877", "name": "Donker, Malte"}}, {"id": 756467251, "type": "score_change", "time": 11078, "match_time": 21, "match_clock": "20:31", "competitor": "home", "home_score": 11, "away_score": 9, "scorer": {"id": "sr:player:125146", "name": "Pevnov, Evgeni"}, "assists": [{"id": "sr:player:905894", "name": "Jonsson, Alfred", "type": "primary"}], "zone": "six_meter_centre", "players": [{"id": "sr:player:125160", "name": "Semisch, Malte", "type": "goalkeeper"}], "shot_type": "pivot"}, {"id": 756467347, "type": "suspension_over", "time": 106346, "match_time": 21, "match_clock": "20:35", "competitor": "away"}, {"id": 756475643, "type": "shot_blocked", "time": 14999, "match_time": 30, "match_clock": "29:59", "competitor": "away", "player": {"id": "sr:player:1262212", "name": "Pusica, Miljan", "type": "shot"}, "players": [{"id": "sr:player:1262212", "name": "Pusica, Miljan", "type": "shot"}, {"id": "sr:player:1104103", "name": "Feise, Hannes", "type": "blocked"}]}, {"id": 756475739, "type": "period_score", "time": 128254, "match_clock": "30:00", "period": "1", "home_score": 16, "away_score": 11}, {"id": 756475741, "type": "break_start", "time": 128254, "break_name": "pause"}, {"id": 756485619, "type": "period_start", "time": 155197, "period_name": "2nd_half"}, {"id": 756485669, "type": "substitution", "time": 155347, "match_time": 31, "match_clock": "30:06", "competitor": "away", "players": [{"id": "sr:player:125160", "name": "Semisch, Malte", "type": "substituted_out"}, {"id": "sr:player:124925", "name": "Lichtlein, Carsten", "type": "substituted_in"}]}, {"id": 756497931, "type": "seven_m_awarded", "time": 11078, "match_time": 45, "match_clock": "44:41", "competitor": "home", "player": {"id": "sr:player:1514831", "name": "Martinovic, Ivan", "type": "fouled"}, "players": [{"id": "sr:player:1514831", "name": "Martinovic, Ivan", "type": "fouled"}, {"id": "sr:player:364524", "name": "Rambo, Christoffer", "type": "foul"}]}, {"id": 768696037, "type": "suspension", "time": 2049481, "match_time": 45, "match_clock": "44:43", "competitor": "away", "player": {"id": "sr:player:1560004", "name": "Knorr, Juri"}, "suspension_minutes": 2}, {"id": 756498047, "type": "score_change", "time": 11078, "match_time": 45, "match_clock": "44:49", "competitor": "home", "home_score": 21, "away_score": 18, "scorer": {"id": "sr:player:1340010", "name": "Hansen, Johan"}, "method": "penalty", "zone": "six_meter_centre", "players": [{"id": "sr:player:124925", "name": "Lichtlein, Carsten", "type": "goalkeeper"}]}, {"id": 756498581, "type": "shot_saved", "time": 14999, "match_time": 46, "match_clock": "45:32", "competitor": "away", "player": {"id": "sr:player:1341258", "name": "Pehlivan, Doruk"}}, {"id": 756512415, "type": "match_ended", "time": 230631, "match_clock": "60:00"}], [[0, 7942, 0], [7942, 8664, 4], [8664, 8735, 1], [8735, 8877, 0], [8877, 9356, 3], [9356, 9430, 0], [9430, 9525, 4], [9525, 9703, 0], [9703, 9827, 3], [9827, 10008, 0], [10008, 10384, 3], [10384, 10511, 0], [10511, 10980, 3], [10980, 11079, 2], [11079, 11232, 0], [11232, 11671, 3], [11671, 11868, 0], [11868, 11930, 3], [11930, 12808, 0], [12808, 12917, 3], [12917, 13000, 0], [13000, 15000, 1], [230536, 230690, 0]]]
+[
+    [
+        {
+            "id": 756445493,
+            "type": "match_started",
+            "time": 56536
+        },
+        {
+            "id": 756445501,
+            "type": "period_start",
+            "time": 56536,
+            "period_name": "1st_half"
+        },
+        {
+            "id": 756446141,
+            "type": "technical_ball_fault",
+            "time": 11078,
+            "match_time": 1,
+            "match_clock": "0:46",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:124859",
+                "name": "Bohm, Fabian"
+            }
+        },
+        {
+            "id": 756446777,
+            "type": "shot_off_target",
+            "time": 14999,
+            "match_time": 2,
+            "match_clock": "1:22",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1262212",
+                "name": "Pusica, Miljan",
+                "type": "shot"
+            },
+            "outcome": "miss",
+            "players": [
+                {
+                    "id": "sr:player:1262212",
+                    "name": "Pusica, Miljan",
+                    "type": "shot"
+                },
+                {
+                    "id": "sr:player:1290992",
+                    "name": "Lesjak, Urban",
+                    "type": "goalkeeper"
+                }
+            ]
+        },
+        {
+            "id": 756446809,
+            "type": "score_change",
+            "time": 11078,
+            "match_time": 2,
+            "match_clock": "1:27",
+            "competitor": "home",
+            "home_score": 1,
+            "away_score": 0,
+            "scorer": {
+                "id": "sr:player:1262014",
+                "name": "Buchner, Vincent"
+            },
+            "assists": [
+                {
+                    "id": "sr:player:905894",
+                    "name": "Jonsson, Alfred",
+                    "type": "primary"
+                }
+            ],
+            "zone": "wing_left",
+            "players": [
+                {
+                    "id": "sr:player:125160",
+                    "name": "Semisch, Malte",
+                    "type": "goalkeeper"
+                }
+            ]
+        },
+        {
+            "id": 756447577,
+            "type": "shot_blocked",
+            "time": 14999,
+            "match_time": 3,
+            "match_clock": "2:32",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:364524",
+                "name": "Rambo, Christoffer",
+                "type": "shot"
+            },
+            "players": [
+                {
+                    "id": "sr:player:364524",
+                    "name": "Rambo, Christoffer",
+                    "type": "shot"
+                },
+                {
+                    "id": "sr:player:124859",
+                    "name": "Bohm, Fabian",
+                    "type": "blocked"
+                }
+            ]
+        },
+        {
+            "id": 756447641,
+            "type": "technical_ball_fault",
+            "time": 14999,
+            "match_time": 3,
+            "match_clock": "2:38",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1560004",
+                "name": "Knorr, Juri"
+            }
+        },
+        {
+            "id": 756447685,
+            "type": "score_change",
+            "time": 11078,
+            "match_time": 3,
+            "match_clock": "2:42",
+            "competitor": "home",
+            "home_score": 2,
+            "away_score": 0,
+            "scorer": {
+                "id": "sr:player:905894",
+                "name": "Jonsson, Alfred"
+            },
+            "zone": "six_meter_centre",
+            "players": [
+                {
+                    "id": "sr:player:125160",
+                    "name": "Semisch, Malte",
+                    "type": "goalkeeper"
+                }
+            ],
+            "shot_type": "fast_break"
+        },
+        {
+            "id": 756448361,
+            "type": "yellow_card",
+            "time": 63099,
+            "match_time": 4,
+            "match_clock": "3:30",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:876102",
+                "name": "Brozovic, Ilija"
+            }
+        },
+        {
+            "id": 756448961,
+            "type": "shot_saved",
+            "time": 11078,
+            "match_time": 4,
+            "match_clock": "3:54",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:124859",
+                "name": "Bohm, Fabian"
+            }
+        },
+        {
+            "id": 756449227,
+            "type": "steal",
+            "time": 14999,
+            "match_time": 5,
+            "match_clock": "4:19",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:364524",
+                "name": "Rambo, Christoffer"
+            }
+        },
+        {
+            "id": 756450959,
+            "type": "seven_m_awarded",
+            "time": 14999,
+            "match_time": 6,
+            "match_clock": "5:05",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:930986",
+                "name": "Staar, Max",
+                "type": "fouled"
+            },
+            "players": [
+                {
+                    "id": "sr:player:930986",
+                    "name": "Staar, Max",
+                    "type": "fouled"
+                },
+                {
+                    "id": "sr:player:1262014",
+                    "name": "Buchner, Vincent",
+                    "type": "foul"
+                }
+            ]
+        },
+        {
+            "id": 756450739,
+            "type": "suspension",
+            "time": 69213,
+            "match_time": 6,
+            "match_clock": "5:06",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:1262014",
+                "name": "Buchner, Vincent"
+            },
+            "suspension_minutes": 2
+        },
+        {
+            "id": 756451037,
+            "type": "seven_m_missed",
+            "time": 69962,
+            "match_time": 6,
+            "match_clock": "5:16",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:913070",
+                "name": "Korte, Mats",
+                "type": "shot"
+            },
+            "players": [
+                {
+                    "id": "sr:player:913070",
+                    "name": "Korte, Mats",
+                    "type": "shot"
+                },
+                {
+                    "id": "sr:player:1290992",
+                    "name": "Lesjak, Urban",
+                    "type": "saved"
+                }
+            ]
+        },
+        {
+            "id": 756453017,
+            "type": "technical_rule_fault",
+            "time": 11078,
+            "match_time": 7,
+            "match_clock": "6:17",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:1104103",
+                "name": "Feise, Hannes"
+            }
+        },
+        {
+            "id": 756453131,
+            "type": "score_change",
+            "time": 14999,
+            "match_time": 7,
+            "match_clock": "6:20",
+            "competitor": "away",
+            "home_score": 3,
+            "away_score": 1,
+            "scorer": {
+                "id": "sr:player:1560004",
+                "name": "Knorr, Juri"
+            },
+            "zone": "back_court",
+            "players": [
+                {
+                    "id": "sr:player:1290992",
+                    "name": "Lesjak, Urban",
+                    "type": "goalkeeper"
+                }
+            ]
+        },
+        {
+            "id": 756453597,
+            "type": "suspension_over",
+            "time": 73499,
+            "match_time": 8,
+            "match_clock": "7:07",
+            "competitor": "home"
+        },
+        {
+            "id": 756464833,
+            "type": "suspension",
+            "time": 100562,
+            "match_time": 19,
+            "match_clock": "18:34",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1560004",
+                "name": "Knorr, Juri"
+            },
+            "suspension_minutes": 2
+        },
+        {
+            "id": 756466533,
+            "type": "shot_saved",
+            "time": 11078,
+            "match_time": 20,
+            "match_clock": "19:30",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:1262014",
+                "name": "Buchner, Vincent"
+            }
+        },
+        {
+            "id": 756466975,
+            "type": "score_change",
+            "time": 14999,
+            "match_time": 21,
+            "match_clock": "20:04",
+            "competitor": "away",
+            "home_score": 10,
+            "away_score": 9,
+            "scorer": {
+                "id": "sr:player:1262462",
+                "name": "Thiele, Joshua"
+            },
+            "assists": [
+                {
+                    "id": "sr:player:1341258",
+                    "name": "Pehlivan, Doruk",
+                    "type": "primary"
+                }
+            ],
+            "zone": "six_meter_left",
+            "players": [
+                {
+                    "id": "sr:player:1290992",
+                    "name": "Lesjak, Urban",
+                    "type": "goalkeeper"
+                }
+            ],
+            "shot_type": "pivot"
+        },
+        {
+            "id": 756467171,
+            "type": "yellow_card",
+            "time": 105806,
+            "match_time": 21,
+            "match_clock": "20:12",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:975877",
+                "name": "Donker, Malte"
+            }
+        },
+        {
+            "id": 756467251,
+            "type": "score_change",
+            "time": 11078,
+            "match_time": 21,
+            "match_clock": "20:31",
+            "competitor": "home",
+            "home_score": 11,
+            "away_score": 9,
+            "scorer": {
+                "id": "sr:player:125146",
+                "name": "Pevnov, Evgeni"
+            },
+            "assists": [
+                {
+                    "id": "sr:player:905894",
+                    "name": "Jonsson, Alfred",
+                    "type": "primary"
+                }
+            ],
+            "zone": "six_meter_centre",
+            "players": [
+                {
+                    "id": "sr:player:125160",
+                    "name": "Semisch, Malte",
+                    "type": "goalkeeper"
+                }
+            ],
+            "shot_type": "pivot"
+        },
+        {
+            "id": 756467347,
+            "type": "suspension_over",
+            "time": 106346,
+            "match_time": 21,
+            "match_clock": "20:35",
+            "competitor": "away"
+        },
+        {
+            "id": 756475643,
+            "type": "shot_blocked",
+            "time": 14999,
+            "match_time": 30,
+            "match_clock": "29:59",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1262212",
+                "name": "Pusica, Miljan",
+                "type": "shot"
+            },
+            "players": [
+                {
+                    "id": "sr:player:1262212",
+                    "name": "Pusica, Miljan",
+                    "type": "shot"
+                },
+                {
+                    "id": "sr:player:1104103",
+                    "name": "Feise, Hannes",
+                    "type": "blocked"
+                }
+            ]
+        },
+        {
+            "id": 756475739,
+            "type": "period_score",
+            "time": 128254,
+            "match_clock": "30:00",
+            "period": "1",
+            "home_score": 16,
+            "away_score": 11
+        },
+        {
+            "id": 756475741,
+            "type": "break_start",
+            "time": 128254,
+            "break_name": "pause"
+        },
+        {
+            "id": 756485619,
+            "type": "period_start",
+            "time": 155197,
+            "period_name": "2nd_half"
+        },
+        {
+            "id": 756485669,
+            "type": "substitution",
+            "time": 155347,
+            "match_time": 31,
+            "match_clock": "30:06",
+            "competitor": "away",
+            "players": [
+                {
+                    "id": "sr:player:125160",
+                    "name": "Semisch, Malte",
+                    "type": "substituted_out"
+                },
+                {
+                    "id": "sr:player:124925",
+                    "name": "Lichtlein, Carsten",
+                    "type": "substituted_in"
+                }
+            ]
+        },
+        {
+            "id": 756497931,
+            "type": "seven_m_awarded",
+            "time": 11078,
+            "match_time": 45,
+            "match_clock": "44:41",
+            "competitor": "home",
+            "player": {
+                "id": "sr:player:1514831",
+                "name": "Martinovic, Ivan",
+                "type": "fouled"
+            },
+            "players": [
+                {
+                    "id": "sr:player:1514831",
+                    "name": "Martinovic, Ivan",
+                    "type": "fouled"
+                },
+                {
+                    "id": "sr:player:364524",
+                    "name": "Rambo, Christoffer",
+                    "type": "foul"
+                }
+            ]
+        },
+        {
+            "id": 768696037,
+            "type": "suspension",
+            "time": 2049481,
+            "match_time": 45,
+            "match_clock": "44:43",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1560004",
+                "name": "Knorr, Juri"
+            },
+            "suspension_minutes": 2
+        },
+        {
+            "id": 756498047,
+            "type": "score_change",
+            "time": 11078,
+            "match_time": 45,
+            "match_clock": "44:49",
+            "competitor": "home",
+            "home_score": 21,
+            "away_score": 18,
+            "scorer": {
+                "id": "sr:player:1340010",
+                "name": "Hansen, Johan"
+            },
+            "method": "penalty",
+            "zone": "six_meter_centre",
+            "players": [
+                {
+                    "id": "sr:player:124925",
+                    "name": "Lichtlein, Carsten",
+                    "type": "goalkeeper"
+                }
+            ]
+        },
+        {
+            "id": 756498581,
+            "type": "shot_saved",
+            "time": 14999,
+            "match_time": 46,
+            "match_clock": "45:32",
+            "competitor": "away",
+            "player": {
+                "id": "sr:player:1341258",
+                "name": "Pehlivan, Doruk"
+            }
+        },
+        {
+            "id": 756505775,
+            "type": "timeout",
+            "time": 209952,
+            "match_time": 54,
+            "match_clock": "53:23",
+            "competitor": "away"
+        },
+        {
+            "id": 756506263,
+            "type": "timeout_over",
+            "time": 211570,
+            "match_time": 54,
+            "match_clock": "53:23"
+        },
+        {
+            "id": 756512415,
+            "type": "match_ended",
+            "time": 230631,
+            "match_clock": "60:00"
+        }
+    ],
+    [
+        [
+            0,
+            7942,
+            0
+        ],
+        [
+            7942,
+            8664,
+            4
+        ],
+        [
+            8664,
+            8735,
+            1
+        ],
+        [
+            8735,
+            8877,
+            0
+        ],
+        [
+            8877,
+            9356,
+            3
+        ],
+        [
+            9356,
+            9430,
+            0
+        ],
+        [
+            9430,
+            9525,
+            4
+        ],
+        [
+            9525,
+            9703,
+            0
+        ],
+        [
+            9703,
+            9827,
+            3
+        ],
+        [
+            9827,
+            10008,
+            0
+        ],
+        [
+            10008,
+            10384,
+            3
+        ],
+        [
+            10384,
+            10511,
+            0
+        ],
+        [
+            10511,
+            10980,
+            3
+        ],
+        [
+            10980,
+            11079,
+            2
+        ],
+        [
+            11079,
+            11232,
+            0
+        ],
+        [
+            11232,
+            11671,
+            3
+        ],
+        [
+            11671,
+            11868,
+            0
+        ],
+        [
+            11868,
+            11930,
+            3
+        ],
+        [
+            11930,
+            12808,
+            0
+        ],
+        [
+            12808,
+            12917,
+            3
+        ],
+        [
+            12917,
+            13000,
+            0
+        ],
+        [
+            13000,
+            15000,
+            1
+        ],
+        [
+            15000,
+            220100,
+            0
+        ],
+        [
+            220100,
+            230536,
+            1
+        ],
+        [
+            230536,
+            230690,
+            0
+        ]
+    ]
+]
