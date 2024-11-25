@@ -4,9 +4,10 @@ from typing import Any
 from unittest import TestCase
 from unittest.mock import patch
 
-from plot_functions.processing import (adjustTimestamp, calculate_sequences,
-                                       give_last_event, searchPhase,
-                                       synchronize_events)
+from plot_functions.processing import (add_threshold_to_time, adjustTimestamp,
+                                       calculate_inactive_phase,
+                                       calculate_sequences, give_last_event,
+                                       searchPhase, synchronize_events)
 
 
 class TestProcessing(TestCase):
@@ -41,6 +42,26 @@ class TestProcessing(TestCase):
                  (11232, 11671, 3), (11671, 11868, 0), (11868, 11930, 3),
                  (11930, 12808, 0), (12808, 12917, 3), (12917, 13000, 0),
                  (13000, 15000, 1), (230536, 230690, 0)]
+    event = {
+        'id': 756467251,
+        'type': 'score_change',
+        'time': 106106,
+        'match_time': 21,
+        'match_clock': '20:31',
+        'competitor': 'home',
+        'home_score': 11,
+        'away_score': 9,
+        'scorer': {
+                'id': 'sr:player:125146',
+                'name': 'Pevnov, Evgeni'
+        },
+        'assists': [{'id': 'sr:player:905894',
+                     'name': 'Jonsson, Alfred', 'type': 'primary'}],
+        'zone': 'six_meter_centre',
+        'players': [{'id': 'sr:player:125160',
+                     'name': 'Semisch, Malte', 'type': 'goalkeeper'}],
+        'shot_type': 'pivot'
+    }
 
     @patch('help_functions.reformatjson_methods.get_paths_by_match_id',
            autospec=True)
@@ -110,38 +131,21 @@ class TestProcessing(TestCase):
         path_expected_output = os.path.join(self.expected_path,
                                             "expected_output_time_only.json")
 
-        event = {
-            'id': 756467251,
-            'type': 'score_change',
-            'time': 106106,
-            'match_time': 21,
-            'match_clock': '20:31',
-            'competitor': 'home',
-            'home_score': 11,
-            'away_score': 9,
-            'scorer': {
-                'id': 'sr:player:125146',
-                'name': 'Pevnov, Evgeni'
-            },
-            'assists': [{'id': 'sr:player:905894',
-                         'name': 'Jonsson, Alfred', 'type': 'primary'}],
-            'zone': 'six_meter_centre',
-            'players': [{'id': 'sr:player:125160',
-                         'name': 'Semisch, Malte', 'type': 'goalkeeper'}],
-            'shot_type': 'pivot'
-        }
         with open(path_expected_output, 'r') as file:
             event_json = json.load(file)
         events = event_json.get("timeline", [])
         result = give_last_event(events, 113865)
-        assert result == event
+        assert result == self.event
 
     def test_add_threshold_to_time(self: Any) -> None:
-        # result = add_threshold_to_time(0, 0, 0)
-        assert True
+        result = add_threshold_to_time(self.event)
+        assert result == 105997.24
 
     def test_calculate_inactive_phase(self: Any) -> None:
-        assert True
+        result = calculate_inactive_phase(8860, sequences=self.sequences)
+        assert result == 8860
+        result = calculate_inactive_phase(9520, sequences=self.sequences)
+        assert result == 9429
 
     def test_calculate_timeouts(self: Any) -> None:
         assert True

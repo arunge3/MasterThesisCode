@@ -259,21 +259,19 @@ def give_last_event(events: list[Any],
     return None
 
 
-def add_threshold_to_time(event: dict[Any, Any]
-                          ) -> int:
+def add_threshold_to_time(event: dict[Any, Any]) -> int:
     """
-    Adjusts the event time by adding a predefined threshold
-    based on the event type.
-    Parameters:
-    event (dict): A dictionary containing event details.
-    It must have the keys:
-        - "type" (str): The type of the event.
-        - "time" (int): The original time of the event.
+    Adjusts the event time by adding a predefined threshold based
+    on the event type.
+    Args:
+        event (dict[Any, Any]): A dictionary containing event details.
+                                It must have a "type" key indicating
+                                the event type and a "time" key
+                                indicating the event time.
     Returns:
-    int: The adjusted event time after adding the threshold.
-    Event types and their corresponding thresholds.
-    If the event type is not found in the predefined thresholds,
-    a default threshold of 0 is used.
+        int: The adjusted event time after adding the threshold. If the event
+        type is not found in the predefined thresholds, the original event
+        time is returned.
     """
 
     # Define the time thresholds for each event type
@@ -327,7 +325,7 @@ def calculate_inactive_phase(
         if start <= time < end:
             if phase == 0:
                 print("correct Phase")
-                return None  # Indicates phase is active and valid.
+                return time  # Indicates phase is active and valid.
             break
 
     # Reverse lookup if phase is not 0
