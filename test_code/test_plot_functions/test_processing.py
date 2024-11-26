@@ -203,8 +203,8 @@ class TestProcessing(TestCase):
     def test_checkSamePhase(self: Any) -> None:
         result = checkSamePhase(209952, 211570, self.sequences, 0)
         assert 211570 == result
-        result = checkSamePhase(209952, 230234, self.sequences, 1)
-        assert result is None
+        with self.assertRaises(ValueError):
+            result = checkSamePhase(209952, 230234, self.sequences, 1)
 
     def test_calculate_correct_phase(self: Any) -> None:
         event_new = self.event_only
