@@ -475,7 +475,7 @@
                 },
                 {
                     "id": "sr:competitor:0045",
-                    "name": "Auswärts Team",
+                    "name": "Ausw\u00c3\u00a4rts Team",
                     "abbreviation": "AUS",
                     "qualifier": "away",
                     "statistics": {
@@ -825,18 +825,18 @@
         {
             "id": 756445493,
             "type": "match_started",
-            "time": "2020-10-01T17:00:11+00:00"
+            "time": 56536
         },
         {
             "id": 756445501,
             "type": "period_start",
-            "time": "2020-10-01T17:00:11+00:00",
+            "time": 56536,
             "period_name": "1st_half"
         },
         {
             "id": 756446141,
             "type": "technical_ball_fault",
-            "time": "2020-10-01T17:00:57+00:00",
+            "time": 57914,
             "match_time": 1,
             "match_clock": "0:46",
             "competitor": "home",
@@ -848,7 +848,7 @@
         {
             "id": 756446777,
             "type": "shot_off_target",
-            "time": "2020-10-01T17:01:34+00:00",
+            "time": 59023,
             "match_time": 2,
             "match_clock": "1:22",
             "competitor": "away",
@@ -874,7 +874,7 @@
         {
             "id": 756446809,
             "type": "score_change",
-            "time": "2020-10-01T17:01:37+00:00",
+            "time": 59113,
             "match_time": 2,
             "match_clock": "1:27",
             "competitor": "home",
@@ -903,7 +903,7 @@
         {
             "id": 756447577,
             "type": "shot_blocked",
-            "time": "2020-10-01T17:02:44+00:00",
+            "time": 61121,
             "match_time": 3,
             "match_clock": "2:32",
             "competitor": "away",
@@ -928,7 +928,7 @@
         {
             "id": 756447641,
             "type": "technical_ball_fault",
-            "time": "2020-10-01T17:02:49+00:00",
+            "time": 61271,
             "match_time": 3,
             "match_clock": "2:38",
             "competitor": "away",
@@ -940,7 +940,7 @@
         {
             "id": 756447685,
             "type": "score_change",
-            "time": "2020-10-01T17:02:53+00:00",
+            "time": 61391,
             "match_time": 3,
             "match_clock": "2:42",
             "competitor": "home",
@@ -963,7 +963,7 @@
         {
             "id": 756448361,
             "type": "yellow_card",
-            "time": "2020-10-01T17:03:50+00:00",
+            "time": 63099,
             "match_time": 4,
             "match_clock": "3:30",
             "competitor": "home",
@@ -975,7 +975,7 @@
         {
             "id": 756448961,
             "type": "shot_saved",
-            "time": "2020-10-01T17:04:39+00:00",
+            "time": 64568,
             "match_time": 4,
             "match_clock": "3:54",
             "competitor": "home",
@@ -987,7 +987,7 @@
         {
             "id": 756449227,
             "type": "steal",
-            "time": "2020-10-01T17:05:04+00:00",
+            "time": 65317,
             "match_time": 5,
             "match_clock": "4:19",
             "competitor": "away",
@@ -999,7 +999,7 @@
         {
             "id": 756450959,
             "type": "seven_m_awarded",
-            "time": "2020-10-01T17:07:33+00:00",
+            "time": 69782,
             "match_time": 6,
             "match_clock": "5:05",
             "competitor": "away",
@@ -1024,7 +1024,7 @@
         {
             "id": 756450739,
             "type": "suspension",
-            "time": "2020-10-01T17:07:14+00:00",
+            "time": 69213,
             "match_time": 6,
             "match_clock": "5:06",
             "competitor": "home",
@@ -1037,7 +1037,7 @@
         {
             "id": 756451037,
             "type": "seven_m_missed",
-            "time": "2020-10-01T17:07:39+00:00",
+            "time": 69962,
             "match_time": 6,
             "match_clock": "5:16",
             "competitor": "away",
@@ -1062,7 +1062,7 @@
         {
             "id": 756453017,
             "type": "technical_rule_fault",
-            "time": "2020-10-01T17:08:47+00:00",
+            "time": 72000,
             "match_time": 7,
             "match_clock": "6:17",
             "competitor": "home",
@@ -1074,7 +1074,7 @@
         {
             "id": 756453131,
             "type": "score_change",
-            "time": "2020-10-01T17:08:57+00:00",
+            "time": 72300,
             "match_time": 7,
             "match_clock": "6:20",
             "competitor": "away",
@@ -1096,7 +1096,7 @@
         {
             "id": 756453597,
             "type": "suspension_over",
-            "time": "2020-10-01T17:09:37+00:00",
+            "time": 73499,
             "match_time": 8,
             "match_clock": "7:07",
             "competitor": "home"
@@ -1104,7 +1104,7 @@
         {
             "id": 756464833,
             "type": "suspension",
-            "time": "2020-10-01T17:24:40+00:00",
+            "time": 100562,
             "match_time": 19,
             "match_clock": "18:34",
             "competitor": "away",
@@ -1117,7 +1117,7 @@
         {
             "id": 756466533,
             "type": "shot_saved",
-            "time": "2020-10-01T17:26:48+00:00",
+            "time": 104398,
             "match_time": 20,
             "match_clock": "19:30",
             "competitor": "home",
@@ -1129,7 +1129,7 @@
         {
             "id": 756466975,
             "type": "score_change",
-            "time": "2020-10-01T17:27:20+00:00",
+            "time": 105357,
             "match_time": 21,
             "match_clock": "20:04",
             "competitor": "away",
@@ -1159,7 +1159,7 @@
         {
             "id": 756467171,
             "type": "yellow_card",
-            "time": "2020-10-01T17:27:35+00:00",
+            "time": 105806,
             "match_time": 21,
             "match_clock": "20:12",
             "competitor": "home",
@@ -1171,7 +1171,7 @@
         {
             "id": 756467251,
             "type": "score_change",
-            "time": "2020-10-01T17:27:45+00:00",
+            "time": 106106,
             "match_time": 21,
             "match_clock": "20:31",
             "competitor": "home",
@@ -1201,7 +1201,7 @@
         {
             "id": 756467347,
             "type": "suspension_over",
-            "time": "2020-10-01T17:27:53+00:00",
+            "time": 106346,
             "match_time": 21,
             "match_clock": "20:35",
             "competitor": "away"
@@ -1209,7 +1209,7 @@
         {
             "id": 756475643,
             "type": "shot_blocked",
-            "time": "2020-10-01T17:39:56+00:00",
+            "time": 128014,
             "match_time": 30,
             "match_clock": "29:59",
             "competitor": "away",
@@ -1234,7 +1234,7 @@
         {
             "id": 756475739,
             "type": "period_score",
-            "time": "2020-10-01T17:40:04+00:00",
+            "time": 128254,
             "match_clock": "30:00",
             "period": "1",
             "home_score": 16,
@@ -1243,19 +1243,19 @@
         {
             "id": 756475741,
             "type": "break_start",
-            "time": "2020-10-01T17:40:04+00:00",
+            "time": 128254,
             "break_name": "pause"
         },
         {
             "id": 756485619,
             "type": "period_start",
-            "time": "2020-10-01T17:55:03+00:00",
+            "time": 155197,
             "period_name": "2nd_half"
         },
         {
             "id": 756485669,
             "type": "substitution",
-            "time": "2020-10-01T17:55:08+00:00",
+            "time": 155347,
             "match_time": 31,
             "match_clock": "30:06",
             "competitor": "away",
@@ -1275,7 +1275,7 @@
         {
             "id": 756497931,
             "type": "seven_m_awarded",
-            "time": "2020-10-01T18:13:44+00:00",
+            "time": 188793,
             "match_time": 45,
             "match_clock": "44:41",
             "competitor": "home",
@@ -1300,7 +1300,7 @@
         {
             "id": 768696037,
             "type": "suspension",
-            "time": "2020-10-22T11:28:29+00:00",
+            "time": 2049481,
             "match_time": 45,
             "match_clock": "44:43",
             "competitor": "away",
@@ -1313,7 +1313,7 @@
         {
             "id": 756498047,
             "type": "score_change",
-            "time": "2020-10-01T18:13:54+00:00",
+            "time": 189093,
             "match_time": 45,
             "match_clock": "44:49",
             "competitor": "home",
@@ -1336,7 +1336,7 @@
         {
             "id": 756498581,
             "type": "shot_saved",
-            "time": "2020-10-01T18:14:42+00:00",
+            "time": 190531,
             "match_time": 46,
             "match_clock": "45:32",
             "competitor": "away",
@@ -1348,7 +1348,7 @@
         {
             "id": 756505775,
             "type": "timeout",
-            "time": "2020-10-01T18:25:30+00:00",
+            "time": 209952,
             "match_time": 54,
             "match_clock": "53:23",
             "competitor": "away"
@@ -1356,14 +1356,14 @@
         {
             "id": 756506263,
             "type": "timeout_over",
-            "time": "2020-10-01T18:26:24+00:00",
+            "time": 211570,
             "match_time": 54,
             "match_clock": "53:23"
         },
         {
             "id": 756512415,
             "type": "match_ended",
-            "time": "2020-10-01T18:37:00+00:00",
+            "time": 230631,
             "match_clock": "60:00"
         }
     ]
