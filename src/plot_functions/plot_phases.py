@@ -154,3 +154,70 @@ def plot_phases(match_id: int, approach: Approach
     ax.set_xlim(6000, 50000)
     # Show plot
     plt.show()
+
+
+def plotEvents(match_id: int) -> None:
+    import matplotlib.pyplot as plt
+    events, _ = processing.adjustTimestamp(match_id)
+
+    # Define event colors based on categories
+    event_colors = {
+        "score_change": "dodgerblue",
+        "suspension": "purple",
+        "suspension_over": "darkviolet",
+        "technical_rule_fault": "gold",
+        "technical_ball_fault": "orange",
+        "steal": "limegreen",
+        "shot_saved": "mediumblue",
+        "shot_off_target": "crimson",
+        "shot_blocked": "red",
+        "seven_m_awarded": "deeppink",
+        "seven_m_missed": "hotpink",
+        "yellow_card": "yellow",
+        "red_card": "darkred",
+        "timeout": "cyan",
+        "timeout_over": "cyan",
+        "subsitution": "black",
+        # Default for all other events
+        "default": "grey",
+    }
+
+    # Initialize the plot
+    _, ax = plt.subplots(figsize=(14, 4))
+
+    # Track labels to avoid duplicates in the legend
+    added_labels = set()
+
+    # Add event markers
+    for event in events:
+        t_start = event["time"]
+        event_type = event["type"]
+        color = event_colors.get(event_type, event_colors["default"])
+
+        # Plot event marker
+        ax.plot(
+            t_start,
+            1,  # All events on a single y-level
+            "x",
+            color=color,
+            markersize=8,
+            label=event_type if event_type not in added_labels else "",
+        )
+        added_labels.add(event_type)
+
+    # Add legend
+    ax.legend(title="Event Types", loc="upper right", bbox_to_anchor=(1.15, 1))
+
+    # Customize the plot
+    ax.axhline(1, color="grey", linewidth=0.5,
+               linestyle="")  # Baseline for events
+    ax.set_yticks([1])  # Single y-tick
+    ax.set_yticklabels(["Events"])  # Label for y-axis
+    ax.set_xlabel("Timeframe")
+    ax.set_title("Event Timeline")
+
+    # Add some padding around the range
+    ax.set_xlim(6000, 50000)
+
+    # Show plot
+    plt.show()
