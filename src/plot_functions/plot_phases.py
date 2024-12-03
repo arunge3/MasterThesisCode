@@ -1,12 +1,24 @@
+from enum import Enum
+
 import matplotlib
 import matplotlib.pyplot as plt
 
 import plot_functions.processing as processing
 
+# Enum für die drei Wahlmöglichkeiten
+
+
+class Approach(Enum):
+    RULE_BASED = "Rule-based Approach"
+    BASELINE = "Baseline"
+    ML_BASED = "Machine Learning Approach"
+
+
 matplotlib.use("TkAgg", force=True)
 
 
-def plot_phases(match_id: int) -> None:
+def plot_phases(match_id: int, approach: Approach
+                = Approach.RULE_BASED) -> None:
     """
     Plots the phases of a handball match along with event markers.
     Args:
@@ -30,10 +42,19 @@ def plot_phases(match_id: int) -> None:
         and modules such as `helpFuctions`, `np`, `plt`, and `Code`.
     """
 
-    events, team_info = processing.adjustTimestamp(match_id)
-    sequences = processing.calculate_sequences(match_id)
-    events, sequences = processing.synchronize_events(
-        events, sequences, team_info)
+    if (approach == Approach.RULE_BASED):
+        events, team_info = processing.adjustTimestamp(match_id)
+        sequences = processing.calculate_sequences(match_id)
+        events, sequences = processing.synchronize_events(
+            events, sequences, team_info)
+    elif (approach == Approach.ML_BASED):
+        events, team_info = processing.adjustTimestamp(match_id)
+        sequences = processing.calculate_sequences(match_id)
+        events, sequences = processing.synchronize_events_ml(
+            events, sequences, team_info)
+    elif (approach == Approach.BASELINE):
+        events, team_info = processing.adjustTimestamp_baseline(match_id)
+        sequences = processing.calculate_sequences(match_id)
 
     # Define positions for each phase
     phase_positions = {
