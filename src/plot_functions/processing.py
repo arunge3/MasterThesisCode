@@ -67,7 +67,8 @@ def adjustTimestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
 
     # Change the time of the events to the timeframe of the positional data
     for event in events:
-        time = add_threshold_to_time(event)
+        # time = add_threshold_to_time(event)
+        time = event["time"]
         event_time_seconds = (time - cut_h1) / fps_video
         event_absolute_timestamp = (
             positional_data_start_timestamp + event_time_seconds)

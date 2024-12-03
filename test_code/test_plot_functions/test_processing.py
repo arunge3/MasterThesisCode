@@ -88,7 +88,7 @@ class TestProcessing(TestCase):
 
         # Verify adjusted timestamps (just an example)
         self.assertEqual(events[0]["time"], 792)
-        self.assertEqual(events[21]["time"], 4094)
+        self.assertEqual(events[21]["time"], 4100)
 
     @patch('help_functions.reformatjson_methods.get_paths_by_match_id',
            autospec=True)
