@@ -585,9 +585,5 @@ def adjustTimestamp_baseline(match_id: int) -> tuple[Any, dict[Any, Any]]:
     return events, team_info
 
 
-def synchronize_events_baseline() -> None:
-    return None
-
-
 def synchronize_events_ml() -> None:
     return None
