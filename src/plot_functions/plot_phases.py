@@ -1,7 +1,10 @@
+import os
 from enum import Enum
+from typing import Any
 
 import matplotlib
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import plot_functions.processing as processing
 
@@ -42,20 +45,28 @@ def plot_phases(match_id: int, approach: Approach
         and modules such as `helpFuctions`, `np`, `plt`, and `Code`.
     """
 
+    base_path = r"D:\Handball\HBL_Events\season_20_21"
+    datengrundlage = r"Datengrundlagen"
+    base_path_grundlage = os.path.join(base_path, datengrundlage)
+
     if (approach == Approach.RULE_BASED):
         events, team_info = processing.adjustTimestamp(match_id)
         sequences = processing.calculate_sequences(match_id)
         events, sequences = processing.synchronize_events(
             events, sequences, team_info)
+        new_name = str(match_id) + "_rb.csv"
     elif (approach == Approach.ML_BASED):
         events, team_info = processing.adjustTimestamp(match_id)
         sequences = processing.calculate_sequences(match_id)
         events, sequences = processing.synchronize_events_ml(
             events, sequences, team_info)
+        new_name = str(match_id) + "_ml.csv"
     elif (approach == Approach.BASELINE):
         events, team_info = processing.adjustTimestamp_baseline(match_id)
         sequences = processing.calculate_sequences(match_id)
+        new_name = str(match_id) + "_bl.csv"
 
+    datei_pfad = os.path.join(base_path_grundlage, new_name)
     # Define positions for each phase
     phase_positions = {
         0: 2,  # (inac)
@@ -111,6 +122,7 @@ def plot_phases(match_id: int, approach: Approach
     # Track labels to avoid duplicates in the legend
     added_labels = set()
 
+    berechne_phase_und_speichern(events, sequences, datei_pfad)
     # Add event markers with labels from `type`
     for event in events:
         t_start = event["time"]
@@ -156,10 +168,45 @@ def plot_phases(match_id: int, approach: Approach
     plt.show()
 
 
+def berechne_phase_und_speichern(events: list[Any],
+                                 sequences: list[tuple[int, int, int]],
+                                 dateipfad: str) -> None:
+    # Erstelle eine Liste, um die Event-Daten zu speichern
+    event_data = []
+
+    # Durchlaufe jedes Event
+    for event in events:
+        event_id = event["id"]
+        event_type = event["type"]
+        event_time = event["time"]
+
+        # Phase berechnen
+        phase = None
+        for start, end, ph in sequences:
+            if start <= event_time < end:
+                phase = ph
+                break
+
+        # Event-Daten hinzufügen
+        if phase is not None:
+            event_data.append({
+                "event_id": event_id,
+                "phase": phase,
+                "type": event_type
+            })
+
+    # DataFrame erstellen
+    df = pd.DataFrame(event_data)
+
+    # Speichern in eine CSV-Datei (oder Excel)
+    # Ändere dies zu .to_excel für Excel-Datei
+    df.to_csv(dateipfad, index=False)
+    print(f"Die Datei wurde unter {dateipfad} gespeichert.")
+
+
 def plotEvents(match_id: int) -> None:
     import matplotlib.pyplot as plt
     events, _ = processing.adjustTimestamp(match_id)
-
     # Define event colors based on categories
     event_colors = {
         "score_change": "dodgerblue",
