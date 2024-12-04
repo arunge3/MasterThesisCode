@@ -192,7 +192,8 @@ def berechne_phase_und_speichern(events: list[Any],
             event_data.append({
                 "event_id": event_id,
                 "phase": phase,
-                "type": event_type
+                "type": event_type,
+                "time": event_time
             })
 
     # DataFrame erstellen

@@ -4,6 +4,24 @@ from typing import Any
 
 import pandas as pd
 
+# TODO Ich muss noch überprüfen, ob nicht nur die
+# richtige Phasenbezeichnung
+# zugeordnet wurde, sondern, ob auch die richtige Phase von der Zeit her
+# zugeordnet wurde.
+# TODO Ich muss noch schauen, ob die Regeln alle richtig sind
+# TODO Manuell überprüfen, ob accuraxy stimmt
+
+
+def calculate_if_correct(phase_true: int, phase_predicted: int,
+                         time_start: int, time_end: int,
+                         time_predicted: int) -> int:
+    if ((phase_true == phase_predicted) and (time_start
+                                             <= time_predicted <= time_end)):
+        return 1
+    else:
+        return 0
+
+
 # Read the files
 base_path = r"D:\Handball\HBL_Events\season_20_21"
 datengrundlage = r"Datengrundlagen"
@@ -39,15 +57,40 @@ if "Event_id" not in df.columns:
 if "Phase_true" not in df.columns:
     df["Phase_true"] = None
 
+if "Phase_start_true" not in df.columns:
+    df["Phase_start_true"] = None
+
+if "Phase_end_true" not in df.columns:
+    df["Phase_end_true"] = None
+
 if "Phase_baseline" not in df.columns:
     df["Phase_baseline"] = None
 
+if "Phase_bl_time" not in df.columns:
+    df["Phase_bl_time"] = None
+
+if "bl_correct" not in df.columns:
+    df["bl_correct"] = None
 
 if "Phase_rulebased" not in df.columns:
     df["Phase_rulebased"] = None
 
+if "Phase_rb_time" not in df.columns:
+    df["Phase_rb_time"] = None
+
+if "rb_correct" not in df.columns:
+    df["rb_correct"] = None
+
 if "Phase_ml-based" not in df.columns:
     df["Phase_ml-based"] = None
+
+if "ml_correct" not in df.columns:
+    df["ml_correct"] = None
+
+# Exrahe Phase from the clips column
+df["Phase_start_true"] = df["clips"].str.split("_").str[0]
+# Exrahe Phase from the clips column
+df["Phase_end_true"] = df["clips"].str.split("_").str[1]
 # Exrahe Phase from the clips column
 df["Phase_true"] = df["clips"].str.split("_").str[2]
 
@@ -82,8 +125,8 @@ df["Event_id"] = df["Event_id"].fillna(0).astype(
 print(df["Event_id"])
 for index, row in df_csv_rb.iterrows():
     event_id = row['event_id']
-    print(type(event_id))
-    phase = row['phase']
+    event_time = int(row['time'])
+    phase = int(row['phase'])
 
     match_condition = (
         (df["Event_id"] == event_id)
@@ -92,10 +135,25 @@ for index, row in df_csv_rb.iterrows():
     # Write the event_id to the DataFrame
     df.loc[match_condition, "Event_id"] = event_id
     df.loc[match_condition, "Phase_rulebased"] = phase
+    df.loc[match_condition, "Phase_rb_time"] = event_time
+    # Get the actual value of the phase and time from df (ground truth)
+    if match_condition.any():
+        phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
+
+        time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
+        time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
+        print(type(phase_true), type(phase), type(
+            time_start), type(time_end), type(event_time))
+
+        correct_phase = calculate_if_correct(
+            phase_true, (phase), (time_start), (time_end), (event_time))
+
+        df.loc[match_condition, "rb_correct"] = correct_phase
+
 for index, row in df_csv_bl.iterrows():
     event_id = row['event_id']
-    print(type(event_id))
     phase = row['phase']
+    event_time = row['time']
 
     match_condition = (
         (df["Event_id"] == event_id)
@@ -104,19 +162,35 @@ for index, row in df_csv_bl.iterrows():
     # Write the event_id to the DataFrame
     df.loc[match_condition, "Event_id"] = event_id
     df.loc[match_condition, "Phase_baseline"] = phase
+    df.loc[match_condition, "Phase_bl_time"] = event_time
+
+    # Get the actual value of the phase and time from df (ground truth)
+    if match_condition.any():
+        phase_true = int(df.loc[match_condition, "Phase_true"])
+        time_start = int(df.loc[match_condition, "Phase_start_true"])
+        time_end = int(df.loc[match_condition, "Phase_end_true"])
+        correct_phase = calculate_if_correct(
+            phase_true, phase, time_start, time_end, event_time)
+
+        df.loc[match_condition, "bl_correct"] = correct_phase
 
 # Save the updated DataFrame
 name_new_game_path = datei_pfad.replace(".csv.xlsx", "_updated.csv.xlsx")
 df.to_excel(name_new_game_path, index=False)
 print("Excel-Datei wurde aktualisiert und gespeichert.")
 
+# # Accuracy for Phase_baseline
+# baseline_correct = (df['Phase_true'] == df['Phase_baseline']).sum()
+# baseline_total = len(df)
+# baseline_accuracy = baseline_correct / baseline_total
+
 # Accuracy for Phase_baseline
-baseline_correct = (df['Phase_true'] == df['Phase_baseline']).sum()
+baseline_correct = (df['bl_correct'] == 1).sum()
 baseline_total = len(df)
 baseline_accuracy = baseline_correct / baseline_total
 
 # Accuracy for Phase_rulebased
-rulebased_correct = (df['Phase_true'] == df['Phase_rulebased']).sum()
+rulebased_correct = (df['rb_correct'] == 1).sum()
 rulebased_accuracy = rulebased_correct / baseline_total
 
 # Show the results
@@ -126,22 +200,41 @@ print(f"Accuracy für Phase_rulebased: {rulebased_accuracy:.4f}")
 # Function to calculate the accuracy for each event type
 
 
+# def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
+#                                       phase_column: Any,
+#                                       true_column: str = '
+# Phase_true') -> Any:
+#     # Find the accuracy for each event type
+#     accuracy_per_event = df.groupby(event_type_column).apply(
+#         lambda group: (group[true_column] ==
+#                        group[phase_column]).sum() / len(group)
+#     )
+#     return accuracy_per_event
+
 def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
-                                      phase_column: Any,
-                                      true_column: str = 'Phase_true') -> Any:
+                                      correct_column: Any) -> Any:
     # Find the accuracy for each event type
     accuracy_per_event = df.groupby(event_type_column).apply(
-        lambda group: (group[true_column] ==
-                       group[phase_column]).sum() / len(group)
+        lambda group: (group[correct_column] ==
+                       1).sum() / len(group)
     )
     return accuracy_per_event
 
 
+# # Calculate the accuracy for each event type
+# baseline_accuracy_per_event = calculate_accuracy_for_event_type(
+#     df, 'eID', 'Phase_baseline')
+# rulebased_accuracy_per_event = calculate_accuracy_for_event_type(
+#     df, 'eID', 'Phase_rulebased')
+
+    # return accuracy_per_event
+
+
 # Calculate the accuracy for each event type
 baseline_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'Phase_baseline')
+    df, 'eID', 'bl_correct')
 rulebased_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'Phase_rulebased')
+    df, 'eID', 'rb_correct')
 
 # Show the results
 print("Accuracy pro Event-Typ für Phase_baseline:")
