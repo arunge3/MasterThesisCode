@@ -14,6 +14,7 @@ import plot_functions.processing as processing
 class Approach(Enum):
     RULE_BASED = "Rule-based Approach"
     BASELINE = "Baseline"
+    NONE = "No Calcuation"
     ML_BASED = "Machine Learning Approach"
 
 
@@ -55,18 +56,26 @@ def plot_phases(match_id: int, approach: Approach
         events, sequences = processing.synchronize_events(
             events, sequences, team_info)
         new_name = str(match_id) + "_rb.csv"
+        datei_pfad = os.path.join(base_path_grundlage, r"rulebased", new_name)
+
     elif (approach == Approach.ML_BASED):
         events, team_info = processing.adjustTimestamp(match_id)
         sequences = processing.calculate_sequences(match_id)
         events, sequences = processing.synchronize_events_ml(
             events, sequences, team_info)
         new_name = str(match_id) + "_ml.csv"
+        datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
     elif (approach == Approach.BASELINE):
         events, team_info = processing.adjustTimestamp_baseline(match_id)
         sequences = processing.calculate_sequences(match_id)
         new_name = str(match_id) + "_bl.csv"
+        datei_pfad = os.path.join(base_path_grundlage, r"baseline", new_name)
+    elif (approach == Approach.NONE):
+        events, _ = processing.getEvents(match_id)
+        sequences = processing.calculate_sequences(match_id)
+        new_name = str(match_id) + "_none.csv"
+        datei_pfad = os.path.join(base_path_grundlage, r"none", new_name)
 
-    datei_pfad = os.path.join(base_path_grundlage, new_name)
     # Define positions for each phase
     phase_positions = {
         0: 2,  # (inac)

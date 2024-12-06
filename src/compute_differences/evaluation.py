@@ -1,8 +1,41 @@
+import csv
 import json
 import os
 from typing import Any
 
 import pandas as pd
+
+
+def generate_paths(number: int,
+                   base_path: str = r"D:\Handball\HBL_Events",
+                   season: str = "season_20_21",
+                   name: str =
+                   r"HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21"
+                   ) -> tuple[str, str, str, str, str, str]:
+    """
+    Generate file paths dynamically based on inputs.
+
+    :param base_path: Base directory for all paths
+    :param season: Season folder name (e.g., "season_20_21")
+    :param name: Name identifier for the game/event
+    :param number: Unique number for the game/event
+    :return: Dictionary of generated paths
+    """
+    base_path_season = os.path.join(base_path, season)
+    datengrundlage = os.path.join(base_path_season, "Datengrundlagen")
+
+    excel_path = os.path.join(datengrundlage, f"{name}.csv.xlsx")
+    event_path = os.path.join(
+        base_path_season, f"EventTimeline/sport_events_{number}_timeline.json")
+    csv_bl_path = os.path.join(datengrundlage, r"baseline", f"{number}_bl.csv")
+    csv_rb_path = os.path.join(
+        datengrundlage, r"rulebased", f"{number}_rb.csv")
+    csv_none_path = os.path.join(datengrundlage, r"none", f"{number}_none.csv")
+    output_path = os.path.join(
+        datengrundlage, r"results", f"detailed_results_{number}.csv")
+
+    return (excel_path, event_path, csv_bl_path, csv_rb_path,
+            csv_none_path, output_path)
 
 # TODO Ich muss noch überprüfen, ob nicht nur die
 # richtige Phasenbezeichnung
@@ -22,22 +55,26 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
         return 0
 
 
-# Read the files
-base_path = r"D:\Handball\HBL_Events\season_20_21"
-datengrundlage = r"Datengrundlagen"
-base_path_grundlage = os.path.join(base_path, datengrundlage)
-name_game_path = r"HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21.csv.xlsx"
-datei_pfad = os.path.join(base_path_grundlage, name_game_path)
-event_name = r"EventTimeline\sport_events_23400267_timeline.json"
-event_path = os.path.join(base_path, event_name)
-csv_pfad_name_bl = r"23400267_bl.csv"
-csv_pfad_bl = os.path.join(base_path_grundlage, csv_pfad_name_bl)
-csv_pfad_name_rb = r"23400267_rb.csv"
-csv_pfad_rb = os.path.join(base_path_grundlage, csv_pfad_name_rb)
+# # Read the files
+# base_path = r"D:\Handball\HBL_Events\season_20_21"
+# datengrundlage = r"Datengrundlagen"
+# base_path_grundlage = os.path.join(base_path, datengrundlage)
+# name_game_path = r"HSG Wetzlar_SG Flensburg-Handewitt_
+# 04.10.2020_20-21.csv.xlsx"
+# datei_pfad = os.path.join(base_path_grundlage, name_game_path)
+# event_name = r"EventTimeline\sport_events_23400277_timeline.json"
+# event_path = os.path.join(base_path, event_name)
+# csv_pfad_name_bl = r"23400277_bl.csv"
+# csv_pfad_bl = os.path.join(base_path_grundlage, csv_pfad_name_bl)
+# csv_pfad_name_rb = r"23400277_rb.csv"
+# csv_pfad_rb = os.path.join(base_path_grundlage, csv_pfad_name_rb)
+# csv_pfad_none = os.path.join(base_path_grundlage, "23400277_none.csv")
+# output_path = os.path.join(
+#     base_path_grundlage, "detailed_results_23400277.csv")
+(excel_path, event_path, csv_bl_path, csv_rb_path,
+ csv_none_path, output_path) = generate_paths(23400277)
 
-df = pd.read_excel(datei_pfad)
-
-
+df = pd.read_excel(excel_path)
 with open(event_path, "r") as file:
     events_inital = json.load(file)
 
@@ -62,6 +99,15 @@ if "Phase_start_true" not in df.columns:
 
 if "Phase_end_true" not in df.columns:
     df["Phase_end_true"] = None
+
+if "Phase_None" not in df.columns:
+    df["Phase_None"] = None
+
+if "Phase_none_time" not in df.columns:
+    df["Phase_none_time"] = None
+
+if "none_correct" not in df.columns:
+    df["none_correct"] = None
 
 if "Phase_baseline" not in df.columns:
     df["Phase_baseline"] = None
@@ -98,8 +144,9 @@ df["Phase_true"] = df["clips"].str.split("_").str[2]
 df["Phase_true"] = pd.to_numeric(df["Phase_true"], errors="coerce")
 
 # Read the CSV files
-df_csv_bl = pd.read_csv(csv_pfad_bl)
-df_csv_rb = pd.read_csv(csv_pfad_rb)
+df_csv_bl = pd.read_csv(csv_bl_path)
+df_csv_rb = pd.read_csv(csv_rb_path)
+df_csv_none = pd.read_csv(csv_none_path)
 # mapping
 for event in events_inital:
     event_id = event["id"]
@@ -127,7 +174,9 @@ for index, row in df_csv_rb.iterrows():
     event_id = row['event_id']
     event_time = int(row['time'])
     phase = int(row['phase'])
-
+    if event_id == 756457145:
+        print("gefunden")
+        # TODO diese event_id muss noch gefunden werden
     match_condition = (
         (df["Event_id"] == event_id)
     )
@@ -149,6 +198,33 @@ for index, row in df_csv_rb.iterrows():
             phase_true, (phase), (time_start), (time_end), (event_time))
 
         df.loc[match_condition, "rb_correct"] = correct_phase
+
+for index, row in df_csv_none.iterrows():
+    event_id = row['event_id']
+    event_time = int(row['time'])
+    phase = int(row['phase'])
+
+    match_condition = (
+        (df["Event_id"] == event_id)
+    )
+
+    # Write the event_id to the DataFrame
+    df.loc[match_condition, "Event_id"] = event_id
+    df.loc[match_condition, "Phase_None"] = phase
+    df.loc[match_condition, "Phase_none_time"] = event_time
+    # Get the actual value of the phase and time from df (ground truth)
+    if match_condition.any():
+        phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
+
+        time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
+        time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
+        print(type(phase_true), type(phase), type(
+            time_start), type(time_end), type(event_time))
+
+        correct_phase = calculate_if_correct(
+            phase_true, (phase), (time_start), (time_end), (event_time))
+
+        df.loc[match_condition, "none_correct"] = correct_phase
 
 for index, row in df_csv_bl.iterrows():
     event_id = row['event_id']
@@ -175,7 +251,7 @@ for index, row in df_csv_bl.iterrows():
         df.loc[match_condition, "bl_correct"] = correct_phase
 
 # Save the updated DataFrame
-name_new_game_path = datei_pfad.replace(".csv.xlsx", "_updated.csv.xlsx")
+name_new_game_path = excel_path.replace(".csv.xlsx", "_updated.csv.xlsx")
 df.to_excel(name_new_game_path, index=False)
 print("Excel-Datei wurde aktualisiert und gespeichert.")
 
@@ -189,11 +265,16 @@ baseline_correct = (df['bl_correct'] == 1).sum()
 baseline_total = len(df)
 baseline_accuracy = baseline_correct / baseline_total
 
+# Accuracy for Phase_baseline
+none_correct = (df['none_correct'] == 1).sum()
+none_accuracy = none_correct / baseline_total
+
 # Accuracy for Phase_rulebased
 rulebased_correct = (df['rb_correct'] == 1).sum()
 rulebased_accuracy = rulebased_correct / baseline_total
 
 # Show the results
+print(f"Accuracy für Phase_None: {none_accuracy:.4f}")
 print(f"Accuracy für Phase_baseline: {baseline_accuracy:.4f}")
 print(f"Accuracy für Phase_rulebased: {rulebased_accuracy:.4f}")
 
@@ -233,12 +314,44 @@ def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
 # Calculate the accuracy for each event type
 baseline_accuracy_per_event = calculate_accuracy_for_event_type(
     df, 'eID', 'bl_correct')
+none_accuracy_per_event = calculate_accuracy_for_event_type(
+    df, 'eID', 'none_correct')
 rulebased_accuracy_per_event = calculate_accuracy_for_event_type(
     df, 'eID', 'rb_correct')
 
 # Show the results
+print("Accuracy pro Event-Typ für Phase_None:")
+print(none_accuracy_per_event)
+
 print("Accuracy pro Event-Typ für Phase_baseline:")
 print(baseline_accuracy_per_event)
 
 print("\nAccuracy pro Event-Typ für Phase_rulebased:")
 print(rulebased_accuracy_per_event)
+
+
+# Save to a CSV file
+with open(output_path, 'w', newline='') as file:
+    writer = csv.writer(file)
+
+    # Write header
+    writer.writerow(["Approach", "Overall Accuracy"])
+    # Write overall accuracies
+    writer.writerow(["None", f"{none_accuracy:.4f}"])
+    writer.writerow(["Baseline", f"{baseline_accuracy:.4f}"])
+    writer.writerow(["Rulebased", f"{rulebased_accuracy:.4f}"])
+    writer.writerow([])  # Blank line for separation
+
+    # Write per-event accuracies
+    writer.writerow(["Approach", "Event Type", "Accuracy"])
+    # Write Phase_None accuracies
+    for event, accuracy in none_accuracy_per_event.items():
+        writer.writerow(["None", event, f"{accuracy:.4f}"])
+    # Write Phase_Baseline accuracies
+    for event, accuracy in baseline_accuracy_per_event.items():
+        writer.writerow(["Baseline", event, f"{accuracy:.4f}"])
+    # Write Phase_Rulebased accuracies
+    for event, accuracy in rulebased_accuracy_per_event.items():
+        writer.writerow(["Rulebased", event, f"{accuracy:.4f}"])
+
+print("Results saved to results.csv")

@@ -182,18 +182,25 @@ def synchronize_events(events: list[Any],
                 # event["time"] = event_calc["time"]
             else:
                 event["time"] = calculate_inactive_phase(time, sequences)
-        elif type == "7m_missed":
+        elif type == "seven_m_missed":
             event["time"] = calculate_inactive_phase(time, sequences)
         elif type == "timeout":
             event["time"] = calculate_timeouts(time, sequences, team_ab, event)
+        elif (type == "yellow_card" or type == "suspension" or
+              type == "steal" or type == "substitution"):
+            if team_ab == "A":
+                calculate_correct_phase(time, sequences, "B", event)
+            else:
+                calculate_correct_phase(time, sequences, "A", event)
         elif (
             type == "seven_m_awarded"
             or type == "shot_off_target"
+            or type == "seven_m_missed"
             or type == "shot_saved"
             or type == "shot_blocked"
             or type == "technical_ball_fault"
             or type == "technical_rule_fault"
-            or type == "steal"
+            or type == "yellow_card"
         ):
             calculate_correct_phase(
                 time, sequences, team_ab, event)
@@ -571,6 +578,62 @@ def adjustTimestamp_baseline(match_id: int) -> tuple[Any, dict[Any, Any]]:
     # Change the time of the events to the timeframe of the positional data
     for event in events:
         time = add_threshold_to_time(event)
+        event_time_seconds = (time - cut_h1) / fps_video
+        event_absolute_timestamp = (
+            positional_data_start_timestamp + event_time_seconds)
+        event_timestamp_date = (dt.fromtimestamp(event_absolute_timestamp)
+                                .replace(tzinfo=utc_timezone))
+        print("event_timestamp_date:", event_timestamp_date)
+        event_timeframe = (
+            event_timestamp_date - positional_data_start_date
+        ).seconds * fps_positional
+        event["time"] = event_timeframe
+
+    return events, team_info
+
+
+def getEvents(match_id: int) -> tuple[Any, dict[Any, Any]]:
+    # Paths
+    (
+        _, path_timeline, _, positions_path, cut_h1, offset_h2,
+        first_vh2, _
+    ) = helpFuctions.get_paths_by_match_id(match_id)
+    (
+        first_time_pos_str,
+        first_time_pos_unix,
+        fps_positional,
+    ) = helpFuctions.load_first_timestamp_position(positions_path)
+
+    # Framerate of the video
+    fps_video = 29.97
+    # Load event data and adjust timestamps
+    event_json = helpFuctions.reformatJson_Time_only(
+        path_timeline, first_time_pos_str, cut_h1, offset_h2,
+        first_vh2, fps_video
+    )
+
+    competitors = event_json["sport_event"]["competitors"]
+    # Extract team names and qualifiers
+    team_info = {team["name"]: team["qualifier"] for team in competitors}
+    events = event_json.get("timeline", [])
+
+    # Match start timestamp
+    first_time_stamp_event = helpFuctions.getFirstTimeStampEvent(path_timeline)
+    print("match_start_datetime:", first_time_stamp_event)
+
+    # timezone
+    utc_timezone = pytz.utc
+
+    # timestamp of the first positional data converting to datetime
+    positional_data_start_timestamp = first_time_pos_unix / 1000
+    positional_data_start_date = dt.fromtimestamp(
+        positional_data_start_timestamp
+    ).replace(tzinfo=utc_timezone)
+    print("positional_data_start_date:", positional_data_start_date)
+
+    # Change the time of the events to the timeframe of the positional data
+    for event in events:
+        time = event["time"]
         event_time_seconds = (time - cut_h1) / fps_video
         event_absolute_timestamp = (
             positional_data_start_timestamp + event_time_seconds)
