@@ -141,7 +141,7 @@
         {
             "id": 756448361,
             "type": "yellow_card",
-            "time": 63099,
+            "time": 14999,
             "match_time": 4,
             "match_clock": "3:30",
             "competitor": "home",
@@ -165,7 +165,7 @@
         {
             "id": 756449227,
             "type": "steal",
-            "time": 14999,
+            "time": 11078,
             "match_time": 5,
             "match_clock": "4:19",
             "competitor": "away",
@@ -202,7 +202,7 @@
         {
             "id": 756450739,
             "type": "suspension",
-            "time": 69213,
+            "time": 14999,
             "match_time": 6,
             "match_clock": "5:06",
             "competitor": "home",
@@ -282,7 +282,7 @@
         {
             "id": 756464833,
             "type": "suspension",
-            "time": 100562,
+            "time": 11078,
             "match_time": 19,
             "match_clock": "18:34",
             "competitor": "away",
@@ -337,7 +337,7 @@
         {
             "id": 756467171,
             "type": "yellow_card",
-            "time": 105806,
+            "time": 14999,
             "match_time": 21,
             "match_clock": "20:12",
             "competitor": "home",
@@ -433,7 +433,7 @@
         {
             "id": 756485669,
             "type": "substitution",
-            "time": 155347,
+            "time": 11078,
             "match_time": 31,
             "match_clock": "30:06",
             "competitor": "away",
@@ -478,7 +478,7 @@
         {
             "id": 768696037,
             "type": "suspension",
-            "time": 2049481,
+            "time": 11078,
             "match_time": 45,
             "match_clock": "44:43",
             "competitor": "away",
