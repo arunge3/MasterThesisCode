@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+from collections import defaultdict
 from typing import Any
 
 import pandas as pd
@@ -10,8 +11,8 @@ def generate_paths(number: int,
                    base_path: str = r"D:\Handball\HBL_Events",
                    season: str = "season_20_21",
                    name: str =
-                   r"HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21"
-                   ) -> tuple[str, str, str, str, str, str]:
+                   r"HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21"
+                   ) -> tuple[str, str, str, str, str, str, str, str, str]:
     """
     Generate file paths dynamically based on inputs.
 
@@ -24,7 +25,11 @@ def generate_paths(number: int,
     base_path_season = os.path.join(base_path, season)
     datengrundlage = os.path.join(base_path_season, "Datengrundlagen")
 
-    excel_path = os.path.join(datengrundlage, f"{name}.csv.xlsx")
+    excel_path = os.path.join(
+        datengrundlage, r"initial_excel", f"{name}.csv.xlsx")
+    # Save the updated DataFrame
+    name_new_game_path = os.path.join(datengrundlage, r"progressed_excel",
+                                      f"{name}_updated.csv.xlsx")
     event_path = os.path.join(
         base_path_season, f"EventTimeline/sport_events_{number}_timeline.json")
     csv_bl_path = os.path.join(datengrundlage, r"baseline", f"{number}_bl.csv")
@@ -33,9 +38,14 @@ def generate_paths(number: int,
     csv_none_path = os.path.join(datengrundlage, r"none", f"{number}_none.csv")
     output_path = os.path.join(
         datengrundlage, r"results", f"detailed_results_{number}.csv")
+    # Directory containing the CSV files
+    directory_results = os.path.join(datengrundlage, r"results")
+    # Save results to CSV
+    output_file_all = os.path.join(datengrundlage, r"results_summary.csv")
 
-    return (excel_path, event_path, csv_bl_path, csv_rb_path,
-            csv_none_path, output_path)
+    return (excel_path, name_new_game_path, event_path, csv_bl_path,
+            csv_rb_path, csv_none_path, output_path,
+            directory_results, output_file_all)
 
 # TODO Ich muss noch überprüfen, ob nicht nur die
 # richtige Phasenbezeichnung
@@ -71,15 +81,15 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 # csv_pfad_none = os.path.join(base_path_grundlage, "23400277_none.csv")
 # output_path = os.path.join(
 #     base_path_grundlage, "detailed_results_23400277.csv")
-(excel_path, event_path, csv_bl_path, csv_rb_path,
- csv_none_path, output_path) = generate_paths(23400277)
+(excel_path, name_new_game_path, event_path, csv_bl_path, csv_rb_path,
+ csv_none_path, output_path, directory_results, output_file_all
+ ) = generate_paths(23400267)
 
 df = pd.read_excel(excel_path)
 with open(event_path, "r") as file:
     events_inital = json.load(file)
 
 events_inital = events_inital["timeline"]
-print(df.dtypes)
 # Adjust the data types
 df["eID"] = df["eID"].astype(str)
 df["minute"] = df["minute"].fillna(0).astype(
@@ -169,14 +179,10 @@ for event in events_inital:
 
 df["Event_id"] = df["Event_id"].fillna(0).astype(
     int)
-print(df["Event_id"])
 for index, row in df_csv_rb.iterrows():
     event_id = row['event_id']
     event_time = int(row['time'])
     phase = int(row['phase'])
-    if event_id == 756457145:
-        print("gefunden")
-        # TODO diese event_id muss noch gefunden werden
     match_condition = (
         (df["Event_id"] == event_id)
     )
@@ -191,8 +197,6 @@ for index, row in df_csv_rb.iterrows():
 
         time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
         time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
-        print(type(phase_true), type(phase), type(
-            time_start), type(time_end), type(event_time))
 
         correct_phase = calculate_if_correct(
             phase_true, (phase), (time_start), (time_end), (event_time))
@@ -218,8 +222,6 @@ for index, row in df_csv_none.iterrows():
 
         time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
         time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
-        print(type(phase_true), type(phase), type(
-            time_start), type(time_end), type(event_time))
 
         correct_phase = calculate_if_correct(
             phase_true, (phase), (time_start), (time_end), (event_time))
@@ -250,8 +252,7 @@ for index, row in df_csv_bl.iterrows():
 
         df.loc[match_condition, "bl_correct"] = correct_phase
 
-# Save the updated DataFrame
-name_new_game_path = excel_path.replace(".csv.xlsx", "_updated.csv.xlsx")
+
 df.to_excel(name_new_game_path, index=False)
 print("Excel-Datei wurde aktualisiert und gespeichert.")
 
@@ -273,24 +274,6 @@ none_accuracy = none_correct / baseline_total
 rulebased_correct = (df['rb_correct'] == 1).sum()
 rulebased_accuracy = rulebased_correct / baseline_total
 
-# Show the results
-print(f"Accuracy für Phase_None: {none_accuracy:.4f}")
-print(f"Accuracy für Phase_baseline: {baseline_accuracy:.4f}")
-print(f"Accuracy für Phase_rulebased: {rulebased_accuracy:.4f}")
-
-# Function to calculate the accuracy for each event type
-
-
-# def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
-#                                       phase_column: Any,
-#                                       true_column: str = '
-# Phase_true') -> Any:
-#     # Find the accuracy for each event type
-#     accuracy_per_event = df.groupby(event_type_column).apply(
-#         lambda group: (group[true_column] ==
-#                        group[phase_column]).sum() / len(group)
-#     )
-#     return accuracy_per_event
 
 def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
                                       correct_column: Any) -> Any:
@@ -302,15 +285,6 @@ def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
     return accuracy_per_event
 
 
-# # Calculate the accuracy for each event type
-# baseline_accuracy_per_event = calculate_accuracy_for_event_type(
-#     df, 'eID', 'Phase_baseline')
-# rulebased_accuracy_per_event = calculate_accuracy_for_event_type(
-#     df, 'eID', 'Phase_rulebased')
-
-    # return accuracy_per_event
-
-
 # Calculate the accuracy for each event type
 baseline_accuracy_per_event = calculate_accuracy_for_event_type(
     df, 'eID', 'bl_correct')
@@ -319,31 +293,18 @@ none_accuracy_per_event = calculate_accuracy_for_event_type(
 rulebased_accuracy_per_event = calculate_accuracy_for_event_type(
     df, 'eID', 'rb_correct')
 
-# Show the results
-print("Accuracy pro Event-Typ für Phase_None:")
-print(none_accuracy_per_event)
-
-print("Accuracy pro Event-Typ für Phase_baseline:")
-print(baseline_accuracy_per_event)
-
-print("\nAccuracy pro Event-Typ für Phase_rulebased:")
-print(rulebased_accuracy_per_event)
-
 
 # Save to a CSV file
 with open(output_path, 'w', newline='') as file:
     writer = csv.writer(file)
 
     # Write header
-    writer.writerow(["Approach", "Overall Accuracy"])
-    # Write overall accuracies
-    writer.writerow(["None", f"{none_accuracy:.4f}"])
-    writer.writerow(["Baseline", f"{baseline_accuracy:.4f}"])
-    writer.writerow(["Rulebased", f"{rulebased_accuracy:.4f}"])
-    writer.writerow([])  # Blank line for separation
-
-    # Write per-event accuracies
     writer.writerow(["Approach", "Event Type", "Accuracy"])
+    # Write overall accuracies
+    writer.writerow(["None", "all", f"{none_accuracy:.4f}"])
+    writer.writerow(["Baseline", "all", f"{baseline_accuracy:.4f}"])
+    writer.writerow(["Rulebased", "all", f"{rulebased_accuracy:.4f}"])
+
     # Write Phase_None accuracies
     for event, accuracy in none_accuracy_per_event.items():
         writer.writerow(["None", event, f"{accuracy:.4f}"])
@@ -355,3 +316,63 @@ with open(output_path, 'w', newline='') as file:
         writer.writerow(["Rulebased", event, f"{accuracy:.4f}"])
 
 print("Results saved to results.csv")
+
+
+def calculate_all_accuracies(directory: str, output_file: str) -> None:
+    """
+    Calculate the average overall and event-type accuracies for
+    each approach across all CSV files.
+
+    :param directory: Path to the directory containing CSV files.
+    :return: Two dictionaries: overall accuracies and event-type accuracies.
+    """
+    # Nested dict: {Approach: {Event Type: [accuracies]}}
+    type_accuracies: dict[Any, Any] = defaultdict(lambda: defaultdict(list))
+    # Iterate through all CSV files in the directory
+    for file_name in os.listdir(directory):
+        if file_name.endswith(".csv"):
+            file_path = os.path.join(directory, file_name)
+            try:
+                # Read the CSV file
+                df = pd.read_csv(file_path)
+
+                # Extract event-type accuracies
+                if 'Event Type' in df.columns and 'Accuracy' in df.columns:
+                    for _, row in df.iterrows():
+                        approach = row['Approach']
+                        event_type = row['Event Type']
+                        accuracy = row['Accuracy']
+                        type_accuracies[approach][event_type].append(accuracy)
+            except Exception as e:
+                print(f"Error processing file {file_path}: {e}")
+
+    # Calculate the average event-type accuracy for each approach
+    avg_type_accuracies = {
+        approach: {
+            event_type: sum(acc_list) / len(acc_list) if acc_list else 0
+            for event_type, acc_list in event_types.items()
+        }
+        for approach, event_types in type_accuracies.items()
+    }
+    # Prepare data for CSV
+    rows: list[Any] = []
+
+    # Add event-type accuracies
+    rows.append([])  # Empty row for spacing
+    rows.append(["Event-Type Accuracies"])
+    rows.append(["Approach", "Event Type", "Average Accuracy"])
+    for approach, event_types in avg_type_accuracies.items():
+        for event_type, accuracy in event_types.items():
+            rows.append([approach, event_type, f"{accuracy:.4f}"])
+
+    # Write data to CSV
+    with open(output_file, 'w', newline='', encoding='utf-8') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerows(rows)
+
+    print(f"Results saved to {output_file}")
+    print(type(rows))
+
+
+# Calculate accuracies
+calculate_all_accuracies(directory_results, output_file_all)
