@@ -7,11 +7,9 @@ from typing import Any
 import pandas as pd
 
 
-def generate_paths(number: int,
+def generate_paths(number: int, name: str,
                    base_path: str = r"D:\Handball\HBL_Events",
                    season: str = "season_20_21",
-                   name: str =
-                   r"HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21"
                    ) -> tuple[str, str, str, str, str, str, str, str, str]:
     """
     Generate file paths dynamically based on inputs.
@@ -31,7 +29,8 @@ def generate_paths(number: int,
     name_new_game_path = os.path.join(datengrundlage, r"progressed_excel",
                                       f"{name}_updated.csv.xlsx")
     event_path = os.path.join(
-        base_path_season, f"EventTimeline/sport_events_{number}_timeline.json")
+        base_path_season,
+        f"EventTimeline\\sport_events_{number}_timeline.json")
     csv_bl_path = os.path.join(datengrundlage, r"baseline", f"{number}_bl.csv")
     csv_rb_path = os.path.join(
         datengrundlage, r"rulebased", f"{number}_rb.csv")
@@ -81,9 +80,18 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 # csv_pfad_none = os.path.join(base_path_grundlage, "23400277_none.csv")
 # output_path = os.path.join(
 #     base_path_grundlage, "detailed_results_23400277.csv")
+
+
+# Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21.csv.xlsx 23400275
+# TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21.csv.xlsx 23400263
+# HSG Wetzlar_THW Kiel_10.10.2020_20-21.csv.xlsx 23400307
+# HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21.csv.xlsx 23400277
+# HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21.csv.xlsx 23400267
+
 (excel_path, name_new_game_path, event_path, csv_bl_path, csv_rb_path,
  csv_none_path, output_path, directory_results, output_file_all
- ) = generate_paths(23400267)
+ ) = generate_paths(23400267,
+                    "HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21")
 
 df = pd.read_excel(excel_path)
 with open(event_path, "r") as file:
@@ -218,15 +226,31 @@ for index, row in df_csv_none.iterrows():
     df.loc[match_condition, "Phase_none_time"] = event_time
     # Get the actual value of the phase and time from df (ground truth)
     if match_condition.any():
-        phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
+        matched_rows = df.loc[match_condition, "Phase_true"]
+        if len(matched_rows) == 1:
 
-        time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
-        time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
+            phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
 
-        correct_phase = calculate_if_correct(
-            phase_true, (phase), (time_start), (time_end), (event_time))
+            time_start = int(
+                df.loc[match_condition, "Phase_start_true"].values[0])
+            time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
 
-        df.loc[match_condition, "none_correct"] = correct_phase
+            correct_phase = calculate_if_correct(
+                phase_true, (phase), (time_start), (time_end), (event_time))
+
+            df.loc[match_condition, "none_correct"] = correct_phase
+        else:
+            phase_true = int(df.loc[match_condition, "Phase_true"].values[1])
+
+            time_start = int(
+                df.loc[match_condition, "Phase_start_true"].values[1])
+            time_end = int(df.loc[match_condition, "Phase_end_true"].values[1])
+
+            correct_phase = calculate_if_correct(
+                phase_true, (phase), (time_start), (time_end), (event_time))
+
+            df.loc[match_condition, "none_correct"] = correct_phase
+
 
 for index, row in df_csv_bl.iterrows():
     event_id = row['event_id']
@@ -242,15 +266,40 @@ for index, row in df_csv_bl.iterrows():
     df.loc[match_condition, "Phase_baseline"] = phase
     df.loc[match_condition, "Phase_bl_time"] = event_time
 
-    # Get the actual value of the phase and time from df (ground truth)
+    # Check if there are any matching conditions
     if match_condition.any():
-        phase_true = int(df.loc[match_condition, "Phase_true"])
-        time_start = int(df.loc[match_condition, "Phase_start_true"])
-        time_end = int(df.loc[match_condition, "Phase_end_true"])
-        correct_phase = calculate_if_correct(
-            phase_true, phase, time_start, time_end, event_time)
+        # Get all matched rows for "Phase_true"
+        matched_rows = df.loc[match_condition, "Phase_true"]
 
-        df.loc[match_condition, "bl_correct"] = correct_phase
+        # Ensure only one non-zero value exists
+        if len(matched_rows) == 1:
+            # Get the index of the single non-zero entry
+            phase_true_index = matched_rows.index[0]
+
+            # Use the index to fetch the corresponding values
+            phase_true = int(df.loc[phase_true_index, "Phase_true"])
+            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
+            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
+
+            # Perform phase correctness calculation
+            correct_phase = calculate_if_correct(
+                phase_true, phase, time_start, time_end, event_time
+            )
+            df.loc[match_condition, "bl_correct"] = correct_phase
+        else:
+            # Get the index of the single non-zero entry
+            phase_true_index = matched_rows.index[1]
+
+            # Use the index to fetch the corresponding values
+            phase_true = int(df.loc[phase_true_index, "Phase_true"])
+            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
+            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
+
+            # Perform phase correctness calculation
+            correct_phase = calculate_if_correct(
+                phase_true, phase, time_start, time_end, event_time
+            )
+            df.loc[match_condition, "bl_correct"] = correct_phase
 
 
 df.to_excel(name_new_game_path, index=False)

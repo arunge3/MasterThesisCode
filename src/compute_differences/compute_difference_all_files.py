@@ -84,7 +84,7 @@ boxplot_data = [
 ]
 plt.boxplot(
     boxplot_data, tick_labels=df_filtered_boxplot["event_type"].unique(),
-    showmeans=True
+    showmeans=True, showfliers=False
 )
 plt.xlabel("Event Type")
 plt.ylabel("Difference in t_start (new - old)")
@@ -94,7 +94,7 @@ plt.grid(True)
 plt.tight_layout()
 
 boxplot_filename = os.path.join(
-    output_dir_box, "boxplot_differences_all_games.png")
+    output_dir_box, "boxplot_differences_all_games_withoutOutliers.png")
 plt.savefig(boxplot_filename)
 plt.close()
 print(f"Boxplot saved for all events here: {boxplot_filename}")
