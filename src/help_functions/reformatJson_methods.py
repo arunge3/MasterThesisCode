@@ -486,9 +486,10 @@ def reformatJson_Time_only(
     with open(path_timeline, "r") as file:
         data = json.load(file)
 
-    events = data.get("timeline", [])
+    events_df = data.get("timeline", [])
+
     # Loop through the entries and change their timestamps
-    for event in events:
+    for event in events_df:
         type = event.get("type")
         match_clock = event.get("match_clock", None)
         second_half = False

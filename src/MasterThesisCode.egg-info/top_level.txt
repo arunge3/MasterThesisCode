@@ -1,4 +1,4 @@
-computeDifferences
+compute_differences
 existing_code
-helpFunctions
+help_functions
 plot_functions
