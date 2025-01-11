@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 import help_functions
 import help_functions.reformatjson_methods
 from plot_functions import processing
-from plot_functions.plot_phases import berechne_phase_und_speichern
+from plot_functions.plot_phases import berechne_phase_und_speichern_fl
 
 
 def createEventObjects(
@@ -158,13 +158,8 @@ def calculateOffset(offset_fr: int,
     )
 
     delta = first_event_time - first_timestamp
-    delta_fr = delta.seconds * fps
 
-    synced_time = delta_fr + offset_fr
-    if second_half:
-        synced_time = synced_time + offseth2_fr
-
-    synced_time_pos_fr = int((synced_time/fps) * pos_fps)
+    synced_time_pos_fr = int(delta.seconds * pos_fps)
     return synced_time_pos_fr
 
 
@@ -280,7 +275,7 @@ def plot_phases(match_id: int, approach: Approach
         events, sequences = synchronize_events_fl(
             events, sequences)
 
-        new_name = str(match_id) + "_rb.csv"
+        new_name = str(match_id) + "_rb_fl.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"rulebased", new_name)
     # elif (approach == Approach.ML_BASED):
     #     events, sequences = processing.synchronize_events_ml(
@@ -289,10 +284,10 @@ def plot_phases(match_id: int, approach: Approach
     #     datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
     elif (approach == Approach.BASELINE):
         events, team_info = processing.adjustTimestamp_baseline(match_id)
-        new_name = str(match_id) + "_bl.csv"
+        new_name = str(match_id) + "_bl_fl.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"baseline", new_name)
     elif (approach == Approach.NONE):
-        new_name = str(match_id) + "_none.csv"
+        new_name = str(match_id) + "_none_fl.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"none", new_name)
 
     # Define positions for each phase
@@ -350,7 +345,7 @@ def plot_phases(match_id: int, approach: Approach
     # Track labels to avoid duplicates in the legend
     added_labels = set()
 
-    berechne_phase_und_speichern(events, sequences, datei_pfad)
+    berechne_phase_und_speichern_fl(events, sequences, datei_pfad)
     # Add event markers with labels from `type`
     for event in events:
         t_start = event[22]

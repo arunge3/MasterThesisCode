@@ -173,9 +173,9 @@ def plot_phases(match_id: int, approach: Approach
     plt.show()
 
 
-def berechne_phase_und_speichern(events: list[Any],
-                                 sequences: list[tuple[int, int, int]],
-                                 dateipfad: str) -> None:
+def berechne_phase_und_speichern_fl(events: list[Any],
+                                    sequences: list[tuple[int, int, int]],
+                                    dateipfad: str) -> None:
     # Erstelle eine Liste, um die Event-Daten zu speichern
     event_data = []
 
@@ -184,6 +184,43 @@ def berechne_phase_und_speichern(events: list[Any],
         event_id = event[11]
         event_type = event[0]
         event_time = event[22]
+
+        # Phase berechnen
+        phase = None
+        for start, end, ph in sequences:
+            if start <= event_time < end:
+                phase = ph
+                break
+
+        # Event-Daten hinzufügen
+        if phase is not None:
+            event_data.append({
+                "event_id": event_id,
+                "phase": phase,
+                "type": event_type,
+                "time": event_time
+            })
+
+    # DataFrame erstellen
+    df = pd.DataFrame(event_data)
+
+    # Speichern in eine CSV-Datei (oder Excel)
+    # Ändere dies zu .to_excel für Excel-Datei
+    df.to_csv(dateipfad, index=False)
+    print(f"Die Datei wurde unter {dateipfad} gespeichert.")
+
+
+def berechne_phase_und_speichern(events: list[Any],
+                                 sequences: list[tuple[int, int, int]],
+                                 dateipfad: str) -> None:
+    # Erstelle eine Liste, um die Event-Daten zu speichern
+    event_data = []
+
+    # Durchlaufe jedes Event
+    for event in events:
+        event_id = event["id"]
+        event_type = event["type"]
+        event_time = event["time"]
 
         # Phase berechnen
         phase = None
