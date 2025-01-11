@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from datetime import datetime as dt
 from enum import Enum
 from typing import Any, List, Tuple
@@ -17,7 +16,7 @@ from plot_functions import processing
 from plot_functions.plot_phases import berechne_phase_und_speichern_fl
 
 
-def createEventObjects(
+def create_event_objects(
         path_timeline: str,
         fps: float) -> Any:
     """
@@ -71,7 +70,19 @@ def createEventObjects(
     return event_all
 
 
-def flatten_nested_events(nested_events: dict[Any, Any]) -> Any:
+def flatten_nested_events(nested_events: dict[Any, Any]) -> pd.DataFrame:
+    """
+    Flattens a nested dictionary of events into a single DataFrame.
+    Args:
+        nested_events (dict[Any, Any]): A dictionary where the keys are
+        segments and the values are dictionaries.
+        These inner dictionaries have teams as keys and event objects as
+        values. Each event object contains a DataFrame of events.
+    Returns:
+        pd.DataFrame: A DataFrame containing all events from the nested
+        structure, with additional columns for segment and team.
+    """
+
     all_events = []
     for segment, teams in nested_events.items():
         for team, events_obj in teams.items():
@@ -121,41 +132,30 @@ def flatten_nested_events(nested_events: dict[Any, Any]) -> Any:
     return all_events_df
 
 
-def calculateOffset(offset_fr: int,
-                    fps: float,
-                    first_event_time_str: str,
-                    offseth2_fr: int,
-                    second_half: bool,
-                    first_timestamp_pos: str,
-                    first_vh2: int,
-                    pos_fps: float) -> int:
+def calculate_offset(first_event_time_str: str,
+                     first_timestamp_pos: str,
+                     pos_fps: float) -> int:
     """
     Calculates the offset between positions data and event data.
     It is based on the real timestamps from eventdata and positional data.
     And the offset to the videodata is used to calcualte the offset.
     Args:
-        offset_fr (int): The initial offset in frames.
-        fps (int): Frames per second of the video.
         first_event_time_str (str): The timestamp of the first event in
         ISO format.
-        offseth2_fr (int): The offset in frames for the second half.
-        second_half (bool): Flag indicating if the event is in the second half.
         first_timestamp_pos (str): The first timestamp position in ISO format.
-        first_vh2 (int): The first video half 2 position.
         pos_fps (int): Frames per second of the position data.
     Returns:
         float: The synchronized time position in frames.
     """
-    utc_timezone = pytz.utc
-    first_event_time = datetime.fromisoformat(
-        first_event_time_str).replace(tzinfo=utc_timezone)
+    first_event_time = dt.fromisoformat(
+        first_event_time_str).replace(tzinfo=pytz.utc)
     if isinstance(first_timestamp_pos, tuple):
         first_timestamp = first_timestamp_pos[0]
     else:
         first_timestamp_str = str(first_timestamp_pos)
-    first_timestamp = datetime.fromisoformat(first_timestamp_str).replace(
-        tzinfo=utc_timezone
-    )
+        first_timestamp = dt.fromisoformat(first_timestamp_str).replace(
+            tzinfo=pytz.utc
+        )
 
     delta = first_event_time - first_timestamp
 
@@ -163,7 +163,7 @@ def calculateOffset(offset_fr: int,
     return synced_time_pos_fr
 
 
-def calculateEventStream(match_id: int) -> tuple[Any, int, Any]:
+def calculate_event_stream(match_id: int) -> tuple[Any, int, Any]:
     """
     Processes match data and returns event streams for home and away teams.
     Args:
@@ -184,8 +184,7 @@ def calculateEventStream(match_id: int) -> tuple[Any, int, Any]:
     """
 
     (
-        _, path_timeline, _, positions_path, cut_h1, offset_h2,
-        first_vh2, _
+        _, path_timeline, _, positions_path, _, _, _, _
     ) = help_functions.reformatjson_methods.get_paths_by_match_id(match_id)
     (
         first_time_pos_str,
@@ -194,30 +193,25 @@ def calculateEventStream(match_id: int) -> tuple[Any, int, Any]:
     ) = help_functions.reformatjson_methods.load_first_timestamp_position(
         positions_path)
 
-    # Framerate of the video
-    fps_video = 29.97
     # Load event data and adjust timestamps
-    event_all = createEventObjects(path_timeline,
-                                   fps_positional)
-    # first_time_stamp_event: pd.Timestamp
+    event_all = create_event_objects(path_timeline,
+                                     fps_positional)
+
     # Match start timestamp
     first_time_stamp_event = event_all.events['time_stamp'][0]
     first_time_stamp_event = first_time_stamp_event.strftime(
         '%Y-%m-%d %H:%M:%S')
     print("match_start_datetime:", first_time_stamp_event)
 
-    # timezone
-    utc_timezone = pytz.utc
-
     # timestamp of the first positional data converting to datetime
     positional_data_start_timestamp = first_time_pos_unix / 1000
-    positional_data_start_date = dt.fromtimestamp(
+    positional_data_start_timestamp = dt.fromtimestamp(
         positional_data_start_timestamp
-    ).replace(tzinfo=utc_timezone)
-    print("positional_data_start_date:", positional_data_start_date)
-    offset = calculateOffset(cut_h1, fps_video, first_time_stamp_event,
-                             offset_h2, False, first_time_pos_str,
-                             first_vh2, fps_positional)
+    ).replace(tzinfo=pytz.utc)
+    print("positional_data_start_date:", positional_data_start_timestamp)
+    offset = calculate_offset(first_time_stamp_event,
+                              first_time_pos_str,
+                              fps_positional)
     event_all.events['frameclock'] = event_all.events['frameclock'] + offset
 
     event_stream_all = event_all.get_event_stream(fade=1)
@@ -225,6 +219,16 @@ def calculateEventStream(match_id: int) -> tuple[Any, int, Any]:
 
 
 class Approach(Enum):
+    """
+    Enum class representing different approaches for the synchronizatrion
+    of gamephases and events.
+    Attributes:
+        RULE_BASED (str): Represents a rule-based approach.
+        BASELINE (str): Represents a baseline approach.
+        NONE (str): Represents no calculation.
+        ML_BASED (str): Represents a machine learning-based approach.
+    """
+
     RULE_BASED = "Rule-based Approach"
     BASELINE = "Baseline"
     NONE = "No Calcuation"
@@ -232,6 +236,13 @@ class Approach(Enum):
 
 
 class Opponent(Enum):
+    """
+    Enum class representing the opponent in a game.
+    Attributes:
+        HOME (str): Represents the home team.
+        AWAY (str): Represents the away team.
+        NONE (str): Represents no opponent.
+    """
     HOME = "Home"
     AWAY = "Away"
     NONE = "None"
@@ -267,28 +278,30 @@ def plot_phases(match_id: int, approach: Approach
 
     base_path = r"D:\Handball\HBL_Events\season_20_21"
     datengrundlage = r"Datengrundlagen"
-    base_path_grundlage = os.path.join(base_path, datengrundlage)
+    datengrundlage = os.path.join(base_path, datengrundlage)
     sequences = processing.calculate_sequences(match_id)
-    if (approach == Approach.RULE_BASED):
+    if approach == Approach.RULE_BASED:
         (_, _,
-         events) = calculateEventStream(23400263)
+         events) = calculate_event_stream(23400263)
         events, sequences = synchronize_events_fl(
             events, sequences)
 
         new_name = str(match_id) + "_rb_fl.csv"
-        datei_pfad = os.path.join(base_path_grundlage, r"rulebased", new_name)
+        datei_pfad = os.path.join(datengrundlage, r"rulebased", new_name)
     # elif (approach == Approach.ML_BASED):
     #     events, sequences = processing.synchronize_events_ml(
     #         events, sequences, team_info)
     #     new_name = str(match_id) + "_ml.csv"
     #     datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
-    elif (approach == Approach.BASELINE):
-        events, team_info = processing.adjustTimestamp_baseline(match_id)
+    elif approach == Approach.BASELINE:
+        events, _ = processing.adjustTimestamp_baseline(match_id)
         new_name = str(match_id) + "_bl_fl.csv"
-        datei_pfad = os.path.join(base_path_grundlage, r"baseline", new_name)
-    elif (approach == Approach.NONE):
+        datei_pfad = os.path.join(datengrundlage, r"baseline", new_name)
+    elif approach == Approach.NONE:
         new_name = str(match_id) + "_none_fl.csv"
-        datei_pfad = os.path.join(base_path_grundlage, r"none", new_name)
+        datei_pfad = os.path.join(datengrundlage, r"none", new_name)
+    else:
+        raise ValueError("Invalid approach specified!")
 
     # Define positions for each phase
     phase_positions = {
@@ -348,14 +361,11 @@ def plot_phases(match_id: int, approach: Approach
     berechne_phase_und_speichern_fl(events, sequences, datei_pfad)
     # Add event markers with labels from `type`
     for event in events:
-        t_start = event[22]
-        event_type = event[0]
-        color = event_colors.get(event_type, event_colors["default"])
+        color = event_colors.get(event[0], event_colors["default"])
         # Find the y value on the continuous line for this event's time
-        # (t_start)
         event_y = None
         for start, end, phase in sequences:
-            if start <= t_start < end:
+            if start <= event[22] < end:
                 event_y = phase_positions[phase]
 
                 break
@@ -364,15 +374,15 @@ def plot_phases(match_id: int, approach: Approach
         # Vertical line at event time
         if event_y is not None:
             ax.plot(
-                t_start,
+                event[22],
                 event_y,
                 "x",
                 color=color,
                 markersize=8,
-                label=event_type if event_type not in added_labels else "",
+                label=event[0] if event[0] not in added_labels else "",
             )
-            print(t_start, event_y, event_type)
-            added_labels.add(event_type)
+            print(event[22], event_y, event[0])
+            added_labels.add(event[0])
     # Add legend
     ax.legend(title="Event Types", loc="upper right", bbox_to_anchor=(1.15, 1))
 
@@ -394,52 +404,71 @@ def plot_phases(match_id: int, approach: Approach
 def synchronize_events_fl(events: list[Any],
                           sequences: list[tuple[int, int, int]]
                           ) -> tuple[list[Any], list[Any]]:
-
+    """
+    Synchronizes events with the given sequences by updating the event times
+    and phases based on specific conditions.
+    Args:
+        events (list[Any]): A list of events where each event is expected to
+        be a list with specific indices representing different attributes.
+        sequences (list[tuple[int, int, int]]): A list of sequences where each
+        sequence is a tuple containing three integers.
+    Returns:
+        tuple[list[Any], list[Any]]: A tuple containing the updated list of
+        events and the original list of sequences.
+    The function processes each event in the events list and updates the event
+    time or phase based on the event type and other conditions.
+    The event types handled include "score_change", "seven_m_missed",
+    "timeout", "yellow_card", "suspension", "steal", "substitution",
+    "seven_m_awarded", "shot_off_target", "shot_saved", "shot_blocked",
+    "technical_ball_fault", "technical_rule_fault", and "timeout_over".
+    """
     for event in events:
-        type = event[0]
-        time = event[22]
-        team_info = event[21]
-        if type == "score_change":
-            if str(give_last_event_fl(events, time)) != "seven_m_awarded":
+        if event[0] == "score_change":
+            if str(give_last_event_fl(events, event[22])) != "seven_m_awarded":
                 calculate_correct_phase_fl(
-                    time, sequences, team_info, event)
+                    event[22], sequences, event[21], event)
                 # event["time"] = event_calc["time"]
             else:
-                event[22] = calculate_inactive_phase_fl(time, sequences)
-        elif type == "seven_m_missed":
-            event[22] = calculate_inactive_phase_fl(time, sequences)
-        elif type == "timeout":
+                event[22] = calculate_inactive_phase_fl(event[22], sequences)
+        elif event[0] == "seven_m_missed":
+            event[22] = calculate_inactive_phase_fl(event[22], sequences)
+        elif event[0] == "timeout":
             event[22] = calculate_timeouts_fl(
-                time, sequences, team_info, event)
-        elif (type == "yellow_card" or type == "suspension" or
-              type == "steal" or type == "substitution"):
-            if team_info == Opponent.HOME:
+                event[22], sequences, event[21], event)
+        elif event[0] in ("yellow_card", "suspension", "steal",
+                          "substitution"):
+            if event[21] == Opponent.HOME:
                 calculate_correct_phase_fl(
-                    time, sequences, Opponent.AWAY, event)
+                    event[22], sequences, Opponent.AWAY, event)
             else:
                 calculate_correct_phase_fl(
-                    time, sequences, Opponent.HOME, event)
+                    event[22], sequences, Opponent.HOME, event)
         elif (
-            type == "seven_m_awarded"
-            or type == "shot_off_target"
-            or type == "seven_m_missed"
-            or type == "shot_saved"
-            or type == "shot_blocked"
-            or type == "technical_ball_fault"
-            or type == "technical_rule_fault"
-            or type == "yellow_card"
+            event[0] in ("seven_m_awarded", "shot_off_target",
+                         "seven_m_missed", "shot_saved",
+                         "shot_blocked", "technical_ball_fault",
+                         "technical_rule_fault", "yellow_card")
         ):
             calculate_correct_phase_fl(
-                time, sequences, team_info, event)
-        elif type == "timeout_over":
+                event[22], sequences, event[21], event)
+        elif event[0] == "timeout_over":
             event[22] = calculate_timeouts_over_fl(
                 sequences, event, events)
     return events, sequences
 
 
-def give_last_event_fl(events: List[Any],
-                       time: int) -> Any:
-
+def give_last_event_fl(events: List[Any], time: int) -> Any:
+    """
+    Returns the last event from the list of events that occurred before the
+    given time, excluding certain types of events.
+    Args:
+        events (List[Any]): A list of event dictionaries.
+        time (int): The time threshold to compare events against.
+    Returns:
+        Any: The last event that occurred before the given time and is not of
+        type "suspension", "yellow_card", "red_card", or "suspension_over".
+        Returns None if no such event is found.
+    """
     event: dict[Any, Any]
     for event in events[::-1]:
         if event[22] < time:
@@ -450,6 +479,7 @@ def give_last_event_fl(events: List[Any],
                 "suspension_over",
             ]:
                 return event
+    return None
 
 
 def calculate_correct_phase_fl(
@@ -476,22 +506,22 @@ def calculate_correct_phase_fl(
     for start, end, phase in sequences:
         if start <= time < end:
             break
-    if ((phase == 1 or phase == 3) and team_ab == Opponent.HOME) or (
-        (phase == 2 or phase == 4) and team_ab == Opponent.AWAY
+    if ((phase in (1, 3)) and team_ab == Opponent.HOME) or (
+        (phase in (2, 4)) and team_ab == Opponent.AWAY
     ):
         print("correct Phase")
 
     else:
-        new_time = searchPhase_fl(time, sequences, team_ab)
+        new_time = search_phase_fl(time, sequences, team_ab)
         if new_time is not None:
             event[22] = new_time
             return event
     return event
 
 
-def searchPhase_fl(time: int,
-                   sequences: list[tuple[int, int, int]], competitor: Opponent
-                   ) -> int:
+def search_phase_fl(time: int,
+                    sequences: list[tuple[int, int, int]], competitor: Opponent
+                    ) -> int:
     """
     Searches for the last matching (active) phase before a given time for a
     specified competitor.
@@ -514,9 +544,9 @@ def searchPhase_fl(time: int,
     print(time)
     for _, end, phase in reversed(sequences):
         if end <= time:
-            if (phase == 1 or phase == 3) and competitor == Opponent.HOME:
+            if (phase in (1, 3)) and competitor == Opponent.HOME:
                 return end - 1  # Return the end of this phase
-            elif (phase == 2 or phase == 4) and competitor == Opponent.AWAY:
+            if (phase in (2, 4)) and competitor == Opponent.AWAY:
                 return end - 1  # Return the end of this phase for
     raise ValueError("No valid phase found for the given time!")
 
@@ -588,30 +618,20 @@ def calculate_timeouts_fl(time: int, sequences: list[tuple[int, int, int]],
         if phase_timeout == 0:
             print("correct Phase")
             return time
-        elif ((phase_timeout == 1 or phase_timeout == 3 and (team_ab ==
-                                                             Opponent.HOME))
-              or (phase_timeout == 2 or phase_timeout == 4
-                  and team_ab == Opponent.AWAY)):
+        if ((phase_timeout in (1, 3) and (team_ab == Opponent.HOME))
+                or (phase_timeout in (2, 4) and team_ab == Opponent.AWAY)):
             if int(time) == int(end - 1):
                 print("correct Phase")
                 return time
-            else:
-                return end - 1
-        else:
-            # Go through sequences in reverse to find the last matching phase
-            # before `time`
-            for _, end, phase in reversed(sequences):
-                if end <= time:
-                    if (phase == 1 or phase == 3) and (team_ab
-                                                       == Opponent.HOME):
-                        return (
-                            end - 1
-                        )  # Return the end of this phase for competitor "A"
-                    elif (phase == 2 or phase == 4) and (team_ab ==
-                                                         Opponent.AWAY):
-                        return (
-                            end - 1
-                        )  # Return the end of this phase for competitor "B"
+            return end - 1
+        # Go through sequences in reverse to find the last matching phase
+        # before `time`
+        for _, end, phase in reversed(sequences):
+            if end <= time:
+                if (phase in (1, 3)) and (team_ab == Opponent.HOME):
+                    return end - 1
+                if (phase in (2, 4)) and (team_ab == Opponent.AWAY):
+                    return end - 1
     raise ValueError("No valid phase found for timeout event!")
 
 
@@ -652,14 +672,12 @@ def calculate_timeouts_over_fl(sequences: list[tuple[int, int, int]],
             lastevent = give_last_event_fl(events, time)
             if lastevent[0] == "timeout":
                 return time
-            else:
-                raise ValueError("Events are in wrong order!")
-        else:
-            time_inactive = calculate_inactive_phase_fl(time, sequences)
-            if time_inactive is not None:
-                lastevent = give_last_event_fl(events, time_inactive)
-                if lastevent[0] == "timeout":
-                    return time_inactive
+            raise ValueError("Events are in wrong order!")
+        time_inactive = calculate_inactive_phase_fl(time, sequences)
+        if time_inactive is not None:
+            lastevent = give_last_event_fl(events, time_inactive)
+            if lastevent[0] == "timeout":
+                return time_inactive
     raise ValueError("No valid phase found for timeout_over event!")
 
 
