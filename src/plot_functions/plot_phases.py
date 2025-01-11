@@ -49,30 +49,26 @@ def plot_phases(match_id: int, approach: Approach
     base_path = r"D:\Handball\HBL_Events\season_20_21"
     datengrundlage = r"Datengrundlagen"
     base_path_grundlage = os.path.join(base_path, datengrundlage)
+    sequences = processing.calculate_sequences(match_id)
 
     if (approach == Approach.RULE_BASED):
         events, team_info = processing.adjustTimestamp(match_id)
-        sequences = processing.calculate_sequences(match_id)
         events, sequences = processing.synchronize_events(
             events, sequences, team_info)
         new_name = str(match_id) + "_rb.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"rulebased", new_name)
-
     elif (approach == Approach.ML_BASED):
         events, team_info = processing.adjustTimestamp(match_id)
-        sequences = processing.calculate_sequences(match_id)
         events, sequences = processing.synchronize_events_ml(
             events, sequences, team_info)
         new_name = str(match_id) + "_ml.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
     elif (approach == Approach.BASELINE):
         events, team_info = processing.adjustTimestamp_baseline(match_id)
-        sequences = processing.calculate_sequences(match_id)
         new_name = str(match_id) + "_bl.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"baseline", new_name)
     elif (approach == Approach.NONE):
         events, _ = processing.getEvents(match_id)
-        sequences = processing.calculate_sequences(match_id)
         new_name = str(match_id) + "_none.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"none", new_name)
 
@@ -185,9 +181,9 @@ def berechne_phase_und_speichern(events: list[Any],
 
     # Durchlaufe jedes Event
     for event in events:
-        event_id = event["id"]
-        event_type = event["type"]
-        event_time = event["time"]
+        event_id = event[11]
+        event_type = event[0]
+        event_time = event[22]
 
         # Phase berechnen
         phase = None
