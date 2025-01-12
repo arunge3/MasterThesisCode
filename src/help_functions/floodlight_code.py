@@ -294,7 +294,7 @@ def plot_phases(match_id: int, approach: Approach
     #     new_name = str(match_id) + "_ml.csv"
     #     datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
     elif approach == Approach.BASELINE:
-        events, _ = processing.adjustTimestamp_baseline(match_id)
+        events, _ = processing.adjust_timestamp_baseline(match_id)
         new_name = str(match_id) + "_bl_fl.csv"
         datei_pfad = os.path.join(datengrundlage, r"baseline", new_name)
     elif approach == Approach.NONE:

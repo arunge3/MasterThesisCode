@@ -1,3 +1,7 @@
+"""
+This script demonstrates various functionalities of the `os` module
+for interacting with the operating system.
+"""
 import os
 from enum import Enum
 from typing import Any
@@ -6,12 +10,21 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import plot_functions.processing as processing
+from plot_functions import processing
 
 # Enum für die drei Wahlmöglichkeiten
 
 
 class Approach(Enum):
+    """
+    Enum class representing different approaches for synchronizing.
+
+    Attributes:
+        RULE_BASED (str): Represents a rule-based approach.
+        BASELINE (str): Represents a baseline approach.
+        NONE (str): Represents no calculation.
+        ML_BASED (str): Represents a machine learning-based approach.
+    """
     RULE_BASED = "Rule-based Approach"
     BASELINE = "Baseline"
     NONE = "No Calcuation"
@@ -51,27 +64,28 @@ def plot_phases(match_id: int, approach: Approach
     base_path_grundlage = os.path.join(base_path, datengrundlage)
     sequences = processing.calculate_sequences(match_id)
 
-    if (approach == Approach.RULE_BASED):
-        events, team_info = processing.adjustTimestamp(match_id)
+    if approach == Approach.RULE_BASED:
+        events, team_info = processing.adjust_timestamp(match_id)
         events, sequences = processing.synchronize_events(
             events, sequences, team_info)
         new_name = str(match_id) + "_rb.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"rulebased", new_name)
-    elif (approach == Approach.ML_BASED):
-        events, team_info = processing.adjustTimestamp(match_id)
-        events, sequences = processing.synchronize_events_ml(
-            events, sequences, team_info)
-        new_name = str(match_id) + "_ml.csv"
-        datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
-    elif (approach == Approach.BASELINE):
-        events, team_info = processing.adjustTimestamp_baseline(match_id)
+    # elif approach == Approach.ML_BASED:
+    #     events, team_info = processing.adjustTimestamp(match_id)
+    #     events, sequences = processing.synchronize_events_ml(
+    #         events, sequences, team_info)
+    #     new_name = str(match_id) + "_ml.csv"
+    #     datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
+    elif approach == Approach.BASELINE:
+        events, team_info = processing.adjust_timestamp_baseline(match_id)
         new_name = str(match_id) + "_bl.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"baseline", new_name)
-    elif (approach == Approach.NONE):
-        events, _ = processing.getEvents(match_id)
+    elif approach == Approach.NONE:
+        events, _ = processing.get_events(match_id)
         new_name = str(match_id) + "_none.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"none", new_name)
-
+    else:
+        raise ValueError("Invalid approach specified!")
     # Define positions for each phase
     phase_positions = {
         0: 2,  # (inac)
@@ -176,6 +190,19 @@ def plot_phases(match_id: int, approach: Approach
 def berechne_phase_und_speichern_fl(events: list[Any],
                                     sequences: list[tuple[int, int, int]],
                                     dateipfad: str) -> None:
+    """
+    Berechnet die Phase für jedes Event basierend auf den gegebenen Sequenzen
+    und speichert die Ergebnisse in einer CSV-Datei.
+    Args:
+        events (list[Any]): Eine Liste von Events, wobei jedes Event eine Liste
+        oder ein Tupel mit verschiedenen Attributen ist.
+        sequences (list[tuple[int, int, int]]): Eine Liste von Tupeln, die die
+        Start- und Endzeiten sowie die zugehörige Phase enthalten.
+        dateipfad (str): Der Dateipfad, unter dem die CSV-Datei gespeichert
+        werden soll.
+    Returns:
+        None
+    """
     # Erstelle eine Liste, um die Event-Daten zu speichern
     event_data = []
 
@@ -213,6 +240,21 @@ def berechne_phase_und_speichern_fl(events: list[Any],
 def berechne_phase_und_speichern(events: list[Any],
                                  sequences: list[tuple[int, int, int]],
                                  dateipfad: str) -> None:
+    """
+    Berechnet die Phase für jedes Event basierend auf den gegebenen
+    Sequenzen und speichert die Ergebnisse in einer CSV-Datei.
+    Args:
+    events (list[Any]): Eine Liste von Events, wobei jedes Event ein
+    Dictionary mit den Schlüsseln "id", "type" und "time" ist.
+    sequences (list[tuple[int, int, int]]): Eine Liste von Tupeln,
+    die die Start- und Endzeiten sowie die Phaseninformationen enthalten.
+    dateipfad (str): Der Dateipfad, unter dem die CSV-Datei gespeichert
+    werden soll.
+
+    Returns:
+    None
+    """
+
     # Erstelle eine Liste, um die Event-Daten zu speichern
     event_data = []
 
@@ -247,9 +289,42 @@ def berechne_phase_und_speichern(events: list[Any],
     print(f"Die Datei wurde unter {dateipfad} gespeichert.")
 
 
-def plotEvents(match_id: int) -> None:
-    import matplotlib.pyplot as plt
-    events, _ = processing.adjustTimestamp(match_id)
+def plot_events(match_id: int) -> None:
+    """
+    Plots the timeline of events for a given match.
+    Parameters:
+    match_id (int): The ID of the match for which events are
+    to be plotted.
+    The function retrieves events associated with the given
+    match ID, assigns colors to different event types,
+    and plots these events on a timeline. Each event is
+    represented by a marker on the plot, with different
+    colors indicating different types of events. A legend is
+    added to the plot to describe the event types.
+
+    Event Types and their Colors:
+    - score_change: dodgerblue
+    - suspension: purple
+    - suspension_over: darkviolet
+    - technical_rule_fault: gold
+    - technical_ball_fault: orange
+    - steal: limegreen
+    - shot_saved: mediumblue
+    - shot_off_target: crimson
+    - shot_blocked: red
+    - seven_m_awarded: deeppink
+    - seven_m_missed: hotpink
+    - yellow_card: yellow
+    - red_card: darkred
+    - timeout: cyan
+    - timeout_over: cyan
+    - subsitution: black
+    - default: grey (for all other events)
+    The plot is displayed with a single y-level for all
+    events, and the x-axis represents the timeframe.
+    """
+
+    events, _ = processing.adjust_timestamp(match_id)
     # Define event colors based on categories
     event_colors = {
         "score_change": "dodgerblue",

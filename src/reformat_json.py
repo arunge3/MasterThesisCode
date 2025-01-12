@@ -51,7 +51,7 @@ match_id = 23400263
 
 first_timestamp_ms = helpFuctions.load_first_timestamp_position(
     file_path_position)
-helpFuctions.reformatJson(
+helpFuctions.reformat_json(
     path_timeline,
     path_output_jsonl,
     first_timestamp_ms,

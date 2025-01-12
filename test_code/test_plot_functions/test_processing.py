@@ -4,13 +4,13 @@ from typing import Any
 from unittest import TestCase
 from unittest.mock import patch
 
-from plot_functions.processing import (add_threshold_to_time, adjustTimestamp,
+from plot_functions.processing import (add_threshold_to_time, adjust_timestamp,
                                        calculate_correct_phase,
                                        calculate_inactive_phase,
                                        calculate_sequences, calculate_timeouts,
-                                       calculate_timeouts_over, checkSamePhase,
-                                       give_last_event, searchPhase,
-                                       synchronize_events)
+                                       calculate_timeouts_over,
+                                       check_same_phase, give_last_event,
+                                       search_phase, synchronize_events)
 
 
 class TestProcessing(TestCase):
@@ -78,7 +78,7 @@ class TestProcessing(TestCase):
         mock_get_paths.return_value = expected_value
         # Call the method under test
         match_id = 1234
-        events, team_info = adjustTimestamp(match_id)
+        events, team_info = adjust_timestamp(match_id)
 
         # Assertions
         mock_get_paths.assert_called_once_with(match_id)
@@ -126,9 +126,9 @@ class TestProcessing(TestCase):
         assert results == loaded_variables
 
     def test_searchPhase(self: Any) -> None:
-        results = searchPhase(13865, self.sequences, "A")
+        results = search_phase(13865, self.sequences, "A")
         assert results == 12916
-        results = searchPhase(13865, self.sequences, "B")
+        results = search_phase(13865, self.sequences, "B")
         assert results == 11078
 
     def test_give_last_event(self: Any) -> None:
@@ -201,10 +201,10 @@ class TestProcessing(TestCase):
         assert result == 211570
 
     def test_checkSamePhase(self: Any) -> None:
-        result = checkSamePhase(209952, 211570, self.sequences, 0)
+        result = check_same_phase(209952, 211570, self.sequences, 0)
         assert 211570 == result
         with self.assertRaises(ValueError):
-            result = checkSamePhase(209952, 230234, self.sequences, 1)
+            result = check_same_phase(209952, 230234, self.sequences, 1)
 
     def test_calculate_correct_phase(self: Any) -> None:
         event_new = self.event_only

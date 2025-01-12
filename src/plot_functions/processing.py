@@ -1,3 +1,7 @@
+"""
+This script demonstrates the use of the `datetime` module for
+working with dates and times in Python.
+"""
 from datetime import datetime as dt
 from typing import Any, List, Tuple
 
@@ -9,7 +13,7 @@ import help_functions.reformatjson_methods as helpFuctions
 from existing_code.rolling_mode import rolling_mode
 
 
-def adjustTimestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
+def adjust_timestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
     """
     Adjusts the timestamps of events in a match to align with the
     positional data timeframe.
@@ -41,7 +45,7 @@ def adjustTimestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
     # Framerate of the video
     fps_video = 29.97
     # Load event data and adjust timestamps
-    event_json = helpFuctions.reformatJson_Time_only(
+    event_json = helpFuctions.reformat_json_time_only(
         path_timeline, first_time_pos_str, cut_h1, offset_h2,
         first_vh2, fps_video
     )
@@ -52,7 +56,8 @@ def adjustTimestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
     events = event_json.get("timeline", [])
 
     # Match start timestamp
-    first_time_stamp_event = helpFuctions.getFirstTimeStampEvent(path_timeline)
+    first_time_stamp_event = helpFuctions.get_first_time_stamp_event(
+        path_timeline)
     print("match_start_datetime:", first_time_stamp_event)
 
     # timezone
@@ -186,21 +191,15 @@ def synchronize_events(events: list[Any],
             event["time"] = calculate_inactive_phase(time, sequences)
         elif type == "timeout":
             event["time"] = calculate_timeouts(time, sequences, team_ab, event)
-        elif (type == "yellow_card" or type == "suspension" or
-              type == "steal" or type == "substitution"):
+        elif type in ("yellow_card", "suspension", "steal", "substitution"):
             if team_ab == "A":
                 calculate_correct_phase(time, sequences, "B", event)
             else:
                 calculate_correct_phase(time, sequences, "A", event)
         elif (
-            type == "seven_m_awarded"
-            or type == "shot_off_target"
-            or type == "seven_m_missed"
-            or type == "shot_saved"
-            or type == "shot_blocked"
-            or type == "technical_ball_fault"
-            or type == "technical_rule_fault"
-            or type == "yellow_card"
+            type in ("seven_m_awarded", "shot_off_target", "seven_m_missed",
+                     "shot_saved", "shot_blocked", "technical_ball_fault",
+                     "technical_rule_fault", "yellow_card")
         ):
             calculate_correct_phase(
                 time, sequences, team_ab, event)
@@ -209,9 +208,9 @@ def synchronize_events(events: list[Any],
     return events, sequences
 
 
-def searchPhase(time: int,
-                sequences: list[tuple[int, int, int]], competitor: str
-                ) -> int:
+def search_phase(time: int,
+                 sequences: list[tuple[int, int, int]], competitor: str
+                 ) -> int:
     """
     Searches for the last matching (active) phase before a given time for a
     specified competitor.
@@ -233,9 +232,9 @@ def searchPhase(time: int,
     phase: int
     for _, end, phase in reversed(sequences):
         if end <= time:
-            if (phase == 1 or phase == 3) and competitor == "A":
+            if (phase in (1, 3)) and competitor == "A":
                 return end - 1  # Return the end of this phase
-            elif (phase == 2 or phase == 4) and competitor == "B":
+            if (phase in (2, 4)) and competitor == "B":
                 return end - 1  # Return the end of this phase for
     raise ValueError("No valid phase found for the given time!")
 
@@ -311,9 +310,9 @@ def add_threshold_to_time(event: dict[Any, Any]) -> int:
     }
 
     threshold = thresholds.get(str(event["type"]), 0)
-    returnTime: int
-    returnTime = event["time"] + threshold
-    return returnTime
+    return_time: int
+    return_time = event["time"] + threshold
+    return return_time
 
 
 def calculate_inactive_phase(
@@ -383,27 +382,22 @@ def calculate_timeouts(time: int, sequences: list[tuple[int, int, int]],
         if phase_timeout == 0:
             print("correct Phase")
             return time
-        elif ((phase_timeout == 1 or phase_timeout == 3 and team_ab == "A")
-              or (phase_timeout == 2 or phase_timeout == 4
-                  and team_ab == "B")):
+        if ((phase_timeout in (1, 3) and team_ab == "A")
+            or (phase_timeout in (2, 4)
+                and team_ab == "B")):
             if int(time) == int(end - 1):
                 print("correct Phase")
                 return time
-            else:
-                return end - 1
-        else:
-            # Go through sequences in reverse to find the last matching phase
-            # before `time`
-            for _, end, phase in reversed(sequences):
-                if end <= time:
-                    if (phase == 1 or phase == 3) and team_ab == "A":
-                        return (
-                            end - 1
-                        )  # Return the end of this phase for competitor "A"
-                    elif (phase == 2 or phase == 4) and team_ab == "B":
-                        return (
-                            end - 1
-                        )  # Return the end of this phase for competitor "B"
+            return end - 1
+
+        # Go through sequences in reverse to find the last matching phase
+        # before `time`
+        for _, end, phase in reversed(sequences):
+            if end <= time:
+                if (phase in (1, 3)) and team_ab == "A":
+                    return end - 1
+                if (phase in (2, 4)) and team_ab == "B":
+                    return end - 1
     raise ValueError("No valid phase found for timeout event!")
 
 
@@ -444,19 +438,18 @@ def calculate_timeouts_over(sequences: list[tuple[int, int, int]],
             lastevent = give_last_event(events, time)
             if lastevent["type"] == "timeout":
                 return time
-            else:
-                raise ValueError("Events are in wrong order!")
-        else:
-            time_inactive = calculate_inactive_phase(time, sequences)
-            if time_inactive is not None:
-                lastevent = give_last_event(events, time_inactive)
-                if lastevent["type"] == "timeout":
-                    return time_inactive
+            raise ValueError("Events are in wrong order!")
+
+        time_inactive = calculate_inactive_phase(time, sequences)
+        if time_inactive is not None:
+            lastevent = give_last_event(events, time_inactive)
+            if lastevent["type"] == "timeout":
+                return time_inactive
     raise ValueError("No valid phase found for timeout_over event!")
 
 
-def checkSamePhase(
-    startTime: int, endtime: int,
+def check_same_phase(
+    start_time: int, endtime: int,
     sequences: list[tuple[int, int, int]], phase: int
 ) -> int:
     """
@@ -479,14 +472,13 @@ def checkSamePhase(
     """
     start: int
     end: int
-    phaseAct: int
-    for start, end, phaseAct in sequences:
-        if startTime >= start and endtime < end:
-            if phase == phaseAct:
+    phase_act: int
+    for start, end, phase_act in sequences:
+        if start_time >= start and endtime < end:
+            if phase == phase_act:
                 return endtime
-            else:
-                return -1
-        elif startTime <= start and endtime >= end:
+            return -1
+        if start_time <= start and endtime >= end:
             return end
     raise ValueError("No valid phase found for the given interval!")
 
@@ -523,20 +515,41 @@ def calculate_correct_phase(
     for start, end, phase in sequences:
         if start <= time < end:
             break
-    if ((phase == 1 or phase == 3) and team_ab == "A") or (
-        (phase == 2 or phase == 4) and team_ab == "B"
+    if ((phase in (1, 3)) and team_ab == "A") or (
+        (phase in (2, 4)) and team_ab == "B"
     ):
         print("correct Phase")
 
     else:
-        new_time = searchPhase(time, sequences, team_ab)
+        new_time = search_phase(time, sequences, team_ab)
         if new_time is not None:
             event["time"] = new_time
             return event
     return event
 
 
-def adjustTimestamp_baseline(match_id: int) -> tuple[Any, dict[Any, Any]]:
+def adjust_timestamp_baseline(match_id: int) -> tuple[Any, dict[Any, Any]]:
+    """
+    Adjusts the timestamps of events in a match to align with the
+    positional data timeframe.
+    Args:
+        match_id (int): The unique identifier for the match.
+    Returns:
+        tuple[Any, dict[Any, Any]]: A tuple containing:
+            - A list of events with adjusted timestamps.
+            - A dictionary with team names as keys and their
+            qualifiers as values.
+    This function performs the following steps:
+        1. Retrieves various paths and timestamps related to the match
+        using helper functions.
+        2. Loads the first timestamp of the positional data.
+        3. Loads and reformats the event data JSON to adjust timestamps.
+        4. Extracts team names and their qualifiers from the event data.
+        5. Converts the first positional data timestamp to a datetime object.
+        6. Adjusts the timestamps of each event to align with the positional
+        data timeframe.
+    """
+
     # Paths
     (
         _, path_timeline, _, positions_path, cut_h1, offset_h2,
@@ -551,7 +564,7 @@ def adjustTimestamp_baseline(match_id: int) -> tuple[Any, dict[Any, Any]]:
     # Framerate of the video
     fps_video = 29.97
     # Load event data and adjust timestamps
-    event_json = helpFuctions.reformatJson_Time_only(
+    event_json = helpFuctions.reformat_json_time_only(
         path_timeline, first_time_pos_str, cut_h1, offset_h2,
         first_vh2, fps_video
     )
@@ -562,7 +575,8 @@ def adjustTimestamp_baseline(match_id: int) -> tuple[Any, dict[Any, Any]]:
     events = event_json.get("timeline", [])
 
     # Match start timestamp
-    first_time_stamp_event = helpFuctions.getFirstTimeStampEvent(path_timeline)
+    first_time_stamp_event = helpFuctions.get_first_time_stamp_event(
+        path_timeline)
     print("match_start_datetime:", first_time_stamp_event)
 
     # timezone
@@ -592,7 +606,30 @@ def adjustTimestamp_baseline(match_id: int) -> tuple[Any, dict[Any, Any]]:
     return events, team_info
 
 
-def getEvents(match_id: int) -> tuple[Any, dict[Any, Any]]:
+def get_events(match_id: int) -> tuple[Any, dict[Any, Any]]:
+    """
+    Retrieves and processes event data for a given match.
+    Args:
+        match_id (int): The unique identifier for the match.
+    Returns:
+        tuple: A tuple containing:
+            - A list of events with adjusted timestamps.
+            - A dictionary with team names as keys and their
+            qualifiers as values.
+    The function performs the following steps:
+        1. Retrieves various paths and timestamps related to the match.
+        2. Loads the first timestamp of positional data.
+        3. Loads and reformats event data, adjusting timestamps based on the
+        positional data.
+        4. Extracts team names and their qualifiers.
+        5. Adjusts the event timestamps to align with the timeframe of the
+        positional data.
+    Note:
+        The function assumes the presence of helper functions in the
+        `helpFuctions` module for
+        retrieving paths, loading timestamps, and reformatting JSON data.
+    """
+
     # Paths
     (
         _, path_timeline, _, positions_path, cut_h1, offset_h2,
@@ -607,7 +644,7 @@ def getEvents(match_id: int) -> tuple[Any, dict[Any, Any]]:
     # Framerate of the video
     fps_video = 29.97
     # Load event data and adjust timestamps
-    event_json = helpFuctions.reformatJson_Time_only(
+    event_json = helpFuctions.reformat_json_time_only(
         path_timeline, first_time_pos_str, cut_h1, offset_h2,
         first_vh2, fps_video
     )
@@ -618,7 +655,8 @@ def getEvents(match_id: int) -> tuple[Any, dict[Any, Any]]:
     events = event_json.get("timeline", [])
 
     # Match start timestamp
-    first_time_stamp_event = helpFuctions.getFirstTimeStampEvent(path_timeline)
+    first_time_stamp_event = helpFuctions.get_first_time_stamp_event(
+        path_timeline)
     print("match_start_datetime:", first_time_stamp_event)
 
     # timezone
@@ -648,5 +686,5 @@ def getEvents(match_id: int) -> tuple[Any, dict[Any, Any]]:
     return events, team_info
 
 
-def synchronize_events_ml() -> None:
-    return None
+# def synchronize_events_ml() -> None:
+#     return None
