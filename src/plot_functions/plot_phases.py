@@ -58,7 +58,7 @@ def plot_phases(match_id: int, approach: Approach
         The function assumes the existence of several helper functions
         and modules such as `helpFuctions`, `np`, `plt`, and `Code`.
     """
-
+    events = []
     base_path = r"D:\Handball\HBL_Events\season_20_21"
     datengrundlage = r"Datengrundlagen"
     base_path_grundlage = os.path.join(base_path, datengrundlage)
