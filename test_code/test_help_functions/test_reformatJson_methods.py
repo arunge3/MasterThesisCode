@@ -5,11 +5,11 @@ from unittest.mock import patch
 
 import pandas as pd
 
-from help_functions.reformatjson_methods import (get_paths_by_match_id,
-                                                 getFirstTimeStampEvent,
+from help_functions.reformatjson_methods import (get_first_time_stamp_event,
+                                                 get_paths_by_match_id,
                                                  load_first_timestamp_position,
-                                                 reformatJson,
-                                                 reformatJson_Time_only,
+                                                 reformat_json,
+                                                 reformat_json_time_only,
                                                  synchronize_time)
 
 
@@ -101,7 +101,7 @@ class TestreformatJson_Methods:
     def test_getFirstTimeStampEvent(self) -> None:
         filename = "sport_events_1234_timeline.json"
         filepath = os.path.join(self.timeline_base_path, filename)
-        result = getFirstTimeStampEvent(filepath)
+        result = get_first_time_stamp_event(filepath)
         assert result == '2020-10-01T17:00:11+00:00'
 
     def test_reformatJson(self) -> None:
@@ -116,9 +116,9 @@ class TestreformatJson_Methods:
         offseth2_fr = 0
         first_vh2 = 0
         fps = 29.97
-        result = reformatJson(path_timeline_full, path_output_full,
-                              first_timestamp_opt, offset_fr, offseth2_fr,
-                              first_vh2, fps)
+        result = reformat_json(path_timeline_full, path_output_full,
+                               first_timestamp_opt, offset_fr, offseth2_fr,
+                               first_vh2, fps)
         assert (result is None)
         with (open(path_output_full, 'r') as file1,
               open(path_expected_output, 'r') as file2):
@@ -133,7 +133,7 @@ class TestreformatJson_Methods:
         offseth2 = int(0)
         first_vh2 = int(0)
         fps = 29.97
-        result = reformatJson_Time_only(
+        result = reformat_json_time_only(
             path_timeline_full, first_timestamp_ms, offset, offseth2,
             first_vh2, fps)
         path_expected_output = os.path.join(self.expected_path,

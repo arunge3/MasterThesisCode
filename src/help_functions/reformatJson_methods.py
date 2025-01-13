@@ -166,7 +166,7 @@ def get_paths_by_match_id(
     )
 
 
-def getFirstTimeStampEvent(path_timeline: str) -> Optional[str]:
+def get_first_time_stamp_event(path_timeline: str) -> Optional[str]:
     """
     Extracts the timestamp of the first "match_started" event from
     a JSON timeline file.
@@ -238,7 +238,7 @@ def getFirstTimeStampEvent(path_timeline: str) -> Optional[str]:
 #     return synced_time
 
 
-def reformatJson(
+def reformat_json(
         path_timeline: str,
         path_output_jsonl: str,
         first_timestamp_ms: Optional[Union[str, tuple[Any]]],
@@ -459,7 +459,7 @@ def reformatJson(
             file.write(json.dumps(reformatted_event) + "\n")
 
 
-def reformatJson_Time_only(
+def reformat_json_time_only(
     path_timeline: str,
     first_timestamp_ms: str,
     offset: int,
@@ -486,9 +486,10 @@ def reformatJson_Time_only(
     with open(path_timeline, "r") as file:
         data = json.load(file)
 
-    events = data.get("timeline", [])
+    events_df = data.get("timeline", [])
+
     # Loop through the entries and change their timestamps
-    for event in events:
+    for event in events_df:
         type = event.get("type")
         match_clock = event.get("match_clock", None)
         second_half = False

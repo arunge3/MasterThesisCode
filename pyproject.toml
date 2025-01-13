@@ -24,7 +24,7 @@ exclude = ["build", "dist"]
 strict = true
 
 [tool.setuptools]
-packages = ["computeDifferences", "existing_code", "helpFunctions", "plot_functions"]
+packages = ["compute_differences", "existing_code", "help_functions", "plot_functions"]
 package-dir = {"" = "src"}
 
 [tool.pytest.ini_options]
