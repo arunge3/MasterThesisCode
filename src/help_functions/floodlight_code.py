@@ -1,6 +1,5 @@
 import os
 from datetime import datetime as dt
-from enum import Enum
 from typing import Any, List, Tuple
 
 import matplotlib
@@ -11,7 +10,9 @@ from floodlight.io.sportradar import read_event_data_json
 from matplotlib import pyplot as plt
 
 import help_functions
+import help_functions.cost_function
 import help_functions.reformatjson_methods
+import variables.data_variables as dv
 from plot_functions import processing
 from plot_functions.plot_phases import berechne_phase_und_speichern_fl
 
@@ -90,11 +91,11 @@ def flatten_nested_events(nested_events: dict[Any, Any]) -> pd.DataFrame:
             df['segment'] = segment
             df['team'] = team
             if team == "Home":
-                df['team'] = Opponent.HOME
+                df['team'] = dv.Opponent.HOME
             elif team == "Away":
-                df['team'] = Opponent.AWAY
+                df['team'] = dv.Opponent.AWAY
             else:
-                df['team'] = Opponent.NONE
+                df['team'] = dv.Opponent.NONE
 
             # Add to the unified list
             all_events.append(df)
@@ -215,44 +216,14 @@ def calculate_event_stream(match_id: int) -> tuple[Any, int, Any]:
     event_all.events['frameclock'] = event_all.events['frameclock'] + offset
 
     event_stream_all = event_all.get_event_stream(fade=1)
-    return event_stream_all, offset, event_all.events.values
-
-
-class Approach(Enum):
-    """
-    Enum class representing different approaches for the synchronizatrion
-    of gamephases and events.
-    Attributes:
-        RULE_BASED (str): Represents a rule-based approach.
-        BASELINE (str): Represents a baseline approach.
-        NONE (str): Represents no calculation.
-        ML_BASED (str): Represents a machine learning-based approach.
-    """
-
-    RULE_BASED = "Rule-based Approach"
-    BASELINE = "Baseline"
-    NONE = "No Calcuation"
-    ML_BASED = "Machine Learning Approach"
-
-
-class Opponent(Enum):
-    """
-    Enum class representing the opponent in a game.
-    Attributes:
-        HOME (str): Represents the home team.
-        AWAY (str): Represents the away team.
-        NONE (str): Represents no opponent.
-    """
-    HOME = "Home"
-    AWAY = "Away"
-    NONE = "None"
+    return event_stream_all, offset, event_all.events
 
 
 matplotlib.use("TkAgg", force=True)
 
 
-def plot_phases(match_id: int, approach: Approach
-                = Approach.RULE_BASED) -> None:
+def plot_phases(match_id: int, approach: dv.Approach
+                = dv.Approach.RULE_BASED) -> None:
     """
     Plots the phases of a handball match along with event markers.
     Args:
@@ -280,7 +251,7 @@ def plot_phases(match_id: int, approach: Approach
     datengrundlage = r"Datengrundlagen"
     datengrundlage = os.path.join(base_path, datengrundlage)
     sequences = processing.calculate_sequences(match_id)
-    if approach == Approach.RULE_BASED:
+    if approach == dv.Approach.RULE_BASED:
         (_, _,
          events) = calculate_event_stream(23400263)
         events, sequences = synchronize_events_fl(
@@ -288,16 +259,18 @@ def plot_phases(match_id: int, approach: Approach
 
         new_name = str(match_id) + "_rb_fl.csv"
         datei_pfad = os.path.join(datengrundlage, r"rulebased", new_name)
-    # elif (approach == Approach.ML_BASED):
-    #     events, sequences = processing.synchronize_events_ml(
-    #         events, sequences, team_info)
-    #     new_name = str(match_id) + "_ml.csv"
-    #     datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
-    elif approach == Approach.BASELINE:
+    elif (approach == dv.Approach.ML_BASED):
+        (_, _,
+            events) = calculate_event_stream(23400263)
+        new_name = str(match_id) + "_ml.csv"
+        datei_pfad = os.path.join(datengrundlage, r"ml", new_name)
+        events = help_functions.cost_function.sync_event_data(
+            events, sequences, match_id)
+    elif approach == dv.Approach.BASELINE:
         events, _ = processing.adjust_timestamp_baseline(match_id)
         new_name = str(match_id) + "_bl_fl.csv"
         datei_pfad = os.path.join(datengrundlage, r"baseline", new_name)
-    elif approach == Approach.NONE:
+    elif approach == dv.Approach.NONE:
         new_name = str(match_id) + "_none_fl.csv"
         datei_pfad = os.path.join(datengrundlage, r"none", new_name)
     else:
@@ -360,7 +333,7 @@ def plot_phases(match_id: int, approach: Approach
 
     berechne_phase_und_speichern_fl(events, sequences, datei_pfad)
     # Add event markers with labels from `type`
-    for event in events:
+    for event in events.values:
         color = event_colors.get(event[0], event_colors["default"])
         # Find the y value on the continuous line for this event's time
         event_y = None
@@ -437,12 +410,12 @@ def synchronize_events_fl(events: list[Any],
                 event[22], sequences, event[21], event)
         elif event[0] in ("yellow_card", "suspension", "steal",
                           "substitution"):
-            if event[21] == Opponent.HOME:
+            if event[21] == dv.Opponent.HOME:
                 calculate_correct_phase_fl(
-                    event[22], sequences, Opponent.AWAY, event)
+                    event[22], sequences, dv.Opponent.AWAY, event)
             else:
                 calculate_correct_phase_fl(
-                    event[22], sequences, Opponent.HOME, event)
+                    event[22], sequences, dv.Opponent.HOME, event)
         elif (
             event[0] in ("seven_m_awarded", "shot_off_target",
                          "seven_m_missed", "shot_saved",
@@ -483,7 +456,7 @@ def give_last_event_fl(events: List[Any], time: int) -> Any:
 
 
 def calculate_correct_phase_fl(
-    time: int, sequences: list[tuple[int, int, int]], team_ab: Opponent,
+    time: int, sequences: list[tuple[int, int, int]], team_ab: dv.Opponent,
     event: dict[Any, Any]
 ) -> dict[Any, Any]:
     """
@@ -506,8 +479,8 @@ def calculate_correct_phase_fl(
     for start, end, phase in sequences:
         if start <= time < end:
             break
-    if ((phase in (1, 3)) and team_ab == Opponent.HOME) or (
-        (phase in (2, 4)) and team_ab == Opponent.AWAY
+    if ((phase in (1, 3)) and team_ab == dv.Opponent.HOME) or (
+        (phase in (2, 4)) and team_ab == dv.Opponent.AWAY
     ):
         print("correct Phase")
 
@@ -520,7 +493,8 @@ def calculate_correct_phase_fl(
 
 
 def search_phase_fl(time: int,
-                    sequences: list[tuple[int, int, int]], competitor: Opponent
+                    sequences: list[tuple[int, int, int]],
+                    competitor: dv.Opponent
                     ) -> int:
     """
     Searches for the last matching (active) phase before a given time for a
@@ -544,9 +518,9 @@ def search_phase_fl(time: int,
     print(time)
     for _, end, phase in reversed(sequences):
         if end <= time:
-            if (phase in (1, 3)) and competitor == Opponent.HOME:
+            if (phase in (1, 3)) and competitor == dv.Opponent.HOME:
                 return end - 1  # Return the end of this phase
-            if (phase in (2, 4)) and competitor == Opponent.AWAY:
+            if (phase in (2, 4)) and competitor == dv.Opponent.AWAY:
                 return end - 1  # Return the end of this phase for
     raise ValueError("No valid phase found for the given time!")
 
@@ -588,7 +562,7 @@ def calculate_inactive_phase_fl(
 
 
 def calculate_timeouts_fl(time: int, sequences: list[tuple[int, int, int]],
-                          team_ab: Opponent, event: dict[Any, Any]
+                          team_ab: dv.Opponent, event: dict[Any, Any]
                           ) -> int:
     """
     Calculate the appropriate timeout time based on the given
@@ -618,8 +592,8 @@ def calculate_timeouts_fl(time: int, sequences: list[tuple[int, int, int]],
         if phase_timeout == 0:
             print("correct Phase")
             return time
-        if ((phase_timeout in (1, 3) and (team_ab == Opponent.HOME))
-                or (phase_timeout in (2, 4) and team_ab == Opponent.AWAY)):
+        if ((phase_timeout in (1, 3) and (team_ab == dv.Opponent.HOME))
+                or (phase_timeout in (2, 4) and team_ab == dv.Opponent.AWAY)):
             if int(time) == int(end - 1):
                 print("correct Phase")
                 return time
@@ -628,9 +602,9 @@ def calculate_timeouts_fl(time: int, sequences: list[tuple[int, int, int]],
         # before `time`
         for _, end, phase in reversed(sequences):
             if end <= time:
-                if (phase in (1, 3)) and (team_ab == Opponent.HOME):
+                if (phase in (1, 3)) and (team_ab == dv.Opponent.HOME):
                     return end - 1
-                if (phase in (2, 4)) and (team_ab == Opponent.AWAY):
+                if (phase in (2, 4)) and (team_ab == dv.Opponent.AWAY):
                     return end - 1
     raise ValueError("No valid phase found for timeout event!")
 
@@ -681,4 +655,4 @@ def calculate_timeouts_over_fl(sequences: list[tuple[int, int, int]],
     raise ValueError("No valid phase found for timeout_over event!")
 
 
-plot_phases(23400263, Approach.RULE_BASED)
+plot_phases(23400263, dv.Approach.ML_BASED)
