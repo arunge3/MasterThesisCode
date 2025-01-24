@@ -182,6 +182,8 @@ def find_key_position(data: dict[Any, Any], key: str) -> int:
 
     keys_list = list(data.keys())
     for i, k in enumerate(keys_list):
+        k = unicodedata.normalize('NFD', k).encode(
+            'ascii', 'ignore').decode('utf-8')
         if key in k:
             return i  # Return the position of the matched key
     raise ValueError("Key not found")  # Key not found

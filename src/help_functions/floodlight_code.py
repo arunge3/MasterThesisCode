@@ -103,20 +103,21 @@ def map_ids_to_dataframe(json_timeline: dict[Any, Any],
     for idx, event_df in dataframe.events.iterrows():
         for event in json_timeline:
             # Replace 'type' with the actual column name
-            if event.get("type") == event_df["eID"]:
-                if (event.get("time") is not None and
-                        pd.Timestamp(event.get("time")) ==
-                        event_df["time_stamp"]):
-                    if event.get("competitor") is not None:
-                        # Replace with actual column
-                        if event.get("competitor") == event_df["team"].value:
-                            # Update the 'eventID' column in the DataFrame
-                            dataframe.events.at[idx,
-                                                "eventID"] = event.get("id")
-                            break
-                    else:
-                        dataframe.events.at[idx, "eventID"] = event.get("id")
+            if event.get("type") != event_df["eID"]:
+                continue
+            if (event.get("time") is not None and
+                    pd.Timestamp(event.get("time")) ==
+                    event_df["time_stamp"]):
+                if event.get("competitor") is not None:
+                    # Replace with actual column
+                    if event.get("competitor") == event_df["team"].value:
+                        # Update the 'eventID' column in the DataFrame
+                        dataframe.events.at[idx,
+                                            "eventID"] = event.get("id")
                         break
+                else:
+                    dataframe.events.at[idx, "eventID"] = event.get("id")
+                    break
 
     return dataframe
 
@@ -301,25 +302,24 @@ def plot_phases(match_id: int, approach: dv.Approach
         base_path, r"Datengrundlagen")
     sequences = processing.calculate_sequences(match_id)
     if approach == dv.Approach.RULE_BASED:
-        (_, _, events) = calculate_event_stream(23400263)
+        (_, _, events) = calculate_event_stream(match_id)
         events, sequences = synchronize_events_fl(
             events, sequences)
-
-        new_name = str(match_id) + "_rb_fl.csv"
-        datei_pfad = os.path.join(datengrundlage, r"rulebased", new_name)
+        datei_pfad = os.path.join(datengrundlage, r"rulebased",
+                                  (str(match_id) + "_rb_fl.csv"))
     elif approach == dv.Approach.ML_BASED:
-        (_, _, events) = calculate_event_stream(23400263)
-        new_name = str(match_id) + "_ml.csv"
-        datei_pfad = os.path.join(datengrundlage, r"ml", new_name)
+        (_, _, events) = calculate_event_stream(match_id)
+        datei_pfad = os.path.join(datengrundlage, r"ml",
+                                  (str(match_id) + "_ml.csv"))
         events = help_functions.cost_function.sync_event_data_cost_function(
             events, sequences, match_id)
     elif approach == dv.Approach.BASELINE:
         events, _ = processing.adjust_timestamp_baseline(match_id)
-        new_name = str(match_id) + "_bl_fl.csv"
-        datei_pfad = os.path.join(datengrundlage, r"baseline", new_name)
+        datei_pfad = os.path.join(datengrundlage, r"baseline",
+                                  (str(match_id) + "_bl_fl.csv"))
     elif approach == dv.Approach.NONE:
-        new_name = str(match_id) + "_none_fl.csv"
-        datei_pfad = os.path.join(datengrundlage, r"none", new_name)
+        datei_pfad = os.path.join(
+            datengrundlage, r"none", (str(match_id) + "_none_fl.csv"))
     else:
         raise ValueError("Invalid approach specified!")
 
@@ -379,7 +379,6 @@ def plot_phases(match_id: int, approach: dv.Approach
     berechne_phase_und_speichern_fl(events, sequences, datei_pfad)
     # Add event markers with labels from `type`
     for event in events.values:
-        color = event_colors.get(event[0], event_colors["default"])
         # Find the y value on the continuous line for this event's time
         event_y = None
         for start, end, phase in sequences:
@@ -387,19 +386,15 @@ def plot_phases(match_id: int, approach: dv.Approach
                 event_y = phase_positions[phase]
 
                 break
-        # Plot event marker
-        # ax.axvline(t_start, color="red", linestyle="--", linewidth=1)
-        # Vertical line at event time
         if event_y is not None:
             ax.plot(
                 event[22],
                 event_y,
                 "x",
-                color=color,
+                color=event_colors.get(event[0], event_colors["default"]),
                 markersize=8,
                 label=event[0] if event[0] not in added_labels else "",
             )
-            print(event[22], event_y, event[0])
             added_labels.add(event[0])
     # Add legend
     ax.legend(title="Event Types", loc="upper right", bbox_to_anchor=(1.15, 1))
@@ -698,6 +693,3 @@ def calculate_timeouts_over_fl(sequences: list[tuple[int, int, int]],
             if lastevent[0] == "timeout":
                 return time_inactive
     raise ValueError("No valid phase found for timeout_over event!")
-
-
-plot_phases(23400263, dv.Approach.ML_BASED)
