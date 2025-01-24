@@ -1,5 +1,12 @@
+
+"""
+This script demonstrates various functionalities of the `os` module
+for interacting with the operating system.
+"""
+import json
 import os
 from datetime import datetime as dt
+from pathlib import Path
 from typing import Any, List, Tuple
 
 import matplotlib
@@ -15,6 +22,8 @@ import help_functions.reformatjson_methods
 import variables.data_variables as dv
 from plot_functions import processing
 from plot_functions.plot_phases import berechne_phase_und_speichern_fl
+
+matplotlib.use("TkAgg", force=True)
 
 
 def create_event_objects(
@@ -66,9 +75,50 @@ def create_event_objects(
     event_all.events = pd.DataFrame(
         filtered_test, columns=event_all.events.columns)
 
-    print(event_all.events)
-
     return event_all
+
+
+def map_ids_to_dataframe(json_timeline: dict[Any, Any],
+                         dataframe: Events) -> Events:
+    """
+    Maps event IDs from a JSON timeline to a DataFrame of events.
+    This function takes a JSON timeline and a DataFrame of events,
+    and maps the event IDs from the JSON timeline to the
+    corresponding events in the DataFrame based on matching event
+    types, timestamps, and optionally competitors.
+    Args:
+        json_timeline (dict[Any, Any]): A dictionary representing
+        the JSON timeline where each event contains keys such as
+        "type", "time", "competitor", and "id".
+        dataframe (Events): An Events object containing a DataFrame
+        of events with columns such as "eID", "time_stamp", and
+        "team".
+    Returns:
+        Events: The updated Events object with the 'eventID' column
+        populated based on the matching criteria.
+    """
+
+    # Initialize a new column 'eventID' in the events DataFrame
+    dataframe.events['eventID'] = None
+    for idx, event_df in dataframe.events.iterrows():
+        for event in json_timeline:
+            # Replace 'type' with the actual column name
+            if event.get("type") == event_df["eID"]:
+                if (event.get("time") is not None and
+                        pd.Timestamp(event.get("time")) ==
+                        event_df["time_stamp"]):
+                    if event.get("competitor") is not None:
+                        # Replace with actual column
+                        if event.get("competitor") == event_df["team"].value:
+                            # Update the 'eventID' column in the DataFrame
+                            dataframe.events.at[idx,
+                                                "eventID"] = event.get("id")
+                            break
+                    else:
+                        dataframe.events.at[idx, "eventID"] = event.get("id")
+                        break
+
+    return dataframe
 
 
 def flatten_nested_events(nested_events: dict[Any, Any]) -> pd.DataFrame:
@@ -197,33 +247,34 @@ def calculate_event_stream(match_id: int) -> tuple[Any, int, Any]:
     # Load event data and adjust timestamps
     event_all = create_event_objects(path_timeline,
                                      fps_positional)
-
+    if not isinstance(path_timeline, (str, Path)):
+        raise ValueError(f"Invalid path: {path_timeline}")
+    path_timeline = Path(path_timeline)
+    data = json.loads(path_timeline.read_text(encoding='utf-8'))
+    df_events = data.get("timeline", [])
     # Match start timestamp
     first_time_stamp_event = event_all.events['time_stamp'][0]
     first_time_stamp_event = first_time_stamp_event.strftime(
         '%Y-%m-%d %H:%M:%S')
-    print("match_start_datetime:", first_time_stamp_event)
 
     # timestamp of the first positional data converting to datetime
     positional_data_start_timestamp = first_time_pos_unix / 1000
     positional_data_start_timestamp = dt.fromtimestamp(
         positional_data_start_timestamp
     ).replace(tzinfo=pytz.utc)
-    print("positional_data_start_date:", positional_data_start_timestamp)
     offset = calculate_offset(first_time_stamp_event,
                               first_time_pos_str,
                               fps_positional)
     event_all.events['frameclock'] = event_all.events['frameclock'] + offset
-
+    event_all = map_ids_to_dataframe(df_events, event_all)
     event_stream_all = event_all.get_event_stream(fade=1)
     return event_stream_all, offset, event_all.events
 
 
-matplotlib.use("TkAgg", force=True)
-
-
 def plot_phases(match_id: int, approach: dv.Approach
-                = dv.Approach.RULE_BASED) -> None:
+                = dv.Approach.RULE_BASED,
+                base_path: str = r"D:\Handball\HBL_Events\season_20_21"
+                ) -> None:
     """
     Plots the phases of a handball match along with event markers.
     Args:
@@ -246,25 +297,21 @@ def plot_phases(match_id: int, approach: dv.Approach
         The function assumes the existence of several helper functions
         and modules such as `helpFuctions`, `np`, `plt`, and `Code`.
     """
-
-    base_path = r"D:\Handball\HBL_Events\season_20_21"
-    datengrundlage = r"Datengrundlagen"
-    datengrundlage = os.path.join(base_path, datengrundlage)
+    datengrundlage = os.path.join(
+        base_path, r"Datengrundlagen")
     sequences = processing.calculate_sequences(match_id)
     if approach == dv.Approach.RULE_BASED:
-        (_, _,
-         events) = calculate_event_stream(23400263)
+        (_, _, events) = calculate_event_stream(23400263)
         events, sequences = synchronize_events_fl(
             events, sequences)
 
         new_name = str(match_id) + "_rb_fl.csv"
         datei_pfad = os.path.join(datengrundlage, r"rulebased", new_name)
-    elif (approach == dv.Approach.ML_BASED):
-        (_, _,
-            events) = calculate_event_stream(23400263)
+    elif approach == dv.Approach.ML_BASED:
+        (_, _, events) = calculate_event_stream(23400263)
         new_name = str(match_id) + "_ml.csv"
         datei_pfad = os.path.join(datengrundlage, r"ml", new_name)
-        events = help_functions.cost_function.sync_event_data(
+        events = help_functions.cost_function.sync_event_data_cost_function(
             events, sequences, match_id)
     elif approach == dv.Approach.BASELINE:
         events, _ = processing.adjust_timestamp_baseline(match_id)
@@ -307,8 +354,6 @@ def plot_phases(match_id: int, approach: dv.Approach
         # Default for all other events
         "default": "grey",
     }
-    # Initialize lists to hold x (time) and y (position) values for a
-    # continuous line
     x_vals = []
     y_vals = []
 

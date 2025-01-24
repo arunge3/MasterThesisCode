@@ -15,8 +15,9 @@ import pandas as pd
 import variables.data_variables as dv
 
 
-def sync_event_data(events: dict[Any, Any], sequences: tuple[int, int, int],
-                    match_id: int) -> dict[Any, Any]:
+def sync_event_data_cost_function(events: Any,
+                                  sequences: tuple[int, int, int],
+                                  match_id: int) -> Any:
     """
     Synchronizes event data with position data for a given match.
     Args:
@@ -36,7 +37,7 @@ def sync_event_data(events: dict[Any, Any], sequences: tuple[int, int, int],
     ball_num = find_key_position(pid_dict, "Ball")
 
     # events = add_information_to_events(events, match_id)
-    for event in events.values():
+    for event in events.values:
         if event[8] is not None:
             pos_num = find_key_position(pid_dict, event[10])
             for i in xids.items():
@@ -48,13 +49,15 @@ def sync_event_data(events: dict[Any, Any], sequences: tuple[int, int, int],
     return events
 
 
-# def add_information_to_events(events: array, match_id: int) -> array:
-#     (path_timeline, _, _, _, _, _, _, _) = help_functions
-# reformatjson_methods.get_paths_by_match_id(
-#         match_id)
-#     # data: dict[Any, Any]
-#     # with open(path_timeline, encoding="r") as file:
-#     #     data = json.load(file)
+# def add_information_to_events(events, match_id: int):
+#     (path_timeline, _, _, _, _, _, _, _) = (
+    # help_functions.reformatjson_methods.get_paths_by_match_id(
+#         match_id))
+
+
+#     data: dict[Any, Any]
+#     with open(path_timeline, encoding="r") as file:
+#         data = json.load(file)
 #     for event in events:
 #         event_type = event[0]
 #         event_time = event[2]
@@ -64,7 +67,12 @@ def sync_event_data(events: dict[Any, Any], sequences: tuple[int, int, int],
 #         #             event.append(value[event_type][event_time])
 #         #             break
 
-
+# def find_event_id(event_type, event_time, data):
+#     for (key, value) in data.items():
+#         if event_type in value:
+#             if event_time in value[event_type]:
+#                 return value[event_type][event_time]
+#     return None
 def get_pos_filepath(match_id: int,
                      season: dv.Season = dv.Season.SEASON_2020_2021,
                      basepath: str = r"D:\Handball") -> str:

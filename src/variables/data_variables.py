@@ -40,6 +40,6 @@ class Opponent(Enum):
         AWAY (str): Represents the away team.
         NONE (str): Represents no opponent.
     """
-    HOME = "Home"
-    AWAY = "Away"
-    NONE = "None"
+    HOME = "home"
+    AWAY = "away"
+    NONE = "none"
