@@ -2,6 +2,7 @@
 This script demonstrates various functionalities of the `os` module
 for interacting with the operating system.
 """
+
 import json
 import os
 from datetime import datetime as dt
@@ -357,41 +358,81 @@ def plot_phases(match_id: int, approach: dv.Approach
 
     berechne_phase_und_speichern_fl(events, sequences, datei_pfad)
     # Add event markers with labels from `type`
-    for event in events.values:
-        # Find the y value on the continuous line for this event's time
-        event_y = None
-        for start, end, phase in sequences:
-            if start <= event[22] < end:
-                event_y = phase_positions[phase]
+    if hasattr(events, 'values'):
+        for event in events.values:
+            # Find the y value on the continuous line for this event's time
+            event_y = None
+            for start, end, phase in sequences:
+                if start <= event[22] < end:
+                    event_y = phase_positions[phase]
 
-                break
-        if event_y is not None:
-            ax.plot(
-                event[22],
-                event_y,
-                "x",
-                color=event_colors.get(event[0], event_colors["default"]),
-                markersize=8,
-                label=event[0] if event[0] not in added_labels else "",
-            )
-            added_labels.add(event[0])
-    # Add legend
-    ax.legend(title="Event Types", loc="upper right",
-              bbox_to_anchor=(1.15, 1))
+                    break
+            if event_y is not None:
+                ax.plot(
+                    event[22],
+                    event_y,
+                    "x",
+                    color=event_colors.get(event[0], event_colors["default"]),
+                    markersize=8,
+                    label=event[0] if event[0] not in added_labels else "",
+                )
+                added_labels.add(event[0])
+        # Add legend
+        ax.legend(title="Event Types", loc="upper right",
+                  bbox_to_anchor=(1.15, 1))
 
-    # Customize the plot
-    ax.axhline(0, color="grey", linewidth=0.5)
-    ax.set_yticks(sorted(set(phase_positions.values())))
-    ax.set_yticklabels(
-        [phase_labels[phase] for phase in sorted(phase_positions.keys())]
-    )
-    ax.set_xlabel("Timeframe")
-    ax.set_title("Continuous Game phase Timeline")
+        # Customize the plot
+        ax.axhline(0, color="grey", linewidth=0.5)
+        ax.set_yticks(sorted(set(phase_positions.values())))
+        ax.set_yticklabels(
+            [phase_labels[phase] for phase in sorted(phase_positions.keys())]
+        )
+        ax.set_xlabel("Timeframe")
+        ax.set_title("Continuous Game phase Timeline")
 
-    # Set x-axis limit to show only from 0 to 2000
-    ax.set_xlim(6000, 50000)
-    # Show plot
-    plt.show()
+        # Set x-axis limit to show only from 0 to 2000
+        ax.set_xlim(6000, 50000)
+        # Show plot
+        plt.show()
+    else:
+        for event in events:
+            # Find the y value on the continuous line for this event's time
+            event_y = None
+            for start, end, phase in sequences:
+
+                if start <= event["time"] < end:
+                    event_y = phase_positions[phase]
+
+                    break
+            if event_y is not None:
+                ax.plot(
+                    event["time"],
+                    event_y,
+                    "x",
+                    color=event_colors.get(
+                        event["type"], event_colors["default"]),
+                    markersize=8,
+                    label=(event["type"] if event["type"]
+                           not in added_labels else ""),
+                )
+                added_labels.add(event["type"])
+        # Add legend
+        ax.legend(title="Event Types", loc="upper right",
+                  bbox_to_anchor=(1.15, 1))
+
+        # Customize the plot
+        ax.axhline(0, color="grey", linewidth=0.5)
+        ax.set_yticks(sorted(set(phase_positions.values())))
+        ax.set_yticklabels(
+            [phase_labels[phase] for phase in sorted(phase_positions.keys())]
+        )
+        ax.set_xlabel("Timeframe")
+        ax.set_title("Continuous Game phase Timeline")
+
+        # Set x-axis limit to show only from 0 to 2000
+        ax.set_xlim(6000, 50000)
+        # Show plot
+        plt.show()
 
 
 def handle_approach(approach: dv.Approach,
@@ -425,7 +466,7 @@ def handle_approach(approach: dv.Approach,
         datei_pfad = os.path.join(datengrundlage, r"ml",
                                   (str(match_id) + "_ml.csv"))
         events = help_functions.cost_function.sync_event_data_cost_function(
-            events, sequences, match_id)
+            events, match_id)
     elif approach == dv.Approach.BASELINE:
         events, _ = processing.adjust_timestamp_baseline(match_id)
         datei_pfad = os.path.join(datengrundlage, r"baseline",
