@@ -477,7 +477,7 @@ def handle_approach(approach: dv.Approach,
     elif approach == dv.Approach.ML_RB:
         (_, _, events) = calculate_event_stream(match_id)
         events = help_functions.cost_function.sync_event_data_cost_function(
-            events, sequences, match_id)
+            events, match_id)
         events, sequences = synchronize_events_fl_rule_based(
             events, sequences)
         datei_pfad = os.path.join(datengrundlage, r"ml_rb",
@@ -519,6 +519,7 @@ def synchronize_events_fl_rule_based(events: Any,
                                      sequences: list[tuple[int, int, int]]
                                      ) -> tuple[list[Any], list[Any]]:
     """
+
     Synchronizes events with the given sequences by updating the event times
     and phases based on specific conditions.
     Args:
@@ -652,10 +653,11 @@ def handle_timeout_over(event: dict[Any, Any],
 
 
 def handle_phase_correction(event: dict[Any, Any],
-                            sequences: list[tuple[int, int, int]]
+                            sequences: list[tuple[int, int, int]],
                             ) -> int:
     """
     Handles phase correction for an event by calculating the correct phase.
+
 
 
     Args:
@@ -701,9 +703,10 @@ def give_last_event_fl(events: pd.DataFrame, time: int) -> Any:
 
 
 def calculate_correct_phase_fl(
-    time: int, sequences: list[tuple[int, int, int]], team_ab: dv.Opponent,
+    time: int, sequences: list[tuple[int, int, int]], team_ab: dv.Opponent
 ) -> int:
     """
+
     Determines the correct phase for a given event based on the provided time,
     sequences, and team.
     Args:
@@ -820,7 +823,8 @@ def search_phase_fl(time: int,
                 return end - 1  # Return the end of this phase
             if (phase in (2, 4)) and competitor == dv.Opponent.AWAY:
                 return end - 1  # Return the end of this phase for
-    raise ValueError("No valid phase found for the given time!")
+    print("No valid phase found for the given time!")
+    return time
 
 
 def calculate_inactive_phase_fl(
