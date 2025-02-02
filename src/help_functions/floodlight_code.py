@@ -472,6 +472,7 @@ def handle_approach(approach: dv.Approach,
         datei_pfad = os.path.join(datengrundlage, r"baseline",
                                   (str(match_id) + "_bl_fl.csv"))
     elif approach == dv.Approach.NONE:
+        (_, _, events) = calculate_event_stream(match_id)
         datei_pfad = os.path.join(
             datengrundlage, r"none", (str(match_id) + "_none_fl.csv"))
     elif approach == dv.Approach.ML_RB:
