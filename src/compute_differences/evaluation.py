@@ -10,7 +10,8 @@ import pandas as pd
 def generate_paths(number: int, name: str,
                    base_path: str = r"D:\Handball\HBL_Events",
                    season: str = "season_20_21",
-                   ) -> tuple[str, str, str, str, str, str, str, str, str]:
+                   ) -> tuple[str, str, str, str, str, str, str,
+                              str, str, str, str]:
     """
     Generate file paths dynamically based on inputs.
 
@@ -35,16 +36,20 @@ def generate_paths(number: int, name: str,
     csv_rb_path = os.path.join(
         datengrundlage, r"rulebased", f"{number}_rb.csv")
     csv_none_path = os.path.join(datengrundlage, r"none", f"{number}_none.csv")
+    csv_ml_path = os.path.join(datengrundlage, r"ml", f"{number}_ml.csv")
+    csv_ml_rb_path = os.path.join(
+        datengrundlage, r"ml_rb", f"{number}_ml_rb_fl.csv")
     output_path = os.path.join(
         datengrundlage, r"results", f"detailed_results_{number}.csv")
     # Directory containing the CSV files
     directory_results = os.path.join(datengrundlage, r"results")
     # Save results to CSV
-    output_file_all = os.path.join(datengrundlage, r"results_summary.csv")
+    output_file_all = os.path.join(datengrundlage,
+                                   r"results_summary.csv")
 
     return (excel_path, name_new_game_path, event_path, csv_bl_path,
-            csv_rb_path, csv_none_path, output_path,
-            directory_results, output_file_all)
+            csv_rb_path, csv_none_path, csv_ml_path, csv_ml_rb_path,
+            output_path, directory_results, output_file_all)
 
 # TODO Ich muss noch überprüfen, ob nicht nur die
 # richtige Phasenbezeichnung
@@ -57,10 +62,24 @@ def generate_paths(number: int, name: str,
 def calculate_if_correct(phase_true: int, phase_predicted: int,
                          time_start: int, time_end: int,
                          time_predicted: int) -> int:
-    if ((phase_true == phase_predicted) and (time_start
-                                             <= time_predicted <= time_end)):
+    """
+    Determines if the predicted phase and time are correct.
+    Args:
+        phase_true (int): The true phase value.
+        phase_predicted (int): The predicted phase value.
+        time_start (int): The start time of the valid time range.
+        time_end (int): The end time of the valid time range.
+        time_predicted (int): The predicted time value.
+    Returns:
+        int: Returns 1 if the predicted phase matches the true
+        phase and the predicted time is within the valid time
+        range, otherwise returns 0.
+                        """
+    if ((phase_true == phase_predicted)
+            and (time_start <= time_predicted <= time_end)):
         return 1
     else:
+
         return 0
 
 
@@ -88,10 +107,11 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 # HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21.csv.xlsx 23400277
 # HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21.csv.xlsx 23400267
 
-(excel_path, name_new_game_path, event_path, csv_bl_path, csv_rb_path,
- csv_none_path, output_path, directory_results, output_file_all
- ) = generate_paths(23400267,
-                    "HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21")
+(excel_path, name_new_game_path, event_path, csv_bl_path,
+ csv_rb_path, csv_none_path, csv_ml_path, csv_ml_rb_path,
+ output_path, directory_results, output_file_all
+ ) = generate_paths(23400263,
+                    "TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21")
 
 df = pd.read_excel(excel_path)
 with open(event_path, "r") as file:
@@ -148,8 +168,21 @@ if "rb_correct" not in df.columns:
 if "Phase_ml-based" not in df.columns:
     df["Phase_ml-based"] = None
 
+if "Phase_ml_time" not in df.columns:
+    df["Phase_ml_time"] = None
+
 if "ml_correct" not in df.columns:
     df["ml_correct"] = None
+
+if "Phase_ml_rb-based" not in df.columns:
+    df["Phase_ml_rb-based"] = None
+
+if "Phase_ml_rb_time" not in df.columns:
+    df["Phase_ml_rb_time"] = None
+
+if "ml_rb_correct" not in df.columns:
+    df["ml_rb_correct"] = None
+
 
 # Exrahe Phase from the clips column
 df["Phase_start_true"] = df["clips"].str.split("_").str[0]
@@ -165,6 +198,8 @@ df["Phase_true"] = pd.to_numeric(df["Phase_true"], errors="coerce")
 df_csv_bl = pd.read_csv(csv_bl_path)
 df_csv_rb = pd.read_csv(csv_rb_path)
 df_csv_none = pd.read_csv(csv_none_path)
+df_csv_ml = pd.read_csv(csv_ml_path)
+df_csv_ml_rb = pd.read_csv(csv_ml_rb_path)
 # mapping
 for event in events_inital:
     event_id = event["id"]
@@ -210,6 +245,54 @@ for index, row in df_csv_rb.iterrows():
             phase_true, (phase), (time_start), (time_end), (event_time))
 
         df.loc[match_condition, "rb_correct"] = correct_phase
+
+
+for index, row in df_csv_ml.iterrows():
+    event_id = row['event_id']
+    event_time = int(row['time'])
+    phase = int(row['phase'])
+    match_condition = (
+        (df["Event_id"] == event_id)
+    )
+
+    # Write the event_id to the DataFrame
+    df.loc[match_condition, "Event_id"] = event_id
+    df.loc[match_condition, "Phase_ml-based"] = phase
+    df.loc[match_condition, "Phase_ml_time"] = event_time
+    # Get the actual value of the phase and time from df (ground truth)
+    if match_condition.any():
+        phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
+
+        time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
+        time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
+
+        correct_phase = calculate_if_correct(
+            phase_true, (phase), (time_start), (time_end), (event_time))
+
+        df.loc[match_condition, "ml_correct"] = correct_phase
+for index, row in df_csv_ml_rb.iterrows():
+    event_id = row['event_id']
+    event_time = int(row['time'])
+    phase = int(row['phase'])
+    match_condition = (
+        (df["Event_id"] == event_id)
+    )
+
+    # Write the event_id to the DataFrame
+    df.loc[match_condition, "Event_id"] = event_id
+    df.loc[match_condition, "Phase_ml_rb-based"] = phase
+    df.loc[match_condition, "Phase_ml_rb_time"] = event_time
+    # Get the actual value of the phase and time from df (ground truth)
+    if match_condition.any():
+        phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
+
+        time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
+        time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
+
+        correct_phase = calculate_if_correct(
+            phase_true, (phase), (time_start), (time_end), (event_time))
+
+        df.loc[match_condition, "ml_rb_correct"] = correct_phase
 
 for index, row in df_csv_none.iterrows():
     event_id = row['event_id']
@@ -323,6 +406,14 @@ none_accuracy = none_correct / baseline_total
 rulebased_correct = (df['rb_correct'] == 1).sum()
 rulebased_accuracy = rulebased_correct / baseline_total
 
+# Accuracy for Phase_rulebased
+ml_correct = (df['ml_correct'] == 1).sum()
+ml_accuracy = ml_correct / baseline_total
+
+# Accuracy for Phase_rulebased
+ml_rb_correct = (df['ml_rb_correct'] == 1).sum()
+ml_rb_accuracy = ml_rb_correct / baseline_total
+
 
 def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
                                       correct_column: Any) -> Any:
@@ -341,6 +432,10 @@ none_accuracy_per_event = calculate_accuracy_for_event_type(
     df, 'eID', 'none_correct')
 rulebased_accuracy_per_event = calculate_accuracy_for_event_type(
     df, 'eID', 'rb_correct')
+ml_accuracy_per_event = calculate_accuracy_for_event_type(
+    df, 'eID', 'ml_correct')
+ml_rb_accuracy_per_event = calculate_accuracy_for_event_type(
+    df, 'eID', 'ml_rb_correct')
 
 
 # Save to a CSV file
@@ -353,6 +448,8 @@ with open(output_path, 'w', newline='') as file:
     writer.writerow(["None", "all", f"{none_accuracy:.4f}"])
     writer.writerow(["Baseline", "all", f"{baseline_accuracy:.4f}"])
     writer.writerow(["Rulebased", "all", f"{rulebased_accuracy:.4f}"])
+    writer.writerow(["ML", "all", f"{ml_accuracy:.4f}"])
+    writer.writerow(["ML_RB", "all", f"{ml_rb_accuracy:.4f}"])
 
     # Write Phase_None accuracies
     for event, accuracy in none_accuracy_per_event.items():
@@ -363,6 +460,10 @@ with open(output_path, 'w', newline='') as file:
     # Write Phase_Rulebased accuracies
     for event, accuracy in rulebased_accuracy_per_event.items():
         writer.writerow(["Rulebased", event, f"{accuracy:.4f}"])
+    for event, accuracy in ml_accuracy_per_event.items():
+        writer.writerow(["ML", event, f"{accuracy:.4f}"])
+    for event, accuracy in ml_rb_accuracy_per_event.items():
+        writer.writerow(["ML_RB", event, f"{accuracy:.4f}"])
 
 print("Results saved to results.csv")
 

@@ -11,12 +11,19 @@ class Approach(Enum):
         BASELINE (str): Represents a baseline approach.
         NONE (str): Represents no calculation.
         ML_BASED (str): Represents a machine learning-based approach.
+        ML_RB (str): Represents a machine learning approach with
+        rule-based.
+        COST_FUNCTION (str): Represents a cost function based approach.
+        ML_CORRECTION (str): Represents a machine learning approach with
+                            correction.
     """
 
     RULE_BASED = "Rule-based Approach"
     BASELINE = "Baseline"
     NONE = "No Calcuation"
     ML_BASED = "Machine Learning Approach"
+    ML_RB = "Machine Learning Approach with Rule-based"
+    ML_CORRECTION = "ML Approach with Correction"
 
 
 class Season(Enum):

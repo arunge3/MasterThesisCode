@@ -11,12 +11,12 @@ import floodlight.core.xy
 import floodlight.io.kinexon as fliok
 import numpy as np
 import pandas as pd
+from rapidfuzz import process
 
 import variables.data_variables as dv
 
 
 def sync_event_data_cost_function(events: Any,
-                                  sequences: tuple[int, int, int],
                                   match_id: int) -> Any:
     """
     Synchronizes event data with position data for a given match.
@@ -37,15 +37,29 @@ def sync_event_data_cost_function(events: Any,
     ball_num = find_key_position(pid_dict, "Ball")
 
     # events = add_information_to_events(events, match_id)
-    for event in events.values:
-        if event[8] is not None:
-            pos_num = find_key_position(pid_dict, event[10])
-            for i in xids.items():
-                if i == event[10]:
-                    event[22] = find_sequence(
-                        sync_pos_data(xids[i], event[22],
-                                      pos_data[pos_num], pos_data[ball_num],
-                                      event[8]), sequences)
+    for idx, event in enumerate(events.values):
+        if event[0] in ["score_change", "shot_saved", "shot_off_target",
+                        "shot_blocked", "technical_rule_fault",
+                        "seven_m_awarded", "steal", "technical_ball_fault"]:
+            if event[8] is not None:
+                pos_num = find_key_position(pid_dict, event[10])
+                for i in xids.items():
+                    if i[0] == event[10]:
+                        events.iloc[idx, 22] = (sync_pos_data(
+                            i[1], event[22],
+                            pos_data[pos_num],
+                            pos_data[ball_num],
+                            event[8]))
+            elif event[14] is not None:
+                pos_num = find_key_position(pid_dict, event[10])
+                for i in xids.items():
+                    if i[0] == event[10]:
+                        events.iloc[idx, 22] = (sync_pos_data(
+                            i[1], event[22],
+                            pos_data[pos_num],
+                            pos_data[ball_num],
+                            event[14]["name"]))
+
     return events
 
 
@@ -108,64 +122,54 @@ def get_pos_filepath(match_id: int,
 def sync_pos_data(links: Any, t_event: int,
                   pos_data: floodlight.core.xy.XY,
                   ball_data: floodlight.core.xy.XY, pid: str,
-                  threshold: float = 0.5) -> int:
+                  threshold: float = 1) -> int:
     """
-    Finds the last frame where the player had the ball before a specific
-    event time.
+    Findet den letzten Frame vor einem bestimmten Ereignis, in dem ein
+    Spieler den Ball hatte.
 
     Args:
-        pos_data: List of XY objects containing player and ball data.
-        pid: The player ID (index of the XY object in pos_data).
-        t_event: The frame index of the event.
-        threshold: Distance threshold to determine if the player has the ball.
+        links: Dictionary mit Spieler-IDs und deren Zuordnungen
+        t_event: Der Frame-Index des Ereignisses
+        pos_data: XY-Objekt mit den Positionsdaten der Spieler
+        ball_data: XY-Objekt mit den Positionsdaten des Balls
+        pid: Die Spieler-ID (Name)
+        threshold: Schwellenwert für die Distanz zum Ball (in Metern)
 
     Returns:
-        The last frame index where the player had the ball before the event,
-        or None if not found.
+        int: Frame-Index des letzten Ballbesitzes vor dem Ereignis
     """
+    # Normalisiere Spieler-ID und hole numerische ID
     pid = normalize(pid)
     pid_num = get_pid_from_name(pid, links)
-    # Get the XY object for the player
-    player_data = pos_data.player(pid_num)  # Player's position data
 
-    # Assuming the ball data is stored in the last XY object
+    # Hole Positionsdaten des Spielers
+    player_data = pos_data.player(pid_num)
+
+    # Kombiniere die beiden Ball-Datensätze
     ball_data_1 = ball_data.player(0)
     ball_data_2 = ball_data.player(1)
-    # Iterate backwards from the event time
-    for t in range(t_event - 1, -1, -1):
-        # Get player and ball positions for frame t
-        player_position = player_data[t, :]  # X, Y of the player
-        ball_position = ball_data_1[t, :]  # X, Y of the ball
+    ball_positions = np.where(np.isnan(ball_data_1), ball_data_2,
+                              ball_data_1)
 
-        # Check for NaN values (indicates missing data)
-        if np.isnan(player_position).any() or np.isnan(ball_position).any():
-            continue  # Skip frames with missing data
+    # Suche rückwärts vom Ereignis-Zeitpunkt
+    for t in range(t_event - 1, max(-1, t_event - 300), -1):
+        player_pos = player_data[t, :]
+        ball_pos = ball_positions[t, :]
 
-        # Calculate the distance between player and ball
-        distance = np.linalg.norm(player_position - ball_position)
+        # Überspringe Frames mit fehlenden Daten
+        if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
+            continue
 
-        # Check if the distance is within the threshold
+        # Berechne Distanz zwischen Spieler und Ball
+        distance = np.linalg.norm(player_pos - ball_pos)
+
         if distance < threshold:
-            return t  # Return the frame index
+            return t
 
-    for t in range(t_event - 1, -1, -1):
-        # Get player and ball positions for frame t
-        player_position = player_data[t, :]  # X, Y of the player
-        ball_position = ball_data_2[t, :]  # X, Y of the ball
-
-        # Check for NaN values (indicates missing data)
-        if np.isnan(player_position).any() or np.isnan(ball_position).any():
-            continue  # Skip frames with missing data
-
-        # Calculate the distance between player and ball
-        distance = np.linalg.norm(player_position - ball_position)
-
-        # Check if the distance is within the threshold
-        if distance < threshold:
-            return t  # Return the frame index
-
-    # If no possession is found before the event
-    raise ValueError("No possession found before the event.")
+    # Wenn kein Ballbesitz gefunden wurde, gebe den ursprünglichen
+    # Event-Frame zurück
+    print(f"Kein Ballbesitz vor Frame {t_event} gefunden für {pid}")
+    return t_event
 
 
 def find_key_position(data: dict[Any, Any], key: str) -> int:
@@ -175,7 +179,8 @@ def find_key_position(data: dict[Any, Any], key: str) -> int:
         data (dict): The dictionary to search in.
         key (str): The key to search for.
     Returns:
-        int: The position (index) of the matched key in the dictionary.
+        int: The position (index) of the matched key in the
+        dictionary.
     Raises:
         ValueError: If the key is not found in the dictionary.
     """
@@ -189,7 +194,7 @@ def find_key_position(data: dict[Any, Any], key: str) -> int:
     raise ValueError("Key not found")  # Key not found
 
 
-def get_pid_from_name(pid: str, links: dict[str, str]) -> str:
+def get_pid_from_name(pid: str, links: dict[str, str]) -> int:
     """
     Retrieves the normalized PID from a given name.
     Args:
@@ -202,10 +207,32 @@ def get_pid_from_name(pid: str, links: dict[str, str]) -> str:
 
     links_normalized = {
         normalize(name): number for name, number in links.items()}
+    return get_pid_with_fuzzy_match(pid, links_normalized)
 
-    if pid in links_normalized:
-        return links_normalized[pid]
-    raise ValueError("No pid for this name.")
+
+def get_pid_with_fuzzy_match(pid: str, links_normalized: dict[str, str],
+                             threshold: int = 80) -> int:
+    """
+    Finds the best match for a given PID in a dictionary of
+    normalized PIDs.
+    Args:
+
+        pid (str): The PID to search for.
+        links_normalized (dict): A dictionary of normalized PIDs.
+        threshold (int, optional): The threshold for the fuzzy match.
+        Defaults to 80.
+    Returns:
+        int: The best match for the PID if found, otherwise None.
+    """
+    # Use `extractOne` to find the best match for the pid
+    best_match = process.extractOne(
+        pid, links_normalized.keys(), score_cutoff=threshold)
+    matched_key: int
+    if best_match:
+        _, _, matched_key = best_match
+        return matched_key
+
+    raise ValueError(f"No suitable match found for pid '{pid}'.")
 
 
 def normalize(name: str) -> str:
@@ -239,24 +266,24 @@ def normalize(name: str) -> str:
     return name.strip()
 
 
-def find_sequence(time: int, sequences: tuple[Any, Any, Any]) -> Any:
-    """
-    Finds the sequence index for a given time.
-    Args:
-        time (int): The time to find the sequence for.
-        sequences (tuple): A tuple of sequences, where each
-        sequence is a tuple of
-                           (start_time, end_time, sequence_index).
-    Returns:
-        int: The index of the sequence that the given time falls
-        into, adjusted by -1.
-             Returns None if no sequence is found for the given time.
-    """
+# def find_sequence(time: int, sequences: tuple[Any, Any, Any]) -> Any:
+#     """
+#     Finds the sequence index for a given time.
+#     Args:
+#         time (int): The time to find the sequence for.
+#         sequences (tuple): A tuple of sequences, where each
+#         sequence is a tuple of
+#                            (start_time, end_time, sequence_index).
+#     Returns:
+#         int: The index of the sequence that the given time falls
+#         into, adjusted by -1.
+#              Returns None if no sequence is found for the given time.
+#     """
 
-    for sequence in sequences:
-        if sequence[0] <= time <= sequence[1]:
-            return sequence[2]-1
-    raise ValueError("No sequence found for this time.")
+#     for sequence in sequences:
+#         if sequence[0] <= time <= sequence[1]:
+#             return sequence[1]-1
+#     raise ValueError("No sequence found for this time.")
 
 
 def calculate_group_id(match_id: int,
