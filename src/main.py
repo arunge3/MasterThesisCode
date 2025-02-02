@@ -5,4 +5,4 @@ import variables.data_variables as dv
 
 # plot_phases.plot_phases(23400263, dv.Approach.ML_BASED)
 # plot_phases.plotEvents(23400263)
-floodlight_code.plot_phases(23400263, dv.Approach.NONE)
+floodlight_code.plot_phases(23400263, dv.Approach.COST_BASED)

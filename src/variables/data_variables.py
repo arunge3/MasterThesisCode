@@ -24,6 +24,7 @@ class Approach(Enum):
     ML_BASED = "Machine Learning Approach"
     ML_RB = "Machine Learning Approach with Rule-based"
     ML_CORRECTION = "ML Approach with Correction"
+    COST_BASED = "Cost-based Approach"
 
 
 class Season(Enum):

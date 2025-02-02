@@ -17,6 +17,7 @@ from floodlight import Events
 from floodlight.io.sportradar import read_event_data_json
 from matplotlib import pyplot as plt
 
+import cost_function_approach
 import help_functions
 import help_functions.cost_function
 import help_functions.reformatjson_methods
@@ -491,7 +492,14 @@ def handle_approach(approach: dv.Approach,
         events, sequences = correct_events_ml_fl(events, sequences)
         datei_pfad = os.path.join(datengrundlage, r"ml_cor",
                                   (str(match_id) + "_ml_cor_fl.csv"))
+    elif approach == dv.Approach.COST_BASED:
+        (_, _, events) = calculate_event_stream(match_id)
+        events = cost_function_approach.sync_events_cost_function(
+            events, sequences)
+        datei_pfad = os.path.join(datengrundlage, r"cost_based",
+                                  (str(match_id) + "_cost_based_fl.csv"))
     else:
+
         raise ValueError("Invalid approach specified!")
     return events, sequences, datei_pfad
 
