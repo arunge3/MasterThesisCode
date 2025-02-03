@@ -467,8 +467,8 @@ def handle_approach(approach: dv.Approach,
                                   (str(match_id) + "_rb_fl.csv"))
     elif approach == dv.Approach.POS_DATA:
         (_, _, events) = calculate_event_stream(match_id)
-        datei_pfad = os.path.join(datengrundlage, r"ml",
-                                  (str(match_id) + "_ml.csv"))
+        datei_pfad = os.path.join(datengrundlage, r"pos",
+                                  (str(match_id) + "_pos_fl.csv"))
         team_order = calculate_team_order(events)
         events = add_team_to_events(events, team_order)
         events = help_functions.pos_data_approach.sync_event_data_pos_data(
@@ -491,8 +491,8 @@ def handle_approach(approach: dv.Approach,
 
         events, sequences = synchronize_events_fl_rule_based(
             events, sequences)
-        datei_pfad = os.path.join(datengrundlage, r"ml_rb",
-                                  (str(match_id) + "_ml_rb_fl.csv")
+        datei_pfad = os.path.join(datengrundlage, r"pos_rb",
+                                  (str(match_id) + "_pos_rb_fl.csv")
                                   )
     elif approach == dv.Approach.POS_CORRECTION:
         (_, _, events) = calculate_event_stream(match_id)
@@ -500,10 +500,10 @@ def handle_approach(approach: dv.Approach,
         events = add_team_to_events(events, team_order)
         events = help_functions.pos_data_approach.sync_event_data_pos_data(
             events, match_id)
-        events, sequences = correct_events_ml_fl(events, sequences)
+        events, sequences = correct_events_fl(events, sequences)
 
-        datei_pfad = os.path.join(datengrundlage, r"ml_cor",
-                                  (str(match_id) + "_ml_cor_fl.csv"))
+        datei_pfad = os.path.join(datengrundlage, r"pos_cor",
+                                  (str(match_id) + "_pos_cor_fl.csv"))
     elif approach == dv.Approach.COST_BASED:
         (_, _, events) = calculate_event_stream(match_id)
         team_order = calculate_team_order(events)
@@ -513,6 +513,28 @@ def handle_approach(approach: dv.Approach,
 
         datei_pfad = os.path.join(datengrundlage, r"cost_based",
                                   (str(match_id) + "_cost_based_fl.csv"))
+    elif approach == dv.Approach.COST_BASED_COR:
+        (_, _, events) = calculate_event_stream(match_id)
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
+        events = cost_function_approach.sync_events_cost_function(
+            events, sequences)
+        events, sequences = correct_events_fl(events, sequences)
+
+        datei_pfad = os.path.join(datengrundlage, r"cost_based_cor",
+                                  (str(match_id) + "_cost_based_cor_fl.csv"))
+    elif approach == dv.Approach.COST_BASED_RB:
+        (_, _, events) = calculate_event_stream(match_id)
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
+
+        events = cost_function_approach.sync_events_cost_function(
+            events, sequences)
+        events, sequences = synchronize_events_fl_rule_based(
+            events, sequences)
+
+        datei_pfad = os.path.join(datengrundlage, r"cost_based_rb",
+                                  (str(match_id) + "_cost_based_rb_fl.csv"))
     else:
         raise ValueError("Invalid approach specified!")
     return events, sequences, datei_pfad
@@ -562,8 +584,8 @@ def calculate_team_order(events: Any) -> list[str]:
     return team_order
 
 
-def correct_events_ml_fl(events: Any, sequences: list[tuple[int, int, int]]
-                         ) -> tuple[Any, list[tuple[int, int, int]]]:
+def correct_events_fl(events: Any, sequences: list[tuple[int, int, int]]
+                      ) -> tuple[Any, list[tuple[int, int, int]]]:
     """
     Korrigiert ML-basierte Event-Synchronisation mit Floodlight-Daten.
 

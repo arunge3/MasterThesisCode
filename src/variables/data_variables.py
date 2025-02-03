@@ -25,6 +25,8 @@ class Approach(Enum):
     POS_RB = "Machine Learning Approach with Rule-based"
     POS_CORRECTION = "ML Approach with Correction"
     COST_BASED = "Cost-based Approach"
+    COST_BASED_COR = "Cost-based with Correction"
+    COST_BASED_RB = "Cost-based with Rule-based"
 
 
 class Season(Enum):

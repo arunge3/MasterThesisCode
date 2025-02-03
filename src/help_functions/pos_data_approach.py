@@ -122,7 +122,7 @@ def get_pos_filepath(match_id: int,
 def sync_pos_data(links: Any, t_event: int,
                   pos_data: floodlight.core.xy.XY,
                   ball_data: floodlight.core.xy.XY, pid: str,
-                  threshold: float = 1) -> int:
+                  threshold: float = 0.1) -> int:
     """
     Findet den letzten Frame vor einem bestimmten Ereignis, in dem ein
     Spieler den Ball hatte.

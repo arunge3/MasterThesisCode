@@ -32,7 +32,7 @@ def calculate_cost_matrix(events: pd.DataFrame,
     for i, event in enumerate(events.values):
         event_time = event[22]  # Zeitstempel des Events
         event_type = event[0]   # Event-Typ
-        competitor = event[21]  # Team (HOME/AWAY)
+        competitor = event[24]  # Team (HOME/AWAY)
 
         for j, (start, end, phase) in enumerate(sequences):
             # Zeitdifferenz in Sekunden
@@ -109,7 +109,7 @@ def calculate_sequential_cost(event_idx: int, seq_idx: int,
     return 0.0
 
 
-def calculate_phase_cost(phase: int, competitor: dv.Opponent,
+def calculate_phase_cost(phase: int, competitor: dv.Team,
                          event_type: str) -> float:
     """
     Berechnet die phasenbasierten Kosten für ein Event.
@@ -128,14 +128,17 @@ def calculate_phase_cost(phase: int, competitor: dv.Opponent,
         "shot_saved": 0.9,
         "shot_blocked": 0.9,
         "seven_m_awarded": 0.8,
-        "turnover": 0.7,
+        "shot_off_target": 0.7,
+        "technical_ball_fault": 0.7,
+        "technical_rule_fault": 0.7,
         "steal": 0.7
     }
 
     # Weniger kritische Events
     non_critical_events = {
-        "technical_rule_fault": 0.4,
-        "substitution": 0.3
+        "yellow_card": 0.4,
+        "suspension": 0.3
+
     }
 
     # Bestimme Basis-Kosten basierend auf Event-Typ
@@ -143,8 +146,8 @@ def calculate_phase_cost(phase: int, competitor: dv.Opponent,
                                     non_critical_events.get(event_type, 0.5))
 
     # Prüfe Phasen-Kompatibilität
-    if ((phase in (1, 3) and competitor == dv.Opponent.HOME) or
-            (phase in (2, 4) and competitor == dv.Opponent.AWAY)):
+    if ((phase in (1, 3) and competitor == dv.Team.A) or
+            (phase in (2, 4) and competitor == dv.Team.B)):
         return 0.0  # Korrekte Phase
 
     return base_cost  # Falsche Phase
