@@ -16,8 +16,8 @@ from rapidfuzz import process
 import variables.data_variables as dv
 
 
-def sync_event_data_cost_function(events: Any,
-                                  match_id: int) -> Any:
+def sync_event_data_pos_data(events: Any,
+                             match_id: int) -> Any:
     """
     Synchronizes event data with position data for a given match.
     Args:

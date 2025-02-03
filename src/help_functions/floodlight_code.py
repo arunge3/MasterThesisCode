@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 
 import cost_function_approach
 import help_functions
-import help_functions.cost_function
+import help_functions.pos_data_approach
 import help_functions.reformatjson_methods
 import variables.data_variables as dv
 from plot_functions import processing
@@ -465,13 +465,13 @@ def handle_approach(approach: dv.Approach,
 
         datei_pfad = os.path.join(datengrundlage, r"rulebased",
                                   (str(match_id) + "_rb_fl.csv"))
-    elif approach == dv.Approach.ML_BASED:
+    elif approach == dv.Approach.POS_DATA:
         (_, _, events) = calculate_event_stream(match_id)
         datei_pfad = os.path.join(datengrundlage, r"ml",
                                   (str(match_id) + "_ml.csv"))
         team_order = calculate_team_order(events)
         events = add_team_to_events(events, team_order)
-        events = help_functions.cost_function.sync_event_data_cost_function(
+        events = help_functions.pos_data_approach.sync_event_data_pos_data(
             events, match_id)
     elif approach == dv.Approach.BASELINE:
 
@@ -482,11 +482,11 @@ def handle_approach(approach: dv.Approach,
         (_, _, events) = calculate_event_stream(match_id)
         datei_pfad = os.path.join(
             datengrundlage, r"none", (str(match_id) + "_none_fl.csv"))
-    elif approach == dv.Approach.ML_RB:
+    elif approach == dv.Approach.POS_RB:
         (_, _, events) = calculate_event_stream(match_id)
         team_order = calculate_team_order(events)
         events = add_team_to_events(events, team_order)
-        events = help_functions.cost_function.sync_event_data_cost_function(
+        events = help_functions.pos_data_approach.sync_event_data_pos_data(
             events, match_id)
 
         events, sequences = synchronize_events_fl_rule_based(
@@ -494,11 +494,11 @@ def handle_approach(approach: dv.Approach,
         datei_pfad = os.path.join(datengrundlage, r"ml_rb",
                                   (str(match_id) + "_ml_rb_fl.csv")
                                   )
-    elif approach == dv.Approach.ML_CORRECTION:
+    elif approach == dv.Approach.POS_CORRECTION:
         (_, _, events) = calculate_event_stream(match_id)
         team_order = calculate_team_order(events)
         events = add_team_to_events(events, team_order)
-        events = help_functions.cost_function.sync_event_data_cost_function(
+        events = help_functions.pos_data_approach.sync_event_data_pos_data(
             events, match_id)
         events, sequences = correct_events_ml_fl(events, sequences)
 

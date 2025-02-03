@@ -21,9 +21,9 @@ class Approach(Enum):
     RULE_BASED = "Rule-based Approach"
     BASELINE = "Baseline"
     NONE = "No Calcuation"
-    ML_BASED = "Machine Learning Approach"
-    ML_RB = "Machine Learning Approach with Rule-based"
-    ML_CORRECTION = "ML Approach with Correction"
+    POS_DATA = "Position Data Approach"
+    POS_RB = "Machine Learning Approach with Rule-based"
+    POS_CORRECTION = "ML Approach with Correction"
     COST_BASED = "Cost-based Approach"
 
 
