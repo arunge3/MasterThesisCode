@@ -51,3 +51,16 @@ class Opponent(Enum):
     HOME = "home"
     AWAY = "away"
     NONE = "none"
+
+
+class Team(Enum):
+    """
+    Enum class representing the opponent in a game.
+    Attributes:
+        HOME (str): Represents the home team.
+        AWAY (str): Represents the away team.
+        NONE (str): Represents no opponent.
+    """
+    A = "first team after alphabetical order"
+    B = "second team after alphabetical order"
+    NONE = "none"

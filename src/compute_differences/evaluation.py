@@ -11,7 +11,7 @@ def generate_paths(number: int, name: str,
                    base_path: str = r"D:\Handball\HBL_Events",
                    season: str = "season_20_21",
                    ) -> tuple[str, str, str, str, str, str, str,
-                              str, str, str, str, str]:
+                              str, str, str, str, str, str]:
     """
     Generate file paths dynamically based on inputs.
 
@@ -45,6 +45,8 @@ def generate_paths(number: int, name: str,
         datengrundlage, r"ml_rb", f"{number}_ml_rb_fl.csv")
     csv_ml_cor_path = os.path.join(
         datengrundlage, r"ml_cor", f"{number}_ml_cor_fl.csv")
+    csv_cost_path = os.path.join(
+        datengrundlage, r"cost_based", f"{number}_cost_based_fl.csv")
     output_path = os.path.join(
         datengrundlage, r"results", f"detailed_results_{number}.csv")
     # Directory containing the CSV files
@@ -56,7 +58,8 @@ def generate_paths(number: int, name: str,
 
     return (excel_path, name_new_game_path, event_path, csv_bl_path,
             csv_rb_path, csv_none_path, csv_ml_path, csv_ml_rb_path,
-            csv_ml_cor_path, output_path, directory_results, output_file_all)
+            csv_ml_cor_path, csv_cost_path, output_path, directory_results,
+            output_file_all)
 
 
 # TODO Ich muss noch überprüfen, ob nicht nur die
@@ -117,9 +120,10 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 
 (excel_path, name_new_game_path, event_path, csv_bl_path,
  csv_rb_path, csv_none_path, csv_ml_path, csv_ml_rb_path,
- csv_ml_cor_path, output_path, directory_results, output_file_all
- ) = generate_paths(23400263,
-                    "TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21")
+ csv_ml_cor_path, csv_cost_path, output_path, directory_results,
+ output_file_all) = generate_paths(
+     23400263,
+     "TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21")
 
 
 df = pd.read_excel(excel_path)
@@ -201,6 +205,15 @@ if "Phase_ml_cor_time" not in df.columns:
 if "ml_cor_correct" not in df.columns:
     df["ml_cor_correct"] = None
 
+if "Phase_cost-based" not in df.columns:
+    df["Phase_cost-based"] = None
+
+if "cost_time" not in df.columns:
+    df["cost_time"] = None
+
+if "cost_correct" not in df.columns:
+    df["cost_correct"] = None
+
 
 # Exrahe Phase from the clips column
 df["Phase_start_true"] = df["clips"].str.split("_").str[0]
@@ -219,6 +232,7 @@ df_csv_none = pd.read_csv(csv_none_path)
 df_csv_ml = pd.read_csv(csv_ml_path)
 df_csv_ml_rb = pd.read_csv(csv_ml_rb_path)
 df_csv_ml_cor = pd.read_csv(csv_ml_cor_path)
+df_csv_cost = pd.read_csv(csv_cost_path)
 # mapping
 for event in events_inital:
     event_id = event["id"]
@@ -453,9 +467,58 @@ for index, row in df_csv_ml_cor.iterrows():
                 phase_true, phase, time_start, time_end, event_time
             )
             df.loc[match_condition, "ml_cor_correct"] = correct_phase
+for index, row in df_csv_cost.iterrows():
 
+    event_id = row['event_id']
+    phase = row['phase']
+    event_time = row['time']
+
+    match_condition = (
+        (df["Event_id"] == event_id)
+    )
+
+    # Write the event_id to the DataFrame
+    df.loc[match_condition, "Event_id"] = event_id
+    df.loc[match_condition, "Phase_cost-based"] = phase
+    df.loc[match_condition, "cost_time"] = event_time
+
+    # Check if there are any matching conditions
+    if match_condition.any():
+        # Get all matched rows for "Phase_true"
+        matched_rows = df.loc[match_condition, "Phase_true"]
+
+        # Ensure only one non-zero value exists
+        if len(matched_rows) == 1:
+            # Get the index of the single non-zero entry
+            phase_true_index = matched_rows.index[0]
+
+            # Use the index to fetch the corresponding values
+            phase_true = int(df.loc[phase_true_index, "Phase_true"])
+            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
+            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
+
+            # Perform phase correctness calculation
+            correct_phase = calculate_if_correct(
+                phase_true, phase, time_start, time_end, event_time
+            )
+            df.loc[match_condition, "cost_correct"] = correct_phase
+        else:
+            # Get the index of the single non-zero entry
+            phase_true_index = matched_rows.index[1]
+
+            # Use the index to fetch the corresponding values
+            phase_true = int(df.loc[phase_true_index, "Phase_true"])
+            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
+            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
+
+            # Perform phase correctness calculation
+            correct_phase = calculate_if_correct(
+                phase_true, phase, time_start, time_end, event_time
+            )
+            df.loc[match_condition, "cost_correct"] = correct_phase
 df.to_excel(name_new_game_path, index=False)
 print("Excel-Datei wurde aktualisiert und gespeichert.")
+
 
 # # Accuracy for Phase_baseline
 # baseline_correct = (df['Phase_true'] == df['Phase_baseline']).sum()
@@ -487,6 +550,10 @@ ml_rb_accuracy = ml_rb_correct / baseline_total
 ml_cor_correct = (df['ml_cor_correct'] == 1).sum()
 ml_cor_accuracy = ml_cor_correct / baseline_total
 
+# Accuracy for Phase_cost-based
+cost_correct = (df['cost_correct'] == 1).sum()
+cost_accuracy = cost_correct / baseline_total
+
 
 def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
                                       correct_column: Any) -> Any:
@@ -512,6 +579,8 @@ ml_rb_accuracy_per_event = calculate_accuracy_for_event_type(
     df, 'eID', 'ml_rb_correct')
 ml_cor_accuracy_per_event = calculate_accuracy_for_event_type(
     df, 'eID', 'ml_cor_correct')
+cost_accuracy_per_event = calculate_accuracy_for_event_type(
+    df, 'eID', 'cost_correct')
 
 
 # Save to a CSV file
@@ -527,6 +596,7 @@ with open(output_path, 'w', newline='') as file:
     writer.writerow(["ML", "all", f"{ml_accuracy:.4f}"])
     writer.writerow(["ML_RB", "all", f"{ml_rb_accuracy:.4f}"])
     writer.writerow(["ML_COR", "all", f"{ml_cor_accuracy:.4f}"])
+    writer.writerow(["Cost", "all", f"{cost_accuracy:.4f}"])
 
     # Write Phase_None accuracies
     for event, accuracy in none_accuracy_per_event.items():
@@ -543,6 +613,8 @@ with open(output_path, 'w', newline='') as file:
         writer.writerow(["ML_RB", event, f"{accuracy:.4f}"])
     for event, accuracy in ml_cor_accuracy_per_event.items():
         writer.writerow(["ML_COR", event, f"{accuracy:.4f}"])
+    for event, accuracy in cost_accuracy_per_event.items():
+        writer.writerow(["Cost", event, f"{accuracy:.4f}"])
 
 
 print("Results saved to results.csv")

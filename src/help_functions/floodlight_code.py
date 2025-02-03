@@ -457,18 +457,24 @@ def handle_approach(approach: dv.Approach,
     """
     if approach == dv.Approach.RULE_BASED:
         (_, _, events) = calculate_event_stream(match_id)
-
+        print(events)
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
         events, sequences = synchronize_events_fl_rule_based(
             events, sequences)
+
         datei_pfad = os.path.join(datengrundlage, r"rulebased",
                                   (str(match_id) + "_rb_fl.csv"))
     elif approach == dv.Approach.ML_BASED:
         (_, _, events) = calculate_event_stream(match_id)
         datei_pfad = os.path.join(datengrundlage, r"ml",
                                   (str(match_id) + "_ml.csv"))
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
         events = help_functions.cost_function.sync_event_data_cost_function(
             events, match_id)
     elif approach == dv.Approach.BASELINE:
+
         events, _ = processing.adjust_timestamp_baseline(match_id)
         datei_pfad = os.path.join(datengrundlage, r"baseline",
                                   (str(match_id) + "_bl_fl.csv"))
@@ -478,8 +484,11 @@ def handle_approach(approach: dv.Approach,
             datengrundlage, r"none", (str(match_id) + "_none_fl.csv"))
     elif approach == dv.Approach.ML_RB:
         (_, _, events) = calculate_event_stream(match_id)
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
         events = help_functions.cost_function.sync_event_data_cost_function(
             events, match_id)
+
         events, sequences = synchronize_events_fl_rule_based(
             events, sequences)
         datei_pfad = os.path.join(datengrundlage, r"ml_rb",
@@ -487,21 +496,70 @@ def handle_approach(approach: dv.Approach,
                                   )
     elif approach == dv.Approach.ML_CORRECTION:
         (_, _, events) = calculate_event_stream(match_id)
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
         events = help_functions.cost_function.sync_event_data_cost_function(
             events, match_id)
         events, sequences = correct_events_ml_fl(events, sequences)
+
         datei_pfad = os.path.join(datengrundlage, r"ml_cor",
                                   (str(match_id) + "_ml_cor_fl.csv"))
     elif approach == dv.Approach.COST_BASED:
         (_, _, events) = calculate_event_stream(match_id)
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
         events = cost_function_approach.sync_events_cost_function(
             events, sequences)
+
         datei_pfad = os.path.join(datengrundlage, r"cost_based",
                                   (str(match_id) + "_cost_based_fl.csv"))
     else:
-
         raise ValueError("Invalid approach specified!")
     return events, sequences, datei_pfad
+
+
+def add_team_to_events(events: pd.DataFrame,
+                       team_order: list[str]) -> pd.DataFrame:
+    """
+    Fügt die Team-Information zu den Ereignissen hinzu.
+
+    Args:
+        events: Die Event-Daten
+        team_order: Die Reihenfolge der Teams
+    Returns:
+        Die Event-Daten mit der Team-Information
+    """
+    # Add new column for team if it doesn't exist
+    if 'teamAB' not in events.columns:
+        events['teamAB'] = None
+
+    for idx, event in enumerate(events.values):
+        if event[10] is not None:
+            # Add team A/B designation based on team_order index
+            if event[10] == team_order[0]:
+                events.iloc[idx, 24] = dv.Team.A
+            elif event[10] == team_order[1]:
+                events.iloc[idx, 24] = dv.Team.B
+    return events
+
+
+def calculate_team_order(events: Any) -> list[str]:
+    """
+    Berechnet die Reihenfolge der Teams basierend auf den Ereignissen.
+
+    Args:
+        events: Die Event-Daten
+    Returns:
+        Liste der Teams in der Reihenfolge der Ereignisse
+    """
+    team_order = []
+    for event in events.values:
+        if event[10] is not None:
+            if event[10] not in team_order:
+                team_order.append(event[10])
+    # Sort team order alphabetically
+    team_order.sort()
+    return team_order
 
 
 def correct_events_ml_fl(events: Any, sequences: list[tuple[int, int, int]]
@@ -520,7 +578,7 @@ def correct_events_ml_fl(events: Any, sequences: list[tuple[int, int, int]]
                         "shot_blocked", "technical_rule_fault",
                         "seven_m_awarded", "steal", "technical_ball_fault"]:
             events.iloc[idx, 22] = search_phase_ml_fl(
-                event[22], sequences, event[21])
+                event[22], sequences, event[24])
     return events, sequences
 
 
@@ -594,7 +652,7 @@ def handle_score_change(event: np.ndarray[Any, Any], events: Any,
     """
     if str(give_last_event_fl(events, event.values[22])) != "seven_m_awarded":
         return calculate_correct_phase_fl(
-            event.values[22], sequences, event.values[21])
+            event.values[22], sequences, event.values[24])
 
     return calculate_inactive_phase_fl(event.values[22], sequences)
 
@@ -632,7 +690,7 @@ def handle_timeout(event: np.ndarray,
             start time, end time and phase number.
     """
     return calculate_timeouts_fl(event.values[22], sequences,
-                                 event.values[21], event)
+                                 event.values[24], event)
 
 
 def handle_timeout_over(event: dict[Any, Any],
@@ -682,7 +740,7 @@ def handle_phase_correction(event: dict[Any, Any],
         calculate_correct_phase_fl
     """
     return calculate_correct_phase_fl(
-        event[22], sequences, event[21])
+        event[22], sequences, event[24])
 
 
 def give_last_event_fl(events: pd.DataFrame, time: int) -> Any:
@@ -712,9 +770,10 @@ def give_last_event_fl(events: pd.DataFrame, time: int) -> Any:
 
 
 def calculate_correct_phase_fl(
-    time: int, sequences: list[tuple[int, int, int]], team_ab: dv.Opponent
+    time: int, sequences: list[tuple[int, int, int]], team_ab: dv.Team
 ) -> int:
     """
+
 
     Determines the correct phase for a given event based on the provided time,
     sequences, and team.
@@ -734,8 +793,8 @@ def calculate_correct_phase_fl(
     for start, end, phase in sequences:
         if start <= time < end:
             break
-    if ((phase in (1, 3)) and team_ab == dv.Opponent.HOME) or (
-        (phase in (2, 4)) and team_ab == dv.Opponent.AWAY
+    if ((phase in (1, 3)) and team_ab == dv.Team.A) or (
+        (phase in (2, 4)) and team_ab == dv.Team.B
     ):
         print("correct Phase")
 
@@ -748,7 +807,7 @@ def calculate_correct_phase_fl(
 
 def search_phase_ml_fl(time: int,
                        sequences: list[tuple[int, int, int]],
-                       competitor: dv.Opponent
+                       competitor: dv.Team
                        ) -> int:
     """
     Sucht nach der passenden Phase für einen Competitor, prüft zuerst
@@ -780,23 +839,23 @@ def search_phase_ml_fl(time: int,
     if current_sequence != (-1, -1, -1):
         # Prüfe ob aktuelle Phase passt
         if ((current_sequence[2] in (1, 3) and
-             competitor == dv.Opponent.HOME) or
+             competitor == dv.Team.A) or
                 (current_sequence[2] in (2, 4)
-                 and competitor == dv.Opponent.AWAY)):
+                 and competitor == dv.Team.B)):
             return time
 
         # Prüfe nächste Phase falls vorhanden
         if current_idx < len(sequences) - 1:
             next_phase = sequences[current_idx + 1][2]
-            if ((next_phase in (1, 3) and competitor == dv.Opponent.HOME) or
-                    (next_phase in (2, 4) and competitor == dv.Opponent.AWAY)):
+            if ((next_phase in (1, 3) and competitor == dv.Team.A) or
+                    (next_phase in (2, 4) and competitor == dv.Team.B)):
                 return sequences[current_idx + 1][0]
 
     # Prüfe vorherige Phasen
     for start, end, phase in reversed(sequences):
         if end <= time:
-            if ((phase in (1, 3) and competitor == dv.Opponent.HOME) or
-                    (phase in (2, 4) and competitor == dv.Opponent.AWAY)):
+            if ((phase in (1, 3) and competitor == dv.Team.A) or
+                    (phase in (2, 4) and competitor == dv.Team.B)):
                 return end - 1
 
     raise ValueError("Keine passende Phase gefunden!")
@@ -804,17 +863,18 @@ def search_phase_ml_fl(time: int,
 
 def search_phase_fl(time: int,
                     sequences: list[tuple[int, int, int]],
-                    competitor: dv.Opponent
+                    competitor: dv.Team
                     ) -> int:
     """
     Searches for the last matching (active) phase before a given time for a
+
     specified competitor.
     Args:
         time (int): The time before which to search for the phase.
         sequences (list of tuples): A list of tuples where each tuple contains
                                     (start_time, end_time, phase).
         competitor (str): The competitor for whom the phase is being searched.
-                          Should be either "A" or "B".
+                Should be either "A" or "B".
     Returns:
         int: The end time of the last matching phase before the given
             time for the specified competitor.
@@ -828,10 +888,11 @@ def search_phase_fl(time: int,
     print(time)
     for _, end, phase in reversed(sequences):
         if end <= time:
-            if (phase in (1, 3)) and competitor == dv.Opponent.HOME:
+            if (phase in (1, 3)) and competitor == dv.Team.A:
                 return end - 1  # Return the end of this phase
-            if (phase in (2, 4)) and competitor == dv.Opponent.AWAY:
+            if (phase in (2, 4)) and competitor == dv.Team.B:
                 return end - 1  # Return the end of this phase for
+
     print("No valid phase found for the given time!")
     return time
 
@@ -873,12 +934,13 @@ def calculate_inactive_phase_fl(
 
 
 def calculate_timeouts_fl(time: int, sequences: list[tuple[int, int, int]],
-                          team_ab: dv.Opponent, event: np.ndarray
+                          team_ab: dv.Team, event: np.ndarray
                           ) -> int:
     """
     Calculate the appropriate timeout time based on the given
     timeout-event and sequences.
     Args:
+
         time (int): The current time in the event.
         sequences (list of tuples): A list of tuples where each
             tuple contains (start, end, phase) representing the
@@ -903,20 +965,22 @@ def calculate_timeouts_fl(time: int, sequences: list[tuple[int, int, int]],
         if phase_timeout == 0:
             print("correct Phase")
             return time
-        if ((phase_timeout in (1, 3) and (team_ab == dv.Opponent.HOME))
-                or (phase_timeout in (2, 4) and team_ab == dv.Opponent.AWAY)):
+        if ((phase_timeout in (1, 3) and (team_ab == dv.Team.A))
+                or (phase_timeout in (2, 4) and team_ab == dv.Team.B)):
             if int(time) == int(end - 1):
                 print("correct Phase")
                 return time
+
             return end - 1
         # Go through sequences in reverse to find the last matching phase
         # before `time`
         for _, end, phase in reversed(sequences):
             if end <= time:
-                if (phase in (1, 3)) and (team_ab == dv.Opponent.HOME):
+                if (phase in (1, 3)) and (team_ab == dv.Team.A):
                     return end - 1
-                if (phase in (2, 4)) and (team_ab == dv.Opponent.AWAY):
+                if (phase in (2, 4)) and (team_ab == dv.Team.B):
                     return end - 1
+
     raise ValueError("No valid phase found for timeout event!")
 
 

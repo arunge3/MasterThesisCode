@@ -56,34 +56,34 @@ def adjust_timestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
     events = event_json.get("timeline", [])
 
     # Match start timestamp
-    first_time_stamp_event = helpFuctions.get_first_time_stamp_event(
-        path_timeline)
-    print("match_start_datetime:", first_time_stamp_event)
+    # first_time_stamp_event = helpFuctions.get_first_time_stamp_event(
+    #     path_timeline)
+    # print("match_start_datetime:", first_time_stamp_event)
 
-    # timezone
-    utc_timezone = pytz.utc
+    # # timezone
+    # utc_timezone = pytz.utc
 
-    # timestamp of the first positional data converting to datetime
-    positional_data_start_timestamp = first_time_pos_unix / 1000
-    positional_data_start_date = dt.fromtimestamp(
-        positional_data_start_timestamp
-    ).replace(tzinfo=utc_timezone)
-    print("positional_data_start_date:", positional_data_start_date)
+    # # timestamp of the first positional data converting to datetime
+    # positional_data_start_timestamp = first_time_pos_unix / 1000
+    # positional_data_start_date = dt.fromtimestamp(
+    #     positional_data_start_timestamp
+    # ).replace(tzinfo=utc_timezone)
+    # print("positional_data_start_date:", positional_data_start_date)
 
-    # Change the time of the events to the timeframe of the positional data
-    for event in events:
-        # time = add_threshold_to_time(event)
-        time = event["time"]
-        event_time_seconds = (time - cut_h1) / fps_video
-        event_absolute_timestamp = (
-            positional_data_start_timestamp + event_time_seconds)
-        event_timestamp_date = (dt.fromtimestamp(event_absolute_timestamp)
-                                .replace(tzinfo=utc_timezone))
-        print("event_timestamp_date:", event_timestamp_date)
-        event_timeframe = (
-            event_timestamp_date - positional_data_start_date
-        ).seconds * fps_positional
-        event["time"] = event_timeframe
+    # # Change the time of the events to the timeframe of the positional data
+    # for event in events:
+    #     # time = add_threshold_to_time(event)
+    #     time = event["time"]
+    #     event_time_seconds = (time - cut_h1) / fps_video
+    #     event_absolute_timestamp = (
+    #         positional_data_start_timestamp + event_time_seconds)
+    #     event_timestamp_date = (dt.fromtimestamp(event_absolute_timestamp)
+    #                             .replace(tzinfo=utc_timezone))
+    #     print("event_timestamp_date:", event_timestamp_date)
+    #     event_timeframe = (
+    #         event_timestamp_date - positional_data_start_date
+    #     ).seconds * fps_positional
+    #     event["time"] = event_timeframe
 
     return events, team_info
 

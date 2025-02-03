@@ -80,12 +80,12 @@ def synchronize_time(
     )
 
     delta = event_time - first_timestamp
-    delta_fr = delta.seconds * fps
+    delta_fr = delta.seconds * 20
 
-    synced_time = delta_fr + offset_fr
-    if second_half:
-        synced_time = synced_time + offseth2_fr
-    return synced_time
+    # synced_time = delta_fr + offset_fr
+    # if second_half:
+    #     synced_time = synced_time + offseth2_fr
+    return delta_fr
 
 
 def get_paths_by_match_id(
