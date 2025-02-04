@@ -30,9 +30,9 @@ def calculate_cost_matrix(events: pd.DataFrame,
     MAX_TIME_DIFF = 10
 
     for i, event in enumerate(events.values):
-        event_time = event[22]  # Zeitstempel des Events
+        event_time = event[24]  # Zeitstempel des Events
         event_type = event[0]   # Event-Typ
-        competitor = event[24]  # Team (HOME/AWAY)
+        competitor = event[25]  # Team (HOME/AWAY)
 
         for j, (start, end, phase) in enumerate(sequences):
             # Zeitdifferenz in Sekunden
@@ -99,7 +99,7 @@ def calculate_sequential_cost(event_idx: int, seq_idx: int,
         return 0.0
 
     # Prüfe relative Position zum vorherigen Event
-    prev_event_time = events.iloc[event_idx - 1][22]
+    prev_event_time = events.iloc[event_idx - 1][24]
     current_start = sequences[seq_idx][0]
 
     # Wenn aktuelles Event vor dem vorherigen liegt, hohe Kosten
@@ -176,6 +176,6 @@ def sync_events_cost_function(events: pd.DataFrame,
         if event_costs[best_sequence_idx] < np.inf:
             start, end, _ = sequences[best_sequence_idx]
             # Setze neuen Zeitstempel
-            events.iloc[i, 22] = start + (end - start) // 2
+            events.iloc[i, 24] = start + (end - start) // 2
 
     return events

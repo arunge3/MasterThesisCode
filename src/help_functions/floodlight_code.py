@@ -58,7 +58,7 @@ def create_event_objects(
     event_all.add_frameclock(fps)
 
     event_all.events = event_all.events.sort_values(
-        by=event_all.events.columns[22])
+        by=event_all.events.columns[2])
 
     # Create a filtered list for timeout and timeout_over
     filtered_test = []
@@ -120,6 +120,23 @@ def map_ids_to_dataframe(json_timeline: dict[Any, Any],
                 else:
                     dataframe.events.at[idx, "eventID"] = event.get("id")
                     break
+
+    return dataframe
+
+
+def add_event_time_framerate(dataframe: pd.DataFrame, first_timestamp_ms: str,
+                             fps: float) -> pd.DataFrame:
+    """
+    Adds a new column to the DataFrame with the event time in frames.
+    """
+    dataframe['event_time_framerate'] = None
+    for idx, row in dataframe.iterrows():
+        event_time = row['time_stamp']
+        event_time_framerate = (help_functions.reformatjson_methods.
+                                synchronize_time(
+                                    event_time, first_timestamp_ms, fps))
+
+        dataframe.at[idx, 'event_time_framerate'] = event_time_framerate
 
     return dataframe
 
@@ -270,7 +287,10 @@ def calculate_event_stream(match_id: int) -> tuple[Any, int, Any]:
                               fps_positional)
     event_all.events['frameclock'] = event_all.events['frameclock'] + offset
     event_all = map_ids_to_dataframe(df_events, event_all)
+    event_all.events = add_event_time_framerate(
+        event_all.events, first_time_pos_str, fps_positional)
     event_stream_all = event_all.get_event_stream(fade=1)
+
     return event_stream_all, offset, event_all.events
 
 
@@ -364,13 +384,13 @@ def plot_phases(match_id: int, approach: dv.Approach
             # Find the y value on the continuous line for this event's time
             event_y = None
             for start, end, phase in sequences:
-                if start <= event[22] < end:
+                if start <= event[24] < end:
                     event_y = phase_positions[phase]
 
                     break
             if event_y is not None:
                 ax.plot(
-                    event[22],
+                    event[24],
                     event_y,
                     "x",
                     color=event_colors.get(event[0], event_colors["default"]),
@@ -476,6 +496,7 @@ def handle_approach(approach: dv.Approach,
     elif approach == dv.Approach.BASELINE:
 
         events, _ = processing.adjust_timestamp_baseline(match_id)
+
         datei_pfad = os.path.join(datengrundlage, r"baseline",
                                   (str(match_id) + "_bl_fl.csv"))
     elif approach == dv.Approach.NONE:
@@ -559,9 +580,9 @@ def add_team_to_events(events: pd.DataFrame,
         if event[10] is not None:
             # Add team A/B designation based on team_order index
             if event[10] == team_order[0]:
-                events.iloc[idx, 24] = dv.Team.A
+                events.iloc[idx, 25] = dv.Team.A
             elif event[10] == team_order[1]:
-                events.iloc[idx, 24] = dv.Team.B
+                events.iloc[idx, 25] = dv.Team.B
     return events
 
 
@@ -599,8 +620,8 @@ def correct_events_fl(events: Any, sequences: list[tuple[int, int, int]]
         if event[0] in ["score_change", "shot_saved", "shot_off_target",
                         "shot_blocked", "technical_rule_fault",
                         "seven_m_awarded", "steal", "technical_ball_fault"]:
-            events.iloc[idx, 22] = search_phase_ml_fl(
-                event[22], sequences, event[24])
+            events.iloc[idx, 24] = search_phase_ml_fl(
+                event[24], sequences, event[25])
     return events, sequences
 
 
@@ -633,7 +654,7 @@ def synchronize_events_fl_rule_based(events: Any,
                                                                   sequences),
         "technical_rule_fault": lambda e: handle_phase_correction(e,
                                                                   sequences),
-        "yellow_card": lambda e: handle_phase_correction(e, sequences)
+        # "yellow_card": lambda e: handle_phase_correction(e, sequences)
     }
 
     possession_change_events = {"yellow_card",
@@ -643,16 +664,15 @@ def synchronize_events_fl_rule_based(events: Any,
         if events.iloc[idx, 0] in event_handlers:
             new_time = event_handlers[events.iloc[idx, 0]](events.iloc[idx])
             if new_time is not None:
-                events.iloc[idx, 22] = new_time
+                events.iloc[idx, 24] = new_time
         elif events.iloc[idx, 0] in possession_change_events:
-            opponent = (dv.Opponent.AWAY
-                        if (events.iloc[idx, 21] == dv.Opponent.HOME)
-                        else dv.Opponent.HOME)
+            opponent = (dv.Team.A if events.iloc[idx, 25] == dv.Team.B
+                        else dv.Team.B)
 
             new_time = calculate_correct_phase_fl(
-                events.iloc[idx, 22], sequences, opponent)
+                events.iloc[idx, 24], sequences, opponent)
             if new_time is not None:
-                events.iloc[idx, 22] = new_time
+                events.iloc[idx, 24] = new_time
 
     return events, sequences
 
@@ -665,18 +685,18 @@ def handle_score_change(event: np.ndarray[Any, Any], events: Any,
 
     Args:
         event (dict): The event dictionary containing event information.
-            event[22] represents the event time
+            event[24] represents the event time
             event[21] represents the team (home/away)
         events (list[dict]): List of all events in the match.
         sequences (list[tuple[int, int, int]]): List of sequences
         where each tuple contains
             start time, end time and phase number.
     """
-    if str(give_last_event_fl(events, event.values[22])) != "seven_m_awarded":
+    if str(give_last_event_fl(events, event.values[24])) != "seven_m_awarded":
         return calculate_correct_phase_fl(
-            event.values[22], sequences, event.values[24])
+            event.values[24], sequences, event.values[25])
 
-    return calculate_inactive_phase_fl(event.values[22], sequences)
+    return calculate_inactive_phase_fl(event.values[24], sequences)
 
 
 def handle_seven_m_missed(event: Any,
@@ -687,13 +707,13 @@ def handle_seven_m_missed(event: Any,
 
     Args:
         event (dict): The event dictionary containing event information.
-            event[22] represents the event time
+            event[24] represents the event time
             event[21] represents the team (home/away)
         sequences (list[tuple[int, int, int]]): List of sequences
         where each tuple contains
             start time, end time and phase number.
     """
-    return calculate_inactive_phase_fl(event.values[22], sequences)
+    return calculate_inactive_phase_fl(event.values[24], sequences)
 
 
 def handle_timeout(event: np.ndarray,
@@ -705,14 +725,14 @@ def handle_timeout(event: np.ndarray,
 
     Args:
         event (dict): The event dictionary containing event information.
-            event[22] represents the event time
+            event[24] represents the event time
             event[21] represents the team (home/away)
         sequences (list[tuple[int, int, int]]): List of sequences
         where each tuple contains
             start time, end time and phase number.
     """
-    return calculate_timeouts_fl(event.values[22], sequences,
-                                 event.values[24], event)
+    return calculate_timeouts_fl(event.values[24], sequences,
+                                 event.values[25], event)
 
 
 def handle_timeout_over(event: dict[Any, Any],
@@ -727,7 +747,7 @@ def handle_timeout_over(event: dict[Any, Any],
     Args:
         event (dict): The event dictionary containing event
         information.
-            event[22] represents the event time
+            event[24] represents the event time
             event[21] represents the team (home/away)
         sequences (list[tuple[int, int, int]]): List of sequences where
             each tuple contains
@@ -751,7 +771,7 @@ def handle_phase_correction(event: dict[Any, Any],
 
     Args:
         event (dict): The event dictionary containing event information.
-            event[22] represents the event time
+            event[24] represents the event time
             event[21] represents the team (home/away)
         sequences (list[tuple[int, int, int]]): List of sequences
         where each tuple contains
@@ -762,7 +782,7 @@ def handle_phase_correction(event: dict[Any, Any],
         calculate_correct_phase_fl
     """
     return calculate_correct_phase_fl(
-        event[22], sequences, event[24])
+        event[24], sequences, event[25])
 
 
 def give_last_event_fl(events: pd.DataFrame, time: int) -> Any:
@@ -777,9 +797,11 @@ def give_last_event_fl(events: pd.DataFrame, time: int) -> Any:
         type "suspension", "yellow_card", "red_card", or "suspension_over".
         Returns None if no such event is found.
     """
+    events = events.sort_values(
+        by=events.columns[24])
     event: np.ndarray[Any, Any]
-    for event in events.values[::-1]:
-        if event[22] < time:
+    for event in reversed(events.values):
+        if event[24] < time:
 
             if event[0] not in [
                 "suspension",
@@ -1029,7 +1051,7 @@ def calculate_timeouts_over_fl(sequences: list[tuple[int, int, int]],
 
     if event.values[0] == "timeout_over":
         time: int
-        time = event.values[22]
+        time = event.values[24]
         start: int
         end: int
         phase: int
@@ -1044,10 +1066,11 @@ def calculate_timeouts_over_fl(sequences: list[tuple[int, int, int]],
             lastevent = give_last_event_fl(events, time)
             if lastevent[0] == "timeout":
                 return time
-            raise ValueError("Events are in wrong order!")
+            print("No valid phase found for timeout_over event!")
         time_inactive = calculate_inactive_phase_fl(time, sequences)
         if time_inactive is not None:
             lastevent = give_last_event_fl(events, time_inactive)
             if lastevent[0] == "timeout":
                 return time_inactive
-    raise ValueError("No valid phase found for timeout_over event!")
+    print("No valid phase found for timeout_over event!")
+    return time

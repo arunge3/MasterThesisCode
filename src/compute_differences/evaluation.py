@@ -33,12 +33,12 @@ def generate_paths(number: int, name: str,
         base_path_season,
         f"EventTimeline\\sport_events_{number}_timeline.json")
     csv_bl_path = os.path.join(
-        datengrundlage, r"baseline", f"{number}_bl.csv")
+        datengrundlage, r"baseline", f"{number}_bl_fl.csv")
     csv_rb_path = os.path.join(
-        datengrundlage, r"rulebased", f"{number}_rb.csv")
+        datengrundlage, r"rulebased", f"{number}_rb_fl.csv")
 
     csv_none_path = os.path.join(
-        datengrundlage, r"none", f"{number}_none.csv")
+        datengrundlage, r"none", f"{number}_none_fl.csv")
     csv_pos_path = os.path.join(datengrundlage, r"pos", f"{number}_pos_fl.csv")
 
     csv_pos_rb_path = os.path.join(
@@ -116,11 +116,17 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 #     base_path_grundlage, "detailed_results_23400277.csv")
 
 
-# Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21.csv.xlsx 23400275
-# TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21.csv.xlsx 23400263
-# HSG Wetzlar_THW Kiel_10.10.2020_20-21.csv.xlsx 23400307
-# HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21.csv.xlsx 23400277
-# HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21.csv.xlsx 23400267
+# 23400275 Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21
+# 23400263 TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21
+# 23400307 HSG Wetzlar_THW Kiel_10.10.2020_20-21
+# 23400277 HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21
+# 23400267 HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21
+# 23400303 TSV Hannover-Burgdorf_HSC 2000 Coburg_08.10.2020_20-21
+# 23400319 Bergischer HC_HSG Nordhorn-Lingen_11.10.2020_20-21
+# 23400315 TUSEM Essen_Rhein-Neckar Löwen_11.10.2020_20-21
+# 23400321 Rhein-Neckar Löwen_SC DHFK Leipzig_15.10.2020_20-21
+# 23400311 Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21
+
 
 (excel_path, name_new_game_path, event_path, csv_bl_path,
  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,

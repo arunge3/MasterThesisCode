@@ -45,8 +45,8 @@ def sync_event_data_pos_data(events: Any,
                 pos_num = find_key_position(pid_dict, event[10])
                 for i in xids.items():
                     if i[0] == event[10]:
-                        events.iloc[idx, 22] = (sync_pos_data(
-                            i[1], event[22],
+                        events.iloc[idx, 24] = (sync_pos_data(
+                            i[1], event[24],
                             pos_data[pos_num],
                             pos_data[ball_num],
                             event[8]))
@@ -54,8 +54,8 @@ def sync_event_data_pos_data(events: Any,
                 pos_num = find_key_position(pid_dict, event[10])
                 for i in xids.items():
                     if i[0] == event[10]:
-                        events.iloc[idx, 22] = (sync_pos_data(
-                            i[1], event[22],
+                        events.iloc[idx, 24] = (sync_pos_data(
+                            i[1], event[24],
                             pos_data[pos_num],
                             pos_data[ball_num],
                             event[14]["name"]))
@@ -148,8 +148,17 @@ def sync_pos_data(links: Any, t_event: int,
     # Kombiniere die beiden Ball-Datensätze
     ball_data_1 = ball_data.player(0)
     ball_data_2 = ball_data.player(1)
-    ball_positions = np.where(np.isnan(ball_data_1), ball_data_2,
-                              ball_data_1)
+    # Check if ball data arrays have different shapes
+    if ball_data_1.shape != ball_data_2.shape:
+        # If first ball data array is empty, use second ball data array
+        if ball_data_1.size == 0:
+            ball_positions = ball_data_2
+        # If second ball data array is empty, keep first ball data array
+        elif ball_data_2.size == 0:
+            ball_positions = ball_data_1
+    else:
+        ball_positions = np.where(np.isnan(ball_data_1), ball_data_2,
+                                  ball_data_1)
 
     # Suche rückwärts vom Ereignis-Zeitpunkt
     for t in range(t_event - 1, max(-1, t_event - 300), -1):
@@ -184,11 +193,11 @@ def find_key_position(data: dict[Any, Any], key: str) -> int:
     Raises:
         ValueError: If the key is not found in the dictionary.
     """
-
+    key = key.lower()
     keys_list = list(data.keys())
     for i, k in enumerate(keys_list):
         k = unicodedata.normalize('NFD', k).encode(
-            'ascii', 'ignore').decode('utf-8')
+            'ascii', 'ignore').decode('utf-8').lower()
         if key in k:
             return i  # Return the position of the matched key
     raise ValueError("Key not found")  # Key not found
