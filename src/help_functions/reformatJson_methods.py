@@ -42,7 +42,7 @@ def load_first_timestamp_position(file_path: str) -> tuple[str, Any, Any]:
 
 
 def synchronize_time(
-    event_time_str: str,
+    event_time_str: Any,
     first_timestamp_opt: Optional[Union[str, tuple[Any]]], fps: float = 20.0
 ) -> float:
     """
@@ -67,6 +67,8 @@ def synchronize_time(
     if isinstance(event_time_str, str):
         event_time_date = datetime.fromisoformat(
             event_time_str).replace(tzinfo=utc_timezone)
+    else:
+        event_time_date = event_time_str
     if isinstance(first_timestamp_opt, tuple):
 
         first_timestamp_str = first_timestamp_opt[0]
@@ -82,7 +84,7 @@ def synchronize_time(
     # synced_time = delta_fr + offset_fr
     # if second_half:
     #     synced_time = synced_time + offseth2_fr
-    return float(delta_fr)
+    return int(delta_fr)
 
 
 def get_paths_by_match_id(

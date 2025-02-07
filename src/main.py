@@ -8,7 +8,7 @@ import variables.data_variables as dv
 # # 23400307 THW Kiel_HSG Wetzlar 10.10.20
 
 # floodlight_code.plot_phases(23400307, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400307, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400307, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400307, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400307, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400307, dv.Approach.POS_CORRECTION)
@@ -20,8 +20,8 @@ import variables.data_variables as dv
 # # 23400263 TSV GWD Minden_TSV Hannover-Burgdorf 01.10.20
 
 # floodlight_code.plot_phases(23400263, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400263, dv.Approach.BASELINE)
-floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
+floodlight_code.plot_phases(23400263, dv.Approach.BASELINE)
+# floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400263, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400263, dv.Approach.POS_CORRECTION)
 # floodlight_code.plot_phases(23400263, dv.Approach.POS_RB)
@@ -32,7 +32,7 @@ floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # # 23400275 Rhein-Neckar Löwen_TVB Stuttgart 04.10.20
 
 # floodlight_code.plot_phases(23400275, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400275, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400275, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400275, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400275, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400275, dv.Approach.POS_CORRECTION)
@@ -45,7 +45,7 @@ floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # # 23400277 HSG Wetzlar_SG Flensburg-Handewitt 04.10.20
 
 # floodlight_code.plot_phases(23400277, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400277, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400277, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400277, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400277, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400277, dv.Approach.POS_CORRECTION)
@@ -57,7 +57,7 @@ floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # # 23400267  HSC 2000 Coburg_TBV Lemgo Lippe 01.10.20
 
 # floodlight_code.plot_phases(23400267, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400267, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400267, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400267, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400267, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400267, dv.Approach.POS_CORRECTION)
@@ -70,7 +70,7 @@ floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # # 23400319 BHC NordhornLingen 11.10.20
 
 # floodlight_code.plot_phases(23400319, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400319, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400319, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400319, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400319, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400319, dv.Approach.POS_CORRECTION)
@@ -82,7 +82,7 @@ floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # # 23400311 Füchse Berlin SC DHFK Leipzig 11.10.20
 
 # floodlight_code.plot_phases(23400311, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400311, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400311, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400311, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400311, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400311, dv.Approach.POS_CORRECTION)
@@ -95,7 +95,7 @@ floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # # 23400321 Rhein-Neckar Löwen_SC DHfK Leipzig 15.10.20
 
 # floodlight_code.plot_phases(23400321, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400321, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400321, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400321, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400321, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400321, dv.Approach.POS_CORRECTION)
@@ -108,7 +108,7 @@ floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # # 23400303 TSV Hannover-Burgdorf_HSC 2000 Coburg 08.10.20
 
 # floodlight_code.plot_phases(23400303, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400303, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400303, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400303, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400303, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400303, dv.Approach.POS_CORRECTION)
@@ -120,7 +120,7 @@ floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # # 23400315 TUSEM Essen_Rhein-Neckar Löwen 11.10.20
 
 # floodlight_code.plot_phases(23400315, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400315, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400315, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400315, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400315, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400315, dv.Approach.POS_CORRECTION)

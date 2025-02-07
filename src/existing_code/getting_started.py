@@ -24,8 +24,10 @@ match = "Bergischer HC_Die Eulen Ludwigshafen_16.12.2020_20-21"  # name of the m
 path_positions = "D:\\Handball\\HBL_Positions\\21-22\\Bergischer HC_Die Eulen Ludwigshafen_16.12.2020_20-21.csv"
 path_events = "D:\\Handball\\HBL_Events\\season_21_22\\EventTimelines\\sport_events_23400513_timeline.json"
 path_slice = "D:\\Handball\\HBL_Slicing\\season_20_21\\Bergischer HC_Die Eulen Ludwigshafen_16.12.2020_20-21.csv.npy"
+template_path = "D:\\processing_code\\templates.json"
 
-positions_path = f"{base_path}HBL_Positions\\{season}\\{match}.csv"
+
+positions_path = f"{base_path}HBL_Positions\\20-21\\{match}.csv"
 phase_predictions_path = f"{base_path}HBL_Slicing\\{season}\\{match}.csv.npy"
 lookup_path = f"{base_path}\\HBL_Events\\lookup\\lookup_matches{season[6:]}.csv"
 
@@ -219,61 +221,73 @@ for team in xy_objects:
     vm.fit(xy_objects[team])
     velocities.update({team: vm.velocity()})
 
-# # template matching
+# template matching
 
-# phase_to_team_def= {3: "b", 4: "a"}
+phase_to_team_def = {3: "b", 4: "a"}
 
-# templates = pd.read_json("C:\\Users\\ke6564\\Desktop\\Studium\\Promotion\\Handball\\FormationDetection\\templates.json")
+# Laden Sie die Templates direkt als JSON
+templates = json.load(open(template_path))
+# Konvertieren Sie die Templates in das richtige Format
+template_dict = {}
+print(templates.items())
+for key, template_array in templates.items():
+
+    template_dict[key] = np.array(template_array).reshape(-1, 2)
 
 
-# i = 2
-# phase = sequences[i]
-# formations = []
-# for i, phase in enumerate(sequences):
-#     start, end, phase_type = phase
-#     if phase_type in [3, 4]:
-#         coords_def = xy_objects[phase_to_team_def[phase_type]].slice(start, end)
+i = 2
+phase = sequences[i]
+formations = []
+for i, phase in enumerate(sequences):
+    start, end, phase_type = phase
+    if phase_type in [3, 4]:
+        coords_def = xy_objects[phase_to_team_def[phase_type]].slice(
+            start, end)
 
-#         # detect playing direction
-#         phase_mean_x = np.nanmean(coords_def.x)
+        # detect playing direction
+        phase_mean_x = np.nanmean(coords_def.x)
 
-#         if phase_mean_x > 0:
-#             playing_direction = "lr"
-#         elif phase_mean_x < 0:
-#             playing_direction = "rl"
-#         else:
-#             ValueError("Dafuq is the playing direction")
+        if phase_mean_x > 0:
+            playing_direction = "lr"
+        elif phase_mean_x < 0:
+            playing_direction = "rl"
+        else:
+            ValueError("Dafuq is the playing direction")
 
-#         # reflect if playing direction is lr, because of template orientation
-#         if playing_direction == "lr":
-#             coords_def.reflect(axis="y")
-#             coords_def.reflect(axis="x")
-#             playing_direction = "rl"
+        # reflect if playing direction is lr, because of template orientation
+        if playing_direction == "lr":
+            coords_def.reflect(axis="y")
+            coords_def.reflect(axis="x")
+            playing_direction = "rl"
 
-#         # translate coords to match templates (origin = bottom left)
-#         # coords_def.translate((20, 10))
+        # translate coords to match templates (origin = bottom left)
+        # coords_def.translate((20, 10))
 
-#         fsims = template_matching(coords_def, templates)
-#         top_formation = sorted(fsims.items(), key=lambda x:x[1], reverse=True)[0][0]
+        fsims = template_matching.template_matching(coords_def, template_dict)
+        top_formation = sorted(
+            fsims.items(), key=lambda x: x[1], reverse=True)[0][0]
 
-#         # identify next phase
-#         next_phase = 0
-#         j = i
-#         while next_phase == 0:
-#             j += 1
-#             if j < len(sequences):
-#                 next_phase = sequences[j][2]
-#             else:
-#                 break
+        # identify next phase
+        next_phase = 0
+        j = i
+        while next_phase == 0:
+            j += 1
+            if j < len(sequences):
+                next_phase = sequences[j][2]
+            else:
+                break
 
-#         # phase intensity
-#         dist_def = np.nansum(distances[phase_to_team_def[phase_type]].slice(start, end).property)
-#         vel_def = np.nanmean(velocities[phase_to_team_def[phase_type]].slice(start, end).property)
+        # phase intensity
+        dist_def = np.nansum(
+            distances[phase_to_team_def[phase_type]].slice(start, end).property)
+        vel_def = np.nanmean(
+            velocities[phase_to_team_def[phase_type]].slice(start, end).property)
 
-#         formation_dict = {
-#             "match": match, "start": start, "end": end,
-#             "phase_type": phase_type, "formation": top_formation, "next_phases": next_phase,
-#             "dist_def": dist_def, "vel_def": vel_def
-#         }
+        formation_dict = {
+            "match": match, "start": start, "end": end,
+            "phase_type": phase_type, "formation": top_formation, "next_phases": next_phase,
+            "dist_def": dist_def, "vel_def": vel_def
+        }
 
-#         formations.append(formation_dict)
+        formations.append(formation_dict)
+        print(formations)

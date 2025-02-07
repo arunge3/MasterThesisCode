@@ -414,7 +414,7 @@ def plot_phases(match_id: int, approach: dv.Approach
         # Set x-axis limit to show only from 0 to 2000
         ax.set_xlim(6000, 50000)
         # Show plot
-        plt.show()
+        # plt.show()
     else:
         for event in events:
             # Find the y value on the continuous line for this event's time
@@ -453,7 +453,7 @@ def plot_phases(match_id: int, approach: dv.Approach
         # Set x-axis limit to show only from 0 to 2000
         ax.set_xlim(6000, 50000)
         # Show plot
-        plt.show()
+        # plt.show()
 
 
 def handle_approach(approach: dv.Approach,
@@ -494,8 +494,8 @@ def handle_approach(approach: dv.Approach,
         events = help_functions.pos_data_approach.sync_event_data_pos_data(
             events, match_id)
     elif approach == dv.Approach.BASELINE:
-
-        events, _ = processing.adjust_timestamp_baseline(match_id)
+        (_, _, events) = calculate_event_stream(match_id)
+        events = adjust_timestamp_baseline(events)
 
         datei_pfad = os.path.join(datengrundlage, r"baseline",
                                   (str(match_id) + "_bl_fl.csv"))
@@ -559,6 +559,42 @@ def handle_approach(approach: dv.Approach,
     else:
         raise ValueError("Invalid approach specified!")
     return events, sequences, datei_pfad
+
+
+def adjust_timestamp_baseline(events: Any) -> Any:
+    """
+    Adjusts the timestamp of the events to the baseline.
+    """
+    event_adjustments = {
+        'break_start': -359,
+        'match_started': -258983,
+        'red_card': -260,
+        'score_change': -109,
+        'seven_m_awarded': -469,
+        'seven_m_missed': -74,
+        'shot_blocked': -142,
+        'shot_off_target': -237,
+        'shot_saved': -251,
+        'steal': -257,
+        'substitution ': -5,
+        'suspension': -386,
+        'suspension_over': -384,
+        'technical_ball_fault': -245,
+        'technical_rule_fault': -258,
+        'timeout': -284,
+        'timeout_over': -29,
+        'yellow_card': -268
+    }
+    for idx, event in enumerate(events.values):
+        event_type = event[0]
+    # Dictionary mapping event types to their mean values (rounded)
+
+    # Get the event type and adjust timestamp based on mean value
+        event_type = event[0]
+        if event_type in event_adjustments:
+            mean_adjustment = event_adjustments[event_type]
+            events.iloc[idx, 24] = events.iloc[idx, 24] + mean_adjustment
+    return events
 
 
 def add_team_to_events(events: pd.DataFrame,
