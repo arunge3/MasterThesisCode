@@ -46,7 +46,7 @@ def plot_phases(match_id: int, approach: dv.Approach
     sequences = processing.calculate_sequences(match_id)
 
     if approach == dv.Approach.RULE_BASED:
-        events, team_info = processing.adjust_timestamp(match_id)
+        events, team_info = processing.adjust_timestsamp(match_id)
         events, sequences = processing.synchronize_events(
             events, sequences, team_info)
         new_name = str(match_id) + "_rb.csv"
@@ -192,7 +192,7 @@ def berechne_phase_und_speichern_fl(events: pd.DataFrame,
         for event in events.values:
             event_id = event[23]
             event_type = event[0]
-            event_time = event[24]
+            event_time = event[22]
 
             # Phase berechnen
             phase = None

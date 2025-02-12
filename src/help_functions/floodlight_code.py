@@ -379,7 +379,12 @@ def plot_phases(match_id: int, approach: dv.Approach
 
     # Track labels to avoid duplicates in the legend
     added_labels = set()
-
+    # Save analysis results to a JSON file
+    analysis_results_path = os.path.join(
+        base_path, f"analysis_results_{match_id}.json")
+    analysis_results_path = os.path.join(analysis_results_path, approach.name)
+    with open(analysis_results_path, 'w', encoding='utf-8') as f:
+        json.dump(analysis_results, f, ensure_ascii=False, indent=4)
     berechne_phase_und_speichern_fl(events, sequences, datei_pfad)
     # Add event markers with labels from `type`
     if hasattr(events, 'values'):

@@ -26,15 +26,14 @@ def analyze_events_and_formations(events: Any, match_id: int
     analysis_results = {
         phase: {'events': [], 'formations': []} for phase in range(5)
     }
-
-    # Events mit Phasen abgleichen
+# TODO Funktioniert noch nicht, debuggen
     for _, event in events.iterrows():
-        event_time = event[24]  # Annahme: Zeit ist in Sekunden
+        event_time = event[24]
         event_type = event[0]
 
-        # Finde die entsprechende Phase für diesen Zeitpunkt
         current_phase = None
         for phase_info in phase_results:
+
             if phase_info['start'] <= event_time <= phase_info['end']:
                 current_phase = phase_info['phase_type']
                 formation = phase_info['formation']

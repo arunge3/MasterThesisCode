@@ -20,14 +20,14 @@ import variables.data_variables as dv
 # # 23400263 TSV GWD Minden_TSV Hannover-Burgdorf 01.10.20
 
 floodlight_code.plot_phases(23400263, dv.Approach.NONE)
-# floodlight_code.plot_phases(23400263, dv.Approach.BASELINE)
-# floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
-# floodlight_code.plot_phases(23400263, dv.Approach.POS_DATA)
-# floodlight_code.plot_phases(23400263, dv.Approach.POS_CORRECTION)
-# floodlight_code.plot_phases(23400263, dv.Approach.POS_RB)
-# floodlight_code.plot_phases(23400263, dv.Approach.COST_BASED)
-# floodlight_code.plot_phases(23400263, dv.Approach.COST_BASED_COR)
-# floodlight_code.plot_phases(23400263, dv.Approach.COST_BASED_RB)
+floodlight_code.plot_phases(23400263, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
+floodlight_code.plot_phases(23400263, dv.Approach.POS_DATA)
+floodlight_code.plot_phases(23400263, dv.Approach.POS_CORRECTION)
+floodlight_code.plot_phases(23400263, dv.Approach.POS_RB)
+floodlight_code.plot_phases(23400263, dv.Approach.COST_BASED)
+floodlight_code.plot_phases(23400263, dv.Approach.COST_BASED_COR)
+floodlight_code.plot_phases(23400263, dv.Approach.COST_BASED_RB)
 
 # # 23400275 Rhein-Neckar Löwen_TVB Stuttgart 04.10.20
 
