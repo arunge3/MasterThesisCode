@@ -8,7 +8,7 @@ import variables.data_variables as dv
 # # 23400307 THW Kiel_HSG Wetzlar 10.10.20
 
 # floodlight_code.plot_phases(23400307, dv.Approach.NONE)
-floodlight_code.plot_phases(23400307, dv.Approach.BASELINE)
+# floodlight_code.plot_phases(23400307, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400307, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400307, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400307, dv.Approach.POS_CORRECTION)
@@ -19,8 +19,8 @@ floodlight_code.plot_phases(23400307, dv.Approach.BASELINE)
 
 # # 23400263 TSV GWD Minden_TSV Hannover-Burgdorf 01.10.20
 
-# floodlight_code.plot_phases(23400263, dv.Approach.NONE)
-floodlight_code.plot_phases(23400263, dv.Approach.BASELINE)
+floodlight_code.plot_phases(23400263, dv.Approach.NONE)
+# floodlight_code.plot_phases(23400263, dv.Approach.BASELINE)
 # floodlight_code.plot_phases(23400263, dv.Approach.RULE_BASED)
 # floodlight_code.plot_phases(23400263, dv.Approach.POS_DATA)
 # floodlight_code.plot_phases(23400263, dv.Approach.POS_CORRECTION)

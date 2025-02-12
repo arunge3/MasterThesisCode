@@ -480,4 +480,4 @@ def identify_and_filter_goalkeepers(team_a_player_ids: list[str],
     return {"a": xy1, "b": xy2}
 
 
-run_template_matching(23400513)
+# run_template_matching(23400513)

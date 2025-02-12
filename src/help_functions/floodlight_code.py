@@ -21,6 +21,7 @@ import cost_function_approach
 import help_functions
 import help_functions.pos_data_approach
 import help_functions.reformatjson_methods
+import sport_analysis
 import variables.data_variables as dv
 from plot_functions import processing
 from plot_functions.plot_phases import berechne_phase_und_speichern_fl
@@ -323,7 +324,9 @@ def plot_phases(match_id: int, approach: dv.Approach
     (events, sequences, datei_pfad) = (handle_approach(
         approach, processing.calculate_sequences(match_id),
         match_id, os.path.join(base_path, r"Datengrundlagen")))
-
+    analysis_results = sport_analysis.analyze_events_and_formations(
+        events, match_id)
+    print(analysis_results)
     # Define positions for each phase
     phase_positions = {
         0: 2,  # (inac)
