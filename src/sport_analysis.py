@@ -6,17 +6,17 @@ from template_start import run_template_matching
 def analyze_events_and_formations(events: Any, match_id: int
                                   ) -> dict[Any, Any]:
     """
-    Analysiert Events und Abwehrformationen zu bestimmten Zeitpunkten
-    im Spiel.
+      Analyzes events and defensive formations at specific times
+    in the game.
 
     Args:
-        events (pd.DataFrame): DataFrame mit Event-Daten
-        sequences (pd.DataFrame): DataFrame mit Sequenz-Daten
-        match_id (int): ID des zu analysierenden Spiels
+        events (pd.DataFrame): DataFrame with event data
+        sequences (pd.DataFrame): DataFrame with sequence data
+        match_id (int): ID of the match to be analyzed
 
     Returns:
-        dict: Dictionary mit Statistiken über Events und Formationen
-        pro Phase
+        dict: Dictionary with statistics on events and formations
+        per phase
     """
     # Template Matching ausführen
     phase_results = run_template_matching(match_id)
@@ -26,8 +26,7 @@ def analyze_events_and_formations(events: Any, match_id: int
     analysis_results = {
         phase: {'events': [], 'formations': []} for phase in range(5)
     }
-# TODO Funktioniert noch nicht, debuggen
-    for _, event in events.iterrows():
+    for event in events.values:
         event_time = event[24]
         event_type = event[0]
 
@@ -51,5 +50,22 @@ def analyze_events_and_formations(events: Any, match_id: int
             'event_statistics': dict(events_count),
             'formation_statistics': dict(formations_count)
         }
+    total_shots = 0
+    successful_goals = 0
+    for phase in analysis_results:
+        for event, count in analysis_results[phase]['event_statistics'
+                                                    ].items():
+            if event in ['shot_blocked', 'shot_saved', 'shot_off_target',
+                         'score_change']:
+                total_shots += count
+                if event == 'score_change':
+                    successful_goals += count
+
+        if total_shots > 0:
+            goal_success_rate = (successful_goals / total_shots) * 100
+        else:
+            goal_success_rate = 0
+
+        analysis_results[phase]['goal_success_rate'] = goal_success_rate
 
     return analysis_results
