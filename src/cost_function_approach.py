@@ -15,45 +15,38 @@ def calculate_cost_matrix(events: pd.DataFrame,
                           sequences: List[Tuple[int, int, int]]
                           ) -> np.ndarray:
     """
-    Berechnet die Kostenmatrix für die Event-Synchronisation.
+    Calculates the cost matrix for event synchronization.
 
     Args:
-        events: DataFrame mit Event-Daten
-        sequences: Liste von Sequenz-Tupeln (start, end, phase)
+        events: DataFrame with event data
+        sequences: List of sequence tuples (start, end, phase)
 
     Returns:
-        np.ndarray: Kostenmatrix
+        np.ndarray: Cost matrix
     """
     cost_matrix = np.full((len(events), len(sequences)), np.inf)
 
-    # Maximale erlaubte Zeitdifferenz (in Sekunden)
     MAX_TIME_DIFF = 10
 
     for i, event in enumerate(events.values):
-        event_time = event[24]  # Zeitstempel des Events
-        event_type = event[0]   # Event-Typ
+        event_time = event[24]  # Timestamp of the event
+        event_type = event[0]   # Event-Type
         competitor = event[25]  # Team (HOME/AWAY)
 
         for j, (start, end, phase) in enumerate(sequences):
-            # Zeitdifferenz in Sekunden
             time_diff = event_time - start
 
-            # Wenn die Zeitdifferenz zu groß ist, überspringen
             if abs(time_diff) > MAX_TIME_DIFF:
                 continue
 
-            # 1. Zeitliche Kosten mit exponentiellem Verfall
             temporal_cost = calculate_temporal_cost(time_diff)
 
-            # 2. Phasenbasierte Kosten
             phase_cost = calculate_phase_cost(phase, competitor, event_type)
-
-            # 3. Sequenzielle Kosten basierend auf vorherigen Events
             sequence_cost = calculate_sequential_cost(i, j, events, sequences)
 
-            # Gesamtkosten (stark gewichtet auf zeitliche Komponente)
+            # Gesamtkosten
             total_cost = (
-                0.7 * temporal_cost +  # Noch stärkere Gewichtung der Zeit
+                0.7 * temporal_cost +
                 0.2 * phase_cost +
                 0.1 * sequence_cost
             )
@@ -65,44 +58,42 @@ def calculate_cost_matrix(events: pd.DataFrame,
 
 def calculate_temporal_cost(time_diff: float) -> float:
     """
-    Berechnet zeitliche Kosten mit exponentiellem Verfall.
+    Calculates temporal costs with exponential decay.
 
     Args:
-        time_diff: Zeitdifferenz in Sekunden
+        time_diff: Time difference in seconds
 
     Returns:
-        float: Zeitkosten
+        float: Temporal costs
     """
-    # Präferenz für frühere Zeitpunkte durch asymmetrische Behandlung
-    if time_diff > 0:  # Event ist später als Start
-        return float(1 - np.exp(-time_diff / 2))  # schneller Anstieg
-    else:  # Event ist früher als Start
-        return float(1 - np.exp(time_diff / 4))   # langsamerer Anstieg
+    # Preference for earlier times through asymmetric treatment
+    if time_diff > 0:  # Event is later than start
+        return float(1 - np.exp(-time_diff / 2))  # faster increase
+    else:  # Event is earlier than start
+        return float(1 - np.exp(time_diff / 4))   # slower increase
 
 
 def calculate_sequential_cost(event_idx: int, seq_idx: int,
                               events: pd.DataFrame,
                               sequences: List[Tuple[int, int, int]]) -> float:
     """
-    Berechnet sequenzielle Kosten basierend auf vorherigen Events.
+    Calculates sequential costs based on previous events.
 
     Args:
-        event_idx: Aktueller Event-Index
-        seq_idx: Aktueller Sequenz-Index
-        events: Alle Events
-        sequences: Alle Sequenzen
+        event_idx: Current event index
+        seq_idx: Current sequence index
+        events: All events
+        sequences: All sequences
 
     Returns:
-        float: Sequenzkosten
+        float: Sequential costs
     """
-    if event_idx == 0:  # Erstes Event
+    if event_idx == 0:  # First event
         return 0.0
 
-    # Prüfe relative Position zum vorherigen Event
     prev_event_time = events.iloc[event_idx - 1][24]
     current_start = sequences[seq_idx][0]
 
-    # Wenn aktuelles Event vor dem vorherigen liegt, hohe Kosten
     if current_start < prev_event_time:
         return 1.0
 
@@ -112,17 +103,17 @@ def calculate_sequential_cost(event_idx: int, seq_idx: int,
 def calculate_phase_cost(phase: int, competitor: dv.Team,
                          event_type: str) -> float:
     """
-    Berechnet die phasenbasierten Kosten für ein Event.
+    Calculates the phase-based costs for an event.
 
     Args:
-        phase: Aktuelle Phase
+        phase: Current phase
         competitor: Team (HOME/AWAY)
-        event_type: Typ des Events
+        event_type: Type of the event
 
     Returns:
-        float: Phasenkosten
+        float: Phase costs
     """
-    # Kritische Events (müssen in der richtigen Phase sein)
+    # Critical events (must be in the correct phase)
     critical_events = {
         "score_change": 1.0,
         "shot_saved": 0.9,
@@ -134,48 +125,47 @@ def calculate_phase_cost(phase: int, competitor: dv.Team,
         "steal": 0.7
     }
 
-    # Weniger kritische Events
+    # Less critical events
     non_critical_events = {
         "yellow_card": 0.4,
         "suspension": 0.3
 
     }
 
-    # Bestimme Basis-Kosten basierend auf Event-Typ
+    # Determine base costs based on event type
     base_cost = critical_events.get(event_type,
                                     non_critical_events.get(event_type, 0.5))
 
-    # Prüfe Phasen-Kompatibilität
+    # Check phase compatibility
     if ((phase in (1, 3) and competitor == dv.Team.A) or
             (phase in (2, 4) and competitor == dv.Team.B)):
-        return 0.0  # Korrekte Phase
+        return 0.0  # Correct phase
 
-    return base_cost  # Falsche Phase
+    return base_cost  # Wrong phase
 
 
 def sync_events_cost_function(events: pd.DataFrame,
                               sequences: List[Tuple[int, int, int]]
                               ) -> pd.DataFrame:
     """
-    Synchronisiert Events mittels Kostenfunktion.
+    Synchronizes events using a cost function.
 
     Args:
-        events: DataFrame mit Event-Daten
-        sequences: Liste von Sequenz-Tupeln
+        events: DataFrame with event data
+        sequences: List of sequence tuples
 
     Returns:
-        pd.DataFrame: Synchronisierte Events
+        pd.DataFrame: Synchronized events
     """
     cost_matrix = calculate_cost_matrix(events, sequences)
 
-    # Optimale Zuordnung für jedes Event finden
+    # Find optimal assignment for each event
     for i, _ in enumerate(events.values):
         event_costs = cost_matrix[i]
         best_sequence_idx = np.argmin(event_costs)
 
         if event_costs[best_sequence_idx] < np.inf:
             start, end, _ = sequences[best_sequence_idx]
-            # Setze neuen Zeitstempel
             events.iloc[i, 24] = start + (end - start) // 2
 
     return events
