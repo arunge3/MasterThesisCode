@@ -537,7 +537,7 @@ def handle_approach(approach: dv.Approach,
         team_order = calculate_team_order(events)
         events = add_team_to_events(events, team_order)
         events = cost_function_approach.sync_events_cost_function(
-            events, sequences)
+            events, sequences, match_id)
 
         datei_pfad = os.path.join(datengrundlage, r"cost_based",
                                   (str(match_id) + "_cost_based_fl.csv"))
@@ -546,7 +546,7 @@ def handle_approach(approach: dv.Approach,
         team_order = calculate_team_order(events)
         events = add_team_to_events(events, team_order)
         events = cost_function_approach.sync_events_cost_function(
-            events, sequences)
+            events, sequences, match_id)
         events, sequences = correct_events_fl(events, sequences)
 
         datei_pfad = os.path.join(datengrundlage, r"cost_based_cor",
@@ -557,7 +557,7 @@ def handle_approach(approach: dv.Approach,
         events = add_team_to_events(events, team_order)
 
         events = cost_function_approach.sync_events_cost_function(
-            events, sequences)
+            events, sequences, match_id)
         events, sequences = synchronize_events_fl_rule_based(
             events, sequences)
 

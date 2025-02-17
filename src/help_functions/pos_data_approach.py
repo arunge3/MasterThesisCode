@@ -124,28 +124,28 @@ def sync_pos_data(links: Any, t_event: int,
                   ball_data: floodlight.core.xy.XY, pid: str,
                   threshold: float = 0.1) -> int:
     """
-    Findet den letzten Frame vor einem bestimmten Ereignis, in dem ein
-    Spieler den Ball hatte.
+    This function finds the last frame before a specific event where a
+    player had the ball.
 
     Args:
-        links: Dictionary mit Spieler-IDs und deren Zuordnungen
-        t_event: Der Frame-Index des Ereignisses
-        pos_data: XY-Objekt mit den Positionsdaten der Spieler
-        ball_data: XY-Objekt mit den Positionsdaten des Balls
-        pid: Die Spieler-ID (Name)
-        threshold: Schwellenwert für die Distanz zum Ball (in Metern)
+        links: Dictionary with player IDs and their assignments
+        t_event: The frame index of the event
+        pos_data: XY-object with the player positions
+        ball_data: XY-object with the ball positions
+        pid: The player ID (name)
+        threshold: Threshold for the distance to the ball (in meters)
 
     Returns:
-        int: Frame-Index des letzten Ballbesitzes vor dem Ereignis
+        int: Frame index of the last ball possession before the event
     """
-    # Normalisiere Spieler-ID und hole numerische ID
+    # Normalize player ID and get numerical ID
     pid = normalize(pid)
     pid_num = get_pid_from_name(pid, links)
 
-    # Hole Positionsdaten des Spielers
+    # Get player positions data
     player_data = pos_data.player(pid_num)
 
-    # Kombiniere die beiden Ball-Datensätze
+    # Combine the two ball data sets
     ball_data_1 = ball_data.player(0)
     ball_data_2 = ball_data.player(1)
     # Check if ball data arrays have different shapes
@@ -160,24 +160,23 @@ def sync_pos_data(links: Any, t_event: int,
         ball_positions = np.where(np.isnan(ball_data_1), ball_data_2,
                                   ball_data_1)
 
-    # Suche rückwärts vom Ereignis-Zeitpunkt
+    # Search backwards from the event time
     for t in range(t_event - 1, max(-1, t_event - 300), -1):
         player_pos = player_data[t, :]
         ball_pos = ball_positions[t, :]
 
-        # Überspringe Frames mit fehlenden Daten
+        # Skip frames with missing data
         if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
             continue
 
-        # Berechne Distanz zwischen Spieler und Ball
+        # Calculate distance between player and ball
         distance = np.linalg.norm(player_pos - ball_pos)
 
         if distance < threshold:
             return t
 
-    # Wenn kein Ballbesitz gefunden wurde, gebe den ursprünglichen
-    # Event-Frame zurück
-    print(f"Kein Ballbesitz vor Frame {t_event} gefunden für {pid}")
+    # If no ball possession is found, return the original event frame
+    print(f"No ball possession found before frame {t_event} for {pid}")
     return t_event
 
 
