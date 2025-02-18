@@ -99,666 +99,175 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
         return 0
 
 
-# # Read the files
-# base_path = r"D:\Handball\HBL_Events\season_20_21"
-# datengrundlage = r"Datengrundlagen"
-# base_path_grundlage = os.path.join(base_path, datengrundage)
-# name_game_path = r"HSG Wetzlar_SG Flensburg-Handewitt_
-# 04.10.2020_20-21.csv.xlsx"
-# datei_pfad = os.path.join(base_path_grundlage, name_game_path)
-# event_name = r"EventTimeline\sport_events_23400277_timeline.json"
-# event_path = os.path.join(base_path, event_name)
-# csv_pfad_name_bl = r"23400277_bl.csv"
-# csv_pfad_bl = os.path.join(base_path_grundlage, csv_pfad_name_bl)
-# csv_pfad_name_rb = r"23400277_rb.csv"
-# csv_pfad_rb = os.path.join(base_path_grundlage, csv_pfad_name_rb)
-# csv_pfad_none = os.path.join(base_path_grundlage, "23400277_none.csv")
-# output_path = os.path.join(
-#     base_path_grundlage, "detailed_results_23400277.csv")
-
-
-# 23400275 Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21
-# 23400263 TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21
-# 23400307 HSG Wetzlar_THW Kiel_10.10.2020_20-21
-# 23400277 HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21
-# 23400267 HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21
-# 23400303 TSV Hannover-Burgdorf_HSC 2000 Coburg_08.10.2020_20-21
-# 23400319 Bergischer HC_HSG Nordhorn-Lingen_11.10.2020_20-21
-# 23400315 TUSEM Essen_Rhein-Neckar Löwen_11.10.2020_20-21
-# 23400321 Rhein-Neckar Löwen_SC DHFK Leipzig_15.10.2020_20-21
-# 23400311 Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400275,
-#          "Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21"))
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400263,
-#          "TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21"))
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400307,
-#          "HSG Wetzlar_THW Kiel_10.10.2020_20-21"))
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400277,
-#          "HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21"))
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400267,
-#          "HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21"))
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400303,
-#          "TSV Hannover-Burgdorf_HSC 2000 Coburg_08.10.2020_20-21"))
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400319,
-#          "Bergischer HC_HSG Nordhorn-Lingen_11.10.2020_20-21"))
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400315,
-#          "TUSEM Essen_Rhein-Neckar Löwen_11.10.2020_20-21"))
-
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400321,
-#          "Rhein-Neckar Löwen_SC DHFK Leipzig_15.10.2020_20-21"))
-
-(excel_path, name_new_game_path, event_path, csv_bl_path,
- csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
- csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
- csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-     generate_paths(
-         23400311,
-         "Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21"))
-
-df = pd.read_excel(excel_path)
-with open(event_path, "r") as file:
-    events_inital = json.load(file)
-
-events_inital = events_inital["timeline"]
-# Adjust the data types
-df["eID"] = df["eID"].astype(str)
-df["minute"] = df["minute"].fillna(0).astype(
-    int)
-df["second"] = df["second"].fillna(0).astype(
-    int)
-df = df.dropna(subset=["clips"])
-# Add new columns to the DataFrame
-if "Event_id" not in df.columns:
-    df["Event_id"] = None
-
-if "Phase_true" not in df.columns:
-    df["Phase_true"] = None
-
-if "Phase_start_true" not in df.columns:
-    df["Phase_start_true"] = None
-
-if "Phase_end_true" not in df.columns:
-    df["Phase_end_true"] = None
-
-if "Phase_None" not in df.columns:
-    df["Phase_None"] = None
-
-if "Phase_none_time" not in df.columns:
-    df["Phase_none_time"] = None
-
-if "none_correct" not in df.columns:
-    df["none_correct"] = None
-
-if "Phase_baseline" not in df.columns:
-    df["Phase_baseline"] = None
-
-if "Phase_bl_time" not in df.columns:
-    df["Phase_bl_time"] = None
-
-if "bl_correct" not in df.columns:
-    df["bl_correct"] = None
-
-if "Phase_rulebased" not in df.columns:
-    df["Phase_rulebased"] = None
-
-if "Phase_rb_time" not in df.columns:
-    df["Phase_rb_time"] = None
-
-if "rb_correct" not in df.columns:
-    df["rb_correct"] = None
-
-if "Phase_pos-based" not in df.columns:
-    df["Phase_pos-based"] = None
-
-if "Phase_pos_time" not in df.columns:
-    df["Phase_pos_time"] = None
-
-if "pos_correct" not in df.columns:
-    df["pos_correct"] = None
-
-if "Phase_pos_rb-based" not in df.columns:
-    df["Phase_pos_rb-based"] = None
-
-if "Phase_pos_rb_time" not in df.columns:
-    df["Phase_pos_rb_time"] = None
-
-if "pos_rb_correct" not in df.columns:
-    df["pos_rb_correct"] = None
-
-if "Phase_pos_cor-based" not in df.columns:
-    df["Phase_pos_cor-based"] = None
-
-if "Phase_pos_cor_time" not in df.columns:
-    df["Phase_pos_cor_time"] = None
-
-if "pos_cor_correct" not in df.columns:
-    df["pos_cor_correct"] = None
-
-if "Phase_cost-based" not in df.columns:
-    df["Phase_cost-based"] = None
-
-if "cost_time" not in df.columns:
-    df["cost_time"] = None
-
-if "cost_correct" not in df.columns:
-    df["cost_correct"] = None
-
-if "Phase_cost_based_rb-based" not in df.columns:
-    df["Phase_cost_based_rb-based"] = None
-
-if "cost_rb_time" not in df.columns:
-    df["cost_rb_time"] = None
-
-if "cost_rb_correct" not in df.columns:
-    df["cost_rb_correct"] = None
-
-
-# Exrahe Phase from the clips column
-df["Phase_start_true"] = df["clips"].str.split("_").str[0]
-# Exrahe Phase from the clips column
-df["Phase_end_true"] = df["clips"].str.split("_").str[1]
-# Exrahe Phase from the clips column
-df["Phase_true"] = df["clips"].str.split("_").str[2]
-
-# Convert the Phase to numeric
-df["Phase_true"] = pd.to_numeric(df["Phase_true"], errors="coerce")
-
-# Read the CSV files
-df_csv_bl = pd.read_csv(csv_bl_path)
-df_csv_rb = pd.read_csv(csv_rb_path)
-df_csv_none = pd.read_csv(csv_none_path)
-df_csv_pos = pd.read_csv(csv_pos_path)
-df_csv_pos_rb = pd.read_csv(csv_pos_rb_path)
-df_csv_pos_cor = pd.read_csv(csv_pos_cor_path)
-df_csv_cost = pd.read_csv(csv_cost_path)
-df_csv_cost_cor = pd.read_csv(csv_cost_cor_path)
-df_csv_cost_rb = pd.read_csv(csv_cost_rb_path)
-# mapping
-for event in events_inital:
-    event_id = event["id"]
-
-    event_type = event["type"]
-    if "match_clock" in event:
-        match_clock = event["match_clock"]
-
-        event_minutes, event_seconds = map(int, match_clock.split(":"))
-
-        match_condition = (
-            (df["eID"] == event_type) &
-            (df["minute"] == (event_minutes)) &
-            (df["second"] == (event_seconds))
-        )
-    else:
-        match_condition = ((df["eID"] == event_type))
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-
-df["Event_id"] = df["Event_id"].fillna(0).astype(
-    int)
-for index, row in df_csv_rb.iterrows():
-    event_id = row['event_id']
-    event_time = int(row['time'])
-    phase = int(row['phase'])
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_rulebased"] = phase
-    df.loc[match_condition, "Phase_rb_time"] = event_time
-    # Get the actual value of the phase and time from df (ground truth)
-    if match_condition.any():
-        phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
-
-        time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
-        time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
-
-        correct_phase = calculate_if_correct(
-            phase_true, (phase), (time_start), (time_end), (event_time))
-
-        df.loc[match_condition, "rb_correct"] = correct_phase
-
-
-for index, row in df_csv_pos.iterrows():
-    event_id = row['event_id']
-    event_time = int(row['time'])
-    phase = int(row['phase'])
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_pos-based"] = phase
-    df.loc[match_condition, "Phase_pos_time"] = event_time
-    # Get the actual value of the phase and time from df (ground truth)
-    if match_condition.any():
-        phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
-
-        time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
-        time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
-
-        correct_phase = calculate_if_correct(
-            phase_true, (phase), (time_start), (time_end), (event_time))
-
-        df.loc[match_condition, "pos_correct"] = correct_phase
-for index, row in df_csv_pos_rb.iterrows():
-    event_id = row['event_id']
-    event_time = int(row['time'])
-    phase = int(row['phase'])
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_pos_rb-based"] = phase
-    df.loc[match_condition, "Phase_pos_rb_time"] = event_time
-    # Get the actual value of the phase and time from df (ground truth)
-    if match_condition.any():
-        phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
-
-        time_start = int(df.loc[match_condition, "Phase_start_true"].values[0])
-        time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
-
-        correct_phase = calculate_if_correct(
-            phase_true, (phase), (time_start), (time_end), (event_time))
-
-        df.loc[match_condition, "pos_rb_correct"] = correct_phase
-
-for index, row in df_csv_none.iterrows():
-    event_id = row['event_id']
-    event_time = int(row['time'])
-    phase = int(row['phase'])
-
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_None"] = phase
-    df.loc[match_condition, "Phase_none_time"] = event_time
-    # Get the actual value of the phase and time from df (ground truth)
-    if match_condition.any():
-        matched_rows = df.loc[match_condition, "Phase_true"]
-        if len(matched_rows) == 1:
-
-            phase_true = int(df.loc[match_condition, "Phase_true"].values[0])
-
+def initialize_dataframe(excel_path: str, event_path: str) -> pd.DataFrame:
+    """
+    Initialisiert und bereitet den DataFrame vor.
+
+    Args:
+        excel_path: Pfad zur Excel-Datei
+        event_path: Pfad zur Event-JSON-Datei
+
+    Returns:
+        pd.DataFrame: Initialisierter und vorbereiteter DataFrame
+    """
+    df = pd.read_excel(excel_path)
+    with open(event_path, "r") as file:
+        events_inital = json.load(file)
+
+    events_inital = events_inital["timeline"]
+
+    # Datentypen anpassen
+    df["eID"] = df["eID"].astype(str)
+    df["minute"] = df["minute"].fillna(0).astype(int)
+    df["second"] = df["second"].fillna(0).astype(int)
+    df = df.dropna(subset=["clips"])
+
+    # Neue Spalten definieren
+    neue_spalten = [
+        "Event_id", "Phase_true", "Phase_start_true", "Phase_end_true",
+        "Phase_None", "Phase_none_time", "none_correct",
+        "Phase_baseline", "Phase_bl_time", "bl_correct",
+        "Phase_rulebased", "Phase_rb_time", "rb_correct",
+        "Phase_pos-based", "Phase_pos_time", "pos_correct",
+        "Phase_pos_rb-based", "Phase_pos_rb_time", "pos_rb_correct",
+        "Phase_pos_cor-based", "Phase_pos_cor_time", "pos_cor_correct",
+        "Phase_cost-based", "cost_time", "cost_correct",
+        "Phase_cost_based_rb-based", "cost_rb_time", "cost_rb_correct"
+    ]
+
+    # Spalten initialisieren falls nicht vorhanden
+    for spalte in neue_spalten:
+        if spalte not in df.columns:
+            df[spalte] = None
+
+    # Phasen aus der clips-Spalte extrahieren
+    df["Phase_start_true"] = df["clips"].str.split("_").str[0]
+    df["Phase_end_true"] = df["clips"].str.split("_").str[1]
+    df["Phase_true"] = df["clips"].str.split("_").str[2]
+
+    # Phase zu numerisch konvertieren
+    df["Phase_true"] = pd.to_numeric(df["Phase_true"], errors="coerce")
+
+    return events_inital, df
+
+
+def process_csv_data(df: pd.DataFrame, csv_df: pd.DataFrame,
+                     method_name: str
+                     ) -> pd.DataFrame:
+    """
+    Verarbeitet CSV-Daten für verschiedene Methoden und aktualisiert
+    den DataFrame.
+
+    Args:
+        df: Haupt-DataFrame mit den Ground-Truth-Daten
+        csv_df: DataFrame mit den Vorhersagen einer bestimmten Methode
+        method_name: Name der Methode (z.B. 'rb' für regelbasiert)
+    """
+    for _, row in csv_df.iterrows():
+        event_id = row['event_id']
+        event_time = int(row['time'])
+        phase = int(row['phase'])
+        match_condition = (df["Event_id"] == event_id)
+
+        # Spalten-Namen basierend auf method_name
+        phase_col = f"Phase_{method_name}"
+        time_col = f"Phase_{method_name}_time" if (method_name != "cost"
+                                                   )else f"{method_name}_time"
+        correct_col = f"{method_name}_correct"
+
+        # DataFrame aktualisieren
+        df.loc[match_condition, "Event_id"] = event_id
+        df.loc[match_condition, phase_col] = phase
+        df.loc[match_condition, time_col] = event_time
+
+        if match_condition.any():
+            matched_rows = df.loc[match_condition, "Phase_true"]
+            idx = 0 if len(matched_rows) == 1 else 1
+
+            phase_true = int(df.loc[match_condition, "Phase_true"].values[idx])
             time_start = int(
-                df.loc[match_condition, "Phase_start_true"].values[0])
-            time_end = int(df.loc[match_condition, "Phase_end_true"].values[0])
+                df.loc[match_condition, "Phase_start_true"].values[idx])
+            time_end = int(
+                df.loc[match_condition, "Phase_end_true"].values[idx])
 
             correct_phase = calculate_if_correct(
-                phase_true, (phase), (time_start), (time_end), (event_time))
+                phase_true, phase, time_start, time_end, event_time)
+            df.loc[match_condition, correct_col] = correct_phase
 
-            df.loc[match_condition, "none_correct"] = correct_phase
+    return df
+
+
+def evaluation(matchid: int, name_match: str) -> None:
+
+    (excel_path, name_new_game_path, event_path, csv_bl_path,
+     csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
+     csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
+     csv_cost_rb_path, output_path, directory_results, output_file_all
+     ) = (generate_paths(matchid, name_match))
+
+    events_inital, df = initialize_dataframe(excel_path, event_path)
+
+    # Read the CSV files
+    df_csv_bl = pd.read_csv(csv_bl_path)
+    df_csv_rb = pd.read_csv(csv_rb_path)
+    df_csv_none = pd.read_csv(csv_none_path)
+    df_csv_pos = pd.read_csv(csv_pos_path)
+    df_csv_pos_rb = pd.read_csv(csv_pos_rb_path)
+    df_csv_pos_cor = pd.read_csv(csv_pos_cor_path)
+    df_csv_cost = pd.read_csv(csv_cost_path)
+    df_csv_cost_cor = pd.read_csv(csv_cost_cor_path)
+    df_csv_cost_rb = pd.read_csv(csv_cost_rb_path)
+    # mapping
+    for event in events_inital:
+        event_id = event["id"]
+
+        event_type = event["type"]
+        if "match_clock" in event:
+            match_clock = event["match_clock"]
+
+            event_minutes, event_seconds = map(int, match_clock.split(":"))
+
+            match_condition = (
+                (df["eID"] == event_type) &
+                (df["minute"] == (event_minutes)) &
+                (df["second"] == (event_seconds))
+            )
+            print(match_condition)
+
+            print(df["eID"] == event_type)
+            print(df["minute"] == (event_minutes))
+            print(df["second"] == (event_seconds))
         else:
-            phase_true = int(df.loc[match_condition, "Phase_true"].values[1])
-
-            time_start = int(
-                df.loc[match_condition, "Phase_start_true"].values[1])
-            time_end = int(df.loc[match_condition, "Phase_end_true"].values[1])
-
-            correct_phase = calculate_if_correct(
-                phase_true, (phase), (time_start), (time_end), (event_time))
-
-            df.loc[match_condition, "none_correct"] = correct_phase
-
-
-for index, row in df_csv_bl.iterrows():
-    event_id = row['event_id']
-    phase = row['phase']
-    event_time = row['time']
-
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_baseline"] = phase
-    df.loc[match_condition, "Phase_bl_time"] = event_time
-
-    # Check if there are any matching conditions
-    if match_condition.any():
-        # Get all matched rows for "Phase_true"
-        matched_rows = df.loc[match_condition, "Phase_true"]
-
-        # Ensure only one non-zero value exists
-        if len(matched_rows) == 1:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[0]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "bl_correct"] = correct_phase
-        else:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[1]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "bl_correct"] = correct_phase
-
-
-for index, row in df_csv_pos_cor.iterrows():
-
-    event_id = row['event_id']
-    phase = row['phase']
-    event_time = row['time']
-
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_pos_cor-based"] = phase
-    df.loc[match_condition, "Phase_pos_cor_time"] = event_time
-
-    # Check if there are any matching conditions
-    if match_condition.any():
-        # Get all matched rows for "Phase_true"
-        matched_rows = df.loc[match_condition, "Phase_true"]
-
-        # Ensure only one non-zero value exists
-        if len(matched_rows) == 1:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[0]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "pos_cor_correct"] = correct_phase
-        else:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[1]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "pos_cor_correct"] = correct_phase
-for index, row in df_csv_cost.iterrows():
-
-    event_id = row['event_id']
-    phase = row['phase']
-    event_time = row['time']
-
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_cost-based"] = phase
-    df.loc[match_condition, "cost_time"] = event_time
-
-    # Check if there are any matching conditions
-    if match_condition.any():
-        # Get all matched rows for "Phase_true"
-        matched_rows = df.loc[match_condition, "Phase_true"]
-
-        # Ensure only one non-zero value exists
-        if len(matched_rows) == 1:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[0]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "cost_correct"] = correct_phase
-        else:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[1]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "cost_correct"] = correct_phase
-for index, row in df_csv_cost_cor.iterrows():
-
-    event_id = row['event_id']
-    phase = row['phase']
-    event_time = row['time']
-
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_cost_cor-based"] = phase
-    df.loc[match_condition, "cost_cor_time"] = event_time
-
-    # Check if there are any matching conditions
-    if match_condition.any():
-        # Get all matched rows for "Phase_true"
-        matched_rows = df.loc[match_condition, "Phase_true"]
-
-        # Ensure only one non-zero value exists
-        if len(matched_rows) == 1:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[0]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "cost_cor_correct"] = correct_phase
-        else:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[1]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "cost_cor_correct"] = correct_phase
-for index, row in df_csv_cost_rb.iterrows():
-
-    event_id = row['event_id']
-    phase = row['phase']
-    event_time = row['time']
-
-    match_condition = (
-        (df["Event_id"] == event_id)
-    )
-
-    # Write the event_id to the DataFrame
-    df.loc[match_condition, "Event_id"] = event_id
-    df.loc[match_condition, "Phase_cost_based_rb-based"] = phase
-    df.loc[match_condition, "cost_rb_time"] = event_time
-
-    # Check if there are any matching conditions
-    if match_condition.any():
-        # Get all matched rows for "Phase_true"
-        matched_rows = df.loc[match_condition, "Phase_true"]
-
-        # Ensure only one non-zero value exists
-        if len(matched_rows) == 1:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[0]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "cost_rb_correct"] = correct_phase
-        else:
-            # Get the index of the single non-zero entry
-            phase_true_index = matched_rows.index[1]
-
-            # Use the index to fetch the corresponding values
-            phase_true = int(df.loc[phase_true_index, "Phase_true"])
-            time_start = int(df.loc[phase_true_index, "Phase_start_true"])
-            time_end = int(df.loc[phase_true_index, "Phase_end_true"])
-
-            # Perform phase correctness calculation
-            correct_phase = calculate_if_correct(
-                phase_true, phase, time_start, time_end, event_time
-            )
-            df.loc[match_condition, "cost_rb_correct"] = correct_phase
-df.to_excel(name_new_game_path, index=False)
-print("Excel-Datei wurde aktualisiert und gespeichert.")
-
-
-# # Accuracy for Phase_baseline
-# baseline_correct = (df['Phase_true'] == df['Phase_baseline']).sum()
-# baseline_total = len(df)
-# baseline_accuracy = baseline_correct / baseline_total
-
-# Accuracy for Phase_baseline
-baseline_correct = (df['bl_correct'] == 1).sum()
-baseline_total = len(df)
-baseline_accuracy = baseline_correct / baseline_total
-
-# Accuracy for Phase_baseline
-none_correct = (df['none_correct'] == 1).sum()
-none_accuracy = none_correct / baseline_total
-
-# Accuracy for Phase_rulebased
-rulebased_correct = (df['rb_correct'] == 1).sum()
-rulebased_accuracy = rulebased_correct / baseline_total
-
-# Accuracy for Phase_rulebased
-pos_correct = (df['pos_correct'] == 1).sum()
-pos_accuracy = pos_correct / baseline_total
-
-# Accuracy for Phase_rulebased
-pos_rb_correct = (df['pos_rb_correct'] == 1).sum()
-pos_rb_accuracy = pos_rb_correct / baseline_total
-
-# Accuracy for Phase_rulebased
-pos_cor_correct = (df['pos_cor_correct'] == 1).sum()
-pos_cor_accuracy = pos_cor_correct / baseline_total
-
-# Accuracy for Phase_cost-based
-cost_correct = (df['cost_correct'] == 1).sum()
-cost_accuracy = cost_correct / baseline_total
-
-# Accuracy for Phase_cost-based
-cost_rb_correct = (df['cost_rb_correct'] == 1).sum()
-cost_rb_accuracy = cost_rb_correct / baseline_total
-
-# Accuracy for Phase_cost-based
-cost_cor_correct = (df['cost_cor_correct'] == 1).sum()
-cost_cor_accuracy = cost_cor_correct / baseline_total
-
-
-def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
-                                      correct_column: Any) -> Any:
-    # Liste der zu berücksichtigenden Events
-    relevant_events = [
+            match_condition = ((df["eID"] == event_type))
+
+        # Write the event_id to the DataFrame
+        df.loc[match_condition, "Event_id"] = event_id
+
+    df["Event_id"] = df["Event_id"].fillna(0).astype(
+        int)
+
+    # CSV-Dateien und ihre Methoden-Namen
+    csv_files = {
+        'rulebased': (df_csv_rb, 'rb_time'),
+        'pos': (df_csv_pos, 'pos_time'),
+        'pos_rb': (df_csv_pos_rb, 'pos_rb_time'),
+        'none': (df_csv_none, 'None'),
+        'baseline': (df_csv_bl, 'baseline'),
+        'pos_cor': (df_csv_pos_cor, 'pos_cor_time'),
+        'cost': (df_csv_cost, 'cost-based'),
+        'cost_cor': (df_csv_cost_cor, 'cost_cor-based'),
+        'cost_rb': (df_csv_cost_rb, 'cost_based_rb-based')
+    }
+
+    # Verarbeite alle CSV-Dateien
+    for csv_df, method_name in csv_files.values():
+        df = process_csv_data(df, csv_df, method_name)
+
+    df.to_excel(name_new_game_path, index=False)
+    print("Excel-Datei wurde aktualisiert und gespeichert.")
+
+    # Konstanten definieren
+    RELEVANT_EVENTS = [
         "score_change",
         "shot_saved",
         "shot_blocked",
@@ -769,121 +278,71 @@ def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
         "steal"
     ]
 
-    # Filtere DataFrame für relevante Events
-    df_filtered = df[df[event_type_column].isin(relevant_events)]
+    APPROACHES = [
+        ("None", "none_correct"),
+        ("Baseline", "bl_correct"),
+        ("Rulebased", "rb_correct"),
+        ("pos", "pos_correct"),
+        ("pos_RB", "pos_rb_correct"),
+        ("pos_COR", "pos_cor_correct"),
+        ("Cost", "cost_correct"),
+        ("Cost_RB", "cost_rb_correct"),
+        ("Cost_COR", "cost_cor-based_correct")
+    ]
 
-    # Berechne Genauigkeit nur für relevante Events
-    accuracy_per_event = df_filtered.groupby(event_type_column).apply(
-        lambda group: (group[correct_column] == 1).sum() / len(group)
-    )
-    return accuracy_per_event
+    def calculate_accuracy_for_event_type(df: pd.DataFrame,
+                                          event_type_column: str,
+                                          correct_column: str) -> pd.Series:
+        """
+        Berechnet die Genauigkeit pro Event-Typ für die gegebenen Daten.
 
+        Args:
+            df: DataFrame mit den Ereignisdaten
+            event_type_column: Name der Spalte mit Event-Typen
+            correct_column: Name der Spalte mit Korrektheitswerten
 
-# Berechne Gesamtgenauigkeit für relevante Events
-relevant_events = [
-    "score_change",
-    "shot_saved",
-    "shot_blocked",
-    "seven_m_awarded",
-    "shot_off_target",
-    "technical_ball_fault",
-    "technical_rule_fault",
-    "steal"
-]
+        Returns:
+            pd.Series mit Genauigkeiten pro Event-Typ
+        """
+        df_filtered = df[df[event_type_column].isin(RELEVANT_EVENTS)]
+        return df_filtered.groupby(event_type_column)[correct_column].mean()
 
-df_relevant = df[df['eID'].isin(relevant_events)]
-baseline_total = len(df_relevant)
+    # Relevante Events filtern
+    df_relevant = df[df['eID'].isin(RELEVANT_EVENTS)]
+    # baseline_total = len(df_relevant)
 
-# Aktualisierte Genauigkeitsberechnungen
-baseline_correct = (df_relevant['bl_correct'] == 1).sum()
-baseline_accuracy = baseline_correct / baseline_total
+    # Genauigkeiten berechnen
+    accuracies = {}
+    accuracy_per_events = {}
 
-none_correct = (df_relevant['none_correct'] == 1).sum()
-none_accuracy = none_correct / baseline_total
+    for approach_name, correct_column in APPROACHES:
+        # Gesamtgenauigkeit
+        accuracies[approach_name] = (df_relevant[correct_column] == 1).mean()
 
-rulebased_correct = (df_relevant['rb_correct'] == 1).sum()
-rulebased_accuracy = rulebased_correct / baseline_total
+        # Event-spezifische Genauigkeit
+        accuracy_per_events[approach_name] = calculate_accuracy_for_event_type(
+            df, 'eID', correct_column)
 
-pos_correct = (df_relevant['pos_correct'] == 1).sum()
-pos_accuracy = pos_correct / baseline_total
+    # Ergebnisse in CSV schreiben
+    with open(output_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Approach", "Event Type", "Accuracy"])
 
-pos_rb_correct = (df_relevant['pos_rb_correct'] == 1).sum()
-pos_rb_accuracy = pos_rb_correct / baseline_total
+        # Gesamtgenauigkeiten schreiben
+        for approach_name in accuracies:
+            writer.writerow([
+                approach_name,
+                "all",
+                f"{accuracies[approach_name]:.4f}"
+            ])
 
-pos_cor_correct = (df_relevant['pos_cor_correct'] == 1).sum()
-pos_cor_accuracy = pos_cor_correct / baseline_total
+        # Event-spezifische Genauigkeiten schreiben
+        for approach_name, accuracies_per_event in accuracy_per_events.items():
+            for event, accuracy in accuracies_per_event.items():
+                writer.writerow([approach_name, event, f"{accuracy:.4f}"])
 
-cost_correct = (df_relevant['cost_correct'] == 1).sum()
-cost_accuracy = cost_correct / baseline_total
-
-cost_rb_correct = (df_relevant['cost_rb_correct'] == 1).sum()
-cost_rb_accuracy = cost_rb_correct / baseline_total
-
-cost_cor_correct = (df_relevant['cost_cor_correct'] == 1).sum()
-cost_cor_accuracy = cost_cor_correct / baseline_total
-
-
-# Berechne Genauigkeiten pro Event-Typ
-none_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'none_correct')
-baseline_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'bl_correct')
-rulebased_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'rb_correct')
-pos_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'pos_correct')
-pos_rb_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'pos_rb_correct')
-pos_cor_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'pos_cor_correct')
-cost_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'cost_correct')
-cost_rb_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'cost_rb_correct')
-cost_cor_accuracy_per_event = calculate_accuracy_for_event_type(
-    df, 'eID', 'cost_cor_correct')
-
-# Save to a CSV file
-with open(output_path, 'w', newline='') as file:
-    writer = csv.writer(file)
-
-    # Write header
-    writer.writerow(["Approach", "Event Type", "Accuracy"])
-    # Write overall accuracies
-    writer.writerow(["None", "all", f"{none_accuracy:.4f}"])
-    writer.writerow(["Baseline", "all", f"{baseline_accuracy:.4f}"])
-    writer.writerow(["Rulebased", "all", f"{rulebased_accuracy:.4f}"])
-    writer.writerow(["pos", "all", f"{pos_accuracy:.4f}"])
-    writer.writerow(["pos_RB", "all", f"{pos_rb_accuracy:.4f}"])
-    writer.writerow(["pos_COR", "all", f"{pos_cor_accuracy:.4f}"])
-    writer.writerow(["Cost", "all", f"{cost_accuracy:.4f}"])
-    writer.writerow(["Cost_RB", "all", f"{cost_rb_accuracy:.4f}"])
-    writer.writerow(["Cost_COR", "all", f"{cost_cor_accuracy:.4f}"])
-
-    # Write Phase_None accuracies
-    for event, accuracy in none_accuracy_per_event.items():
-        writer.writerow(["None", event, f"{accuracy:.4f}"])
-    # Write Phase_Baseline accuracies
-    for event, accuracy in baseline_accuracy_per_event.items():
-        writer.writerow(["Baseline", event, f"{accuracy:.4f}"])
-    # Write Phase_Rulebased accuracies
-    for event, accuracy in rulebased_accuracy_per_event.items():
-        writer.writerow(["Rulebased", event, f"{accuracy:.4f}"])
-    for event, accuracy in pos_accuracy_per_event.items():
-        writer.writerow(["pos", event, f"{accuracy:.4f}"])
-    for event, accuracy in pos_rb_accuracy_per_event.items():
-        writer.writerow(["pos_RB", event, f"{accuracy:.4f}"])
-    for event, accuracy in pos_cor_accuracy_per_event.items():
-        writer.writerow(["pos_COR", event, f"{accuracy:.4f}"])
-    for event, accuracy in cost_accuracy_per_event.items():
-        writer.writerow(["Cost", event, f"{accuracy:.4f}"])
-    for event, accuracy in cost_rb_accuracy_per_event.items():
-        writer.writerow(["Cost_RB", event, f"{accuracy:.4f}"])
-    for event, accuracy in cost_cor_accuracy_per_event.items():
-        writer.writerow(["Cost_COR", event, f"{accuracy:.4f}"])
-
-
-print("Results saved to results.csv")
+    print(f"Ergebnisse wurden in {output_path} gespeichert")
+    calculate_all_accuracies(directory_results, output_file_all)
 
 
 def calculate_all_accuracies(directory: str, output_file: str) -> None:
@@ -942,5 +401,13 @@ def calculate_all_accuracies(directory: str, output_file: str) -> None:
     print(type(rows))
 
 
-# Calculate accuracies
-calculate_all_accuracies(directory_results, output_file_all)
+evaluation(23400275, "Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21")
+evaluation(23400263, "TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21")
+evaluation(23400307, "HSG Wetzlar_THW Kiel_10.10.2020_20-21")
+evaluation(23400277, "HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21")
+evaluation(23400267, "HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21")
+evaluation(23400303, "TSV Hannover-Burgdorf_HSC 2000 Coburg_08.10.2020_20-21")
+evaluation(23400319, "Bergischer HC_HSG Nordhorn-Lingen_11.10.2020_20-21")
+evaluation(23400315, "TUSEM Essen_Rhein-Neckar Löwen_11.10.2020_20-21")
+evaluation(23400321, "Rhein-Neckar Löwen_SC DHFK Leipzig_15.10.2020_20-21")
+evaluation(23400311, "Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21")

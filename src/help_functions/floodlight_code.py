@@ -66,9 +66,9 @@ def create_event_objects(
     team = None
 
     for _, row in event_all.events.iterrows():
-        if row[0] == "timeout":
-            team = row[21]  # Store the team for the last timeout
-        elif row[0] == "timeout_over" and row[21] != team:
+        if row.iloc[0] == "timeout":
+            team = row.iloc[21]  # Store the team for the last timeout
+        elif row.iloc[0] == "timeout_over" and row.iloc[21] != team:
             continue  # Skip this timeout_over if it doesn't match the team
         else:
             team = None
@@ -295,7 +295,34 @@ def calculate_event_stream(match_id: int) -> tuple[Any, int, Any]:
     return event_stream_all, offset, event_all.events
 
 
-def plot_phases(match_id: int, approach: dv.Approach
+def approach_plot(match_id: int, approach: dv.Approach
+                  = dv.Approach.RULE_BASED,
+                  base_path: str = r"D:\Handball\HBL_Events\season_20_21"
+                  ) -> None:
+    """
+    Plots the phases of a handball match along with event markers.
+    """
+    (events, sequences, datei_pfad) = (handle_approach(
+        approach, processing.calculate_sequences(match_id),
+        match_id, os.path.join(base_path, r"Datengrundlagen")))
+    plot_phases(events, sequences, datei_pfad, match_id, approach)
+    if approach == dv.Approach.COST_BASED:
+
+        events1, sequences = correct_events_fl(events, sequences)
+        datei_pfad = os.path.join(os.path.join(base_path, r"Datengrundlagen"),
+                                  r"cost_based_cor",
+                                  (str(match_id) + "_cost_based_cor_fl.csv"))
+        plot_phases(events1, sequences, datei_pfad, match_id, approach)
+        events2, sequences = synchronize_events_fl_rule_based(
+            events, sequences)
+        datei_pfad = os.path.join(os.path.join(base_path, r"Datengrundlagen"),
+                                  r"cost_based_rb",
+                                  (str(match_id) + "_cost_based_rb_fl.csv"))
+        plot_phases(events2, sequences, datei_pfad, match_id, approach)
+
+
+def plot_phases(events: Any, sequences: list[tuple[int, int, int]],
+                datei_pfad: str, match_id: int, approach: dv.Approach
                 = dv.Approach.RULE_BASED,
                 base_path: str = r"D:\Handball\HBL_Events\season_20_21"
                 ) -> None:
@@ -321,9 +348,15 @@ def plot_phases(match_id: int, approach: dv.Approach
         The function assumes the existence of several helper functions
         and modules such as `helpFuctions`, `np`, `plt`, and `Code`.
     """
-    (events, sequences, datei_pfad) = (handle_approach(
-        approach, processing.calculate_sequences(match_id),
-        match_id, os.path.join(base_path, r"Datengrundlagen")))
+    # if approach == dv.Approach.COST_BASED:
+    #     (events, sequences, datei_pfad) = (handle_approach(
+    #     approach, processing.calculate_sequences(match_id),
+    #     match_id, os.path.join(base_path, r"Datengrundlagen")))
+
+    # else:
+    #     (events, sequences, datei_pfad) = (handle_approach(
+    #         approach, processing.calculate_sequences(match_id),
+    #         match_id, os.path.join(base_path, r"Datengrundlagen")))
     analysis_results = sport_analysis.analyze_events_and_formations(
         events, match_id)
     print(analysis_results)

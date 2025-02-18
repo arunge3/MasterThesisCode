@@ -127,13 +127,13 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 # 23400321 Rhein-Neckar Löwen_SC DHFK Leipzig_15.10.2020_20-21
 # 23400311 Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21
 
-(excel_path, name_new_game_path, event_path, csv_bl_path,
- csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
- csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
- csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-     generate_paths(
-         23400275,
-         "Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21"))
+# (excel_path, name_new_game_path, event_path, csv_bl_path,
+#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
+#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
+#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
+#      generate_paths(
+#          23400275,
+#          "Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21"))
 
 # (excel_path, name_new_game_path, event_path, csv_bl_path,
 #  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
@@ -189,7 +189,7 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 #  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
 #      generate_paths(
 #          23400315,
-#          "TUSEM Essen_Rhein-Neckar Löwen_11.10.2020_20-21"))'
+#          "TUSEM Essen_Rhein-Neckar Löwen_11.10.2020_20-21"))
 
 # (excel_path, name_new_game_path, event_path, csv_bl_path,
 #  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
@@ -199,13 +199,13 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 #          23400321,
 #          "Rhein-Neckar Löwen_SC DHFK Leipzig_15.10.2020_20-21"))
 
-# (excel_path, name_new_game_path, event_path, csv_bl_path,
-#  csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
-#  csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
-#  csv_cost_rb_path, output_path, directory_results, output_file_all) = (
-#      generate_paths(
-#          23400311,
-#          "Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21"))
+(excel_path, name_new_game_path, event_path, csv_bl_path,
+ csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
+ csv_pos_cor_path, csv_cost_path, csv_cost_cor_path,
+ csv_cost_rb_path, output_path, directory_results, output_file_all) = (
+     generate_paths(
+         23400311,
+         "Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21"))
 
 df = pd.read_excel(excel_path)
 with open(event_path, "r") as file:

@@ -192,7 +192,7 @@ def berechne_phase_und_speichern_fl(events: pd.DataFrame,
         for event in events.values:
             event_id = event[23]
             event_type = event[0]
-            event_time = event[22]
+            event_time = event[24]
 
             # Phase berechnen
             phase = None
