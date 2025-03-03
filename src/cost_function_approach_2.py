@@ -300,24 +300,18 @@ def prepare(match_id: int) -> tuple[Any, Any, Any, Any]:
     return pos_data, pos_data[ball_num], pid_dict, xids
 
 
-def main(match_id: int, events: Any,
-         pos_data: Any,
-         ball_data: Any,
-         pid_dict: Any,
-         xids: Any) -> Any:
+def main(match_id: int, events: Any) -> Any:
     """
     Main function to prepare the data for the cost function.
     Args:
         match_id: The match ID
         events: The events
-        pos_data: The position data
-        ball_data: The ball data
-        pid_dict: The player ID dictionary
-        xids: The player ID dictionary
 
     Returns:
         Any: The events with the tracking indices
+
     """
+    pos_data, ball_data, pid_dict, xids = prepare(match_id)
     ball_data, ball_acceleration = prepare_ball_data(ball_data)
     for idx, event in enumerate(events.values):
         links, player_data, pid = prepare_position_cost(
