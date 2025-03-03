@@ -316,7 +316,7 @@ def run_template_matching(match_id: int
         )
         if formation_dict:
             formations.append(formation_dict)
-    print(formations)
+    # print(formations)
     return formations
 
 

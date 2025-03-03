@@ -18,6 +18,7 @@ from floodlight.io.sportradar import read_event_data_json
 from matplotlib import pyplot as plt
 
 import cost_function_approach
+import cost_function_approach_2
 import help_functions
 import help_functions.pos_data_approach
 import help_functions.reformatjson_methods
@@ -359,7 +360,7 @@ def plot_phases(events: Any, sequences: list[tuple[int, int, int]],
     #         match_id, os.path.join(base_path, r"Datengrundlagen")))
     analysis_results = sport_analysis.analyze_events_and_formations(
         events, match_id)
-    print(analysis_results)
+    # print(analysis_results)
     # Define positions for each phase
     phase_positions = {
         0: 2,  # (inac)
@@ -517,7 +518,7 @@ def handle_approach(approach: dv.Approach,
     """
     if approach == dv.Approach.RULE_BASED:
         (_, _, events) = calculate_event_stream(match_id)
-        print(events)
+        # print(events)
         team_order = calculate_team_order(events)
         events = add_team_to_events(events, team_order)
         events, sequences = synchronize_events_fl_rule_based(
@@ -569,8 +570,9 @@ def handle_approach(approach: dv.Approach,
         (_, _, events) = calculate_event_stream(match_id)
         team_order = calculate_team_order(events)
         events = add_team_to_events(events, team_order)
-        events = cost_function_approach.sync_events_cost_function(
-            events, sequences, match_id)
+        events = cost_function_approach_2.main(match_id, events)
+        # events = cost_function_approach.sync_events_cost_function(
+        #     events, sequences, match_id)
 
         datei_pfad = os.path.join(datengrundlage, r"cost_based",
                                   (str(match_id) + "_cost_based_fl.csv"))

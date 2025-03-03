@@ -11,7 +11,8 @@ import floodlight.core.xy
 import floodlight.io.kinexon as fliok
 import numpy as np
 import pandas as pd
-from rapidfuzz import process
+from matplotlib import pyplot as plt
+from rapidfuzz import fuzz
 
 import variables.data_variables as dv
 
@@ -32,12 +33,16 @@ def sync_event_data_pos_data(events: Any,
     pos_data = fliok.read_position_data_csv(filepath_data)
     pid_dict, _, _, _ = fliok.get_meta_data(
         filepath_data)
-    print(pid_dict)
+    # print(pid_dict)
     xids = fliok.create_links_from_meta_data(pid_dict, identifier="name")
     ball_num = find_key_position(pid_dict, "Ball")
 
     # events = add_information_to_events(events, match_id)
     for idx, event in enumerate(events.values):
+        if (event[0] == "score_change" and str(
+                give_last_event_fl(events.values, event[24])) ==
+                "seven_m_awarded"):
+            events.iloc[idx, 0] = "seven_m_scored"
         if event[0] in ["score_change", "shot_saved", "shot_off_target",
                         "shot_blocked", "technical_rule_fault",
                         "seven_m_awarded", "steal", "technical_ball_fault"]:
@@ -122,7 +127,7 @@ def get_pos_filepath(match_id: int,
 def sync_pos_data(links: Any, t_event: int,
                   pos_data: floodlight.core.xy.XY,
                   ball_data: floodlight.core.xy.XY, pid: str,
-                  threshold: float = 0.1) -> int:
+                  threshold: float = 0.99) -> int:
     """
     This function finds the last frame before a specific event where a
     player had the ball.
@@ -144,40 +149,130 @@ def sync_pos_data(links: Any, t_event: int,
 
     # Get player positions data
     player_data = pos_data.player(pid_num)
+    if ball_data.N <= 2:
+        # Combine the two ball data sets
+        ball_data_1 = ball_data.player(0)
+        ball_data_2 = ball_data.player(1)
 
-    # Combine the two ball data sets
-    ball_data_1 = ball_data.player(0)
-    ball_data_2 = ball_data.player(1)
-    # Check if ball data arrays have different shapes
-    if ball_data_1.shape != ball_data_2.shape:
-        # If first ball data array is empty, use second ball data array
-        if ball_data_1.size == 0:
-            ball_positions = ball_data_2
-        # If second ball data array is empty, keep first ball data array
-        elif ball_data_2.size == 0:
-            ball_positions = ball_data_1
+        if ball_data_1.shape != ball_data_2.shape:
+            # If first ball data array is empty, use second ball data array
+            if ball_data_1.size == 0:
+                ball_positions = ball_data_2
+            # If second ball data array is empty, keep first ball data array
+            elif ball_data_2.size == 0:
+                ball_positions = ball_data_1
+            else:
+                raise ValueError(
+                    f"Ball data arrays have different shapes: "
+                    f"{ball_data_1.shape} and {ball_data_2.shape}")
+        else:
+            # Check if ball data arrays have different shapes
+            both_valid = ~np.isnan(ball_data_1) & ~np.isnan(ball_data_2)
+            if np.any(both_valid):
+                raise ValueError(
+                    f"Warning: Found {np.sum(both_valid)} positions where "
+                    "both ball tracks have valid data")
+            ball_positions = np.where(np.isnan(ball_data_1), ball_data_2,
+                                      ball_data_1)
+        pos_index = False
+        ball_index = False
+        none_idx = 0
+        max_time = t_event-500
+        # Search backwards from the event time
+        for t in range(t_event - 1, max(-1, max_time), -1):
+            player_pos = player_data[t, :]
+            ball_pos = ball_positions[t, :]
+
+            # Skip frames with missing data
+            if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
+                none_idx += 1
+                continue
+
+            # Calculate distance between player and ball
+            distance = np.linalg.norm(player_pos - ball_pos)
+
+            if distance < 0.3:
+                return t
+        if none_idx >= 499:
+            for t in range(max_time, 0, -1):
+                if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
+                    none_idx += 1
+                else:
+                    break
+        if none_idx > 10:
+            print(f"Game was interrupted for {none_idx} frames")
+            max_time = max_time-none_idx
+        for t in range(t_event - 1, max(-1, max_time), -1):
+            player_pos = player_data[t, :]
+            ball_pos = ball_positions[t, :]
+            if not np.isnan(player_pos).any():
+                pos_index = True
+            if not np.isnan(ball_pos).any():
+                ball_index = True
+            # Skip frames with missing data
+            if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
+                continue
+
+            # Calculate distance between player and ball
+            distance = np.linalg.norm(player_pos - ball_pos)
+
+            if distance < threshold:
+                return t
     else:
-        ball_positions = np.where(np.isnan(ball_data_1), ball_data_2,
-                                  ball_data_1)
 
-    # Search backwards from the event time
-    for t in range(t_event - 1, max(-1, t_event - 300), -1):
-        player_pos = player_data[t, :]
-        ball_pos = ball_positions[t, :]
-
-        # Skip frames with missing data
-        if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
-            continue
-
-        # Calculate distance between player and ball
-        distance = np.linalg.norm(player_pos - ball_pos)
-
-        if distance < threshold:
-            return t
-
+        raise ValueError(
+            f"No ball possession found before frame {t_event} for {pid}")
     # If no ball possession is found, return the original event frame
+    if not pos_index:
+        print(
+            f"No player position data found for {pid} from frame {t_event} "
+            f"to {max_time}")
+    if not ball_index:
+        print(f"No ball data found from frame {t_event} to {max_time}")
+    plot_test(max_time, t_event, player_data, ball_positions, pid)
     print(f"No ball possession found before frame {t_event} for {pid}")
     return t_event
+
+
+def plot_test(max_time: int, t_event: int,
+              player_data: Any, ball_positions: Any, pid: str) -> None:
+    """
+    Plots the movement path of a player and the ball.
+    Args:
+        max_time (int): The maximum time of the data.
+        t_event (int): The time of the event.
+        player_data (Any): The player data.
+        ball_positions (Any): The ball positions.
+        pid (str): The player ID.
+    """
+    # Define the time range for plotting
+    plot_range = range(max_time, t_event)
+    # Prepare data for plotting
+    player_positions = player_data[plot_range]
+    ball_positions = ball_positions[plot_range]
+
+    # Create plot
+    plt.figure(figsize=(16, 8))  # Aspect ratio 2:1 for 40x20m field
+
+    # Plot player positions
+    plt.plot(player_positions[:, 0],
+             player_positions[:, 1], 'b.-', label='Player')
+
+    # Plot ball positions
+    plt.plot(ball_positions[:, 0], ball_positions[:, 1], 'r.-', label='Ball')
+
+    plt.title(f'Movement path of player {pid} and ball')
+    plt.xlabel('X-Position (m)')
+    plt.ylabel('Y-Position (m)')
+    plt.legend()
+    plt.grid(True)
+
+    # Set axis limits to exact Handball field dimensions
+    plt.xlim(-20, 20)  # Length of the field (40m)
+    plt.ylim(-10, 10)  # Width of the field (20m)
+    plt.gca().set_aspect('equal')  # Force aspect ratio 2:1
+
+    # plt.show()
 
 
 def find_key_position(data: dict[Any, Any], key: str) -> int:
@@ -202,7 +297,7 @@ def find_key_position(data: dict[Any, Any], key: str) -> int:
     raise ValueError("Key not found")  # Key not found
 
 
-def get_pid_from_name(pid: str, links: dict[str, str]) -> int:
+def get_pid_from_name(pid: str, links: dict[str, str]) -> Any:
     """
     Retrieves the normalized PID from a given name.
     Args:
@@ -219,28 +314,63 @@ def get_pid_from_name(pid: str, links: dict[str, str]) -> int:
 
 
 def get_pid_with_fuzzy_match(pid: str, links_normalized: dict[str, str],
-                             threshold: int = 80) -> int:
+                             threshold: int = 80) -> Any:
     """
     Finds the best match for a given PID in a dictionary of
     normalized PIDs.
     Args:
-
         pid (str): The PID to search for.
-        links_normalized (dict): A dictionary of normalized PIDs.
-        threshold (int, optional): The threshold for the fuzzy match.
-        Defaults to 80.
-    Returns:
-        int: The best match for the PID if found, otherwise None.
-    """
-    # Use `extractOne` to find the best match for the pid
-    best_match = process.extractOne(
-        pid, links_normalized.keys(), score_cutoff=threshold)
-    matched_key: int
-    if best_match:
-        _, _, matched_key = best_match
-        return matched_key
+        links_normalized (dict): Dictionary with normalized PIDs.
+        threshold (int, optional): Threshold for the fuzzy match.
+        Default: 80
 
-    raise ValueError(f"No suitable match found for pid '{pid}'.")
+    Returns:
+        int: The best match for the PID
+
+    Raises:
+        ValueError: If no matching PID is found
+    """
+    # Split the search name into first and last name
+    search_first, search_last = split_name(pid)
+
+    best_match = ""
+    best_score = 0
+
+    for key in links_normalized.keys():
+        # Split the comparison name
+        current_first, current_last = split_name(key)
+
+        # Calculate the match for the last name (weight: 70%)
+        lastname_score = fuzz.ratio(search_last, current_last) * 0.7
+
+        # Calculate the match for the first name (weight: 30%)
+        firstname_score = fuzz.ratio(search_first, current_first) * 0.3
+
+        # Total score
+        total_score = lastname_score + firstname_score
+
+        if total_score > best_score:
+            best_score = total_score
+            best_match = key
+
+    # Check the threshold (converted to 0-100 scale)
+    if best_score * 100 >= threshold:
+        return links_normalized[best_match]
+
+    raise ValueError(
+        f"No matching PID found for pid '{pid}'.")
+
+
+def split_name(name: str) -> tuple[str, str]:
+    """
+    Splits a name into first and last name.
+    Args:
+        name (str): The name to split.
+    Returns:
+        tuple: A tuple containing the first and last name.
+    """
+    parts = name.split()
+    return parts[0], " ".join(parts[1:]) if len(parts) > 1 else ""
 
 
 def normalize(name: str) -> str:
@@ -312,5 +442,30 @@ def calculate_group_id(match_id: int,
     filepath = get_pos_filepath(match_id, season, basepath)
     df = pd.read_csv(filepath)
     distinct_pairs = df[['group id', 'group name']].drop_duplicates()
-    print(distinct_pairs)
+    # print(distinct_pairs)
     return distinct_pairs
+
+
+def give_last_event_fl(events: pd.DataFrame, time: int) -> Any:
+    """
+    Returns the last event from the list of events that occurred before the
+    given time, excluding certain types of events.
+    Args:
+        events (List[Any]): A list of event dictionaries.
+        time (int): The time threshold to compare events against.
+    Returns:
+        Any: The last event that occurred before the given time and is not of
+        type "suspension", "yellow_card", "red_card", or "suspension_over".
+        Returns None if no such event is found.
+    """
+    for event in reversed(events):
+        if event[24] < time:
+
+            if event[0] not in [
+                "suspension",
+                "yellow_card",
+                "red_card",
+                "suspension_over",
+            ]:
+                return event
+    return None

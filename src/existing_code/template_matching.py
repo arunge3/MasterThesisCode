@@ -48,7 +48,7 @@ def template_matching(coords, templates):
         # Konvertieren Sie das Template in ein numpy-Array und stellen Sie sicher,
         # dass es die richtige Form hat
         template_array = np.array(templates[key]).flatten()  # Zuerst flatten
-        print(template_array)
+        # print(template_array)
         # Dann in (n,2) Form umwandeln
         templates[key] = template_array.reshape(-1, 2)
         # plt.scatter(templates[key][:, ::2], templates[key][:, 1::2])
@@ -96,7 +96,7 @@ def template_matching(coords, templates):
 
     fsims = {}
     for formation in templates:
-        print(templates[formation].shape[1])
+        # print(templates[formation].shape[1])
         cost_matrix = np.square(
             cdist(
                 average_position_scaled,
