@@ -8,9 +8,8 @@ from typing import Any
 import floodlight.io.kinexon as fliok
 import numpy as np
 import pandas as pd
-from floodlight import XY
-from floodlight.models.kinematics import AccelerationModel
 
+import position_helpers
 import variables.data_variables as dv
 from help_functions.pos_data_approach import (find_key_position,
                                               get_pid_from_name,
@@ -215,71 +214,6 @@ def prepare_position_cost(pos_data: Any,
     return None, None, None
 
 
-def prepare_ball_data(ball_data: Any) -> tuple[Any, Any]:
-    """
-    Prepares the ball data for the cost function.
-    Args:
-        ball_data: The ball data
-
-    Returns:
-        tuple: The ball data and the acceleration of the ball
-    """
-    # Zuerst die kombinierten Ballpositionen ermitteln
-    if ball_data.N <= 2:
-        ball_data_1 = ball_data.player(0)
-        ball_data_2 = ball_data.player(1)
-
-        if ball_data_1.shape != ball_data_2.shape:
-            if ball_data_1.size == 0:
-                ball_positions = ball_data_2
-            elif ball_data_2.size == 0:
-                ball_positions = ball_data_1
-            else:
-                raise ValueError(
-                    f"Ball data arrays have different shapes: "
-                    f"{ball_data_1.shape} and {ball_data_2.shape}")
-        else:
-            # Kombiniere die Daten, indem wir den jeweils aktiven Ball nehmen
-            both_valid = ~np.isnan(ball_data_1) & ~np.isnan(ball_data_2)
-            if np.any(both_valid):
-                raise ValueError(
-                    f"Warning: Found {np.sum(both_valid)}"
-                    "positions where both ball tracks have valid data")
-            # Wenn beide NaN sind, behalte NaN,
-            # ansonsten nimm den nicht-NaN Wert
-            ball_positions = np.where(
-                ~np.isnan(ball_data_1), ball_data_1,
-                np.where(~np.isnan(ball_data_2), ball_data_2, np.nan))
-
-    # Debugging
-    print("ball_positions shape:", ball_positions.shape)
-    print("ball_positions:", ball_positions)
-
-    # Erstelle ein neues XY-Objekt mit den kombinierten Ballpositionen
-    combined_ball_data = XY(ball_positions.reshape(-1, 2),
-                            framerate=ball_data.framerate)
-
-    # Sicherstellen, dass die Daten nicht leer oder fehlerhaft sind
-    if combined_ball_data is None or combined_ball_data.xy.shape[0] == 0:
-        raise ValueError(
-            "combined_ball_data is empty or invalid, "
-            "cannot compute acceleration.")
-
-    # Berechne die Beschleunigung nur für die kombinierten Daten
-    am = AccelerationModel()
-    am.fit(combined_ball_data)
-
-    # Debugging: Prüfe, ob acceleration() None zurückgibt
-    ball_acceleration = am.acceleration()
-    if ball_acceleration is None:
-        raise ValueError("AccelerationModel.acceleration() returned None. "
-                         "Check if fit() was successful.")
-
-    ball_acceleration = np.hstack(ball_acceleration)
-
-    return ball_positions, ball_acceleration
-
-
 def prepare(match_id: int) -> tuple[Any, Any, Any, Any]:
     """
     Prepares the data for the cost function.
@@ -312,7 +246,8 @@ def main(match_id: int, events: Any) -> Any:
 
     """
     pos_data, ball_data, pid_dict, xids = prepare(match_id)
-    ball_data, ball_acceleration = prepare_ball_data(ball_data)
+    ball_data, ball_acceleration = position_helpers.prepare_ball_data(
+        ball_data)
     for idx, event in enumerate(events.values):
         links, player_data, pid = prepare_position_cost(
             pos_data, pid_dict, xids, event)

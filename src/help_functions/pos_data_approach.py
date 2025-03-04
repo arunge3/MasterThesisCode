@@ -14,6 +14,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from rapidfuzz import fuzz
 
+import position_helpers
 import variables.data_variables as dv
 
 
@@ -149,75 +150,51 @@ def sync_pos_data(links: Any, t_event: int,
 
     # Get player positions data
     player_data = pos_data.player(pid_num)
-    if ball_data.N <= 2:
-        # Combine the two ball data sets
-        ball_data_1 = ball_data.player(0)
-        ball_data_2 = ball_data.player(1)
+    ball_positions, _ = position_helpers.prepare_ball_data(ball_data)
+    pos_index = False
+    ball_index = False
+    none_idx = 0
+    max_time = t_event-500
+    # Search backwards from the event time
+    for t in range(t_event - 1, max(-1, max_time), -1):
+        player_pos = player_data[t, :]
+        ball_pos = ball_positions[t, :]
 
-        if ball_data_1.shape != ball_data_2.shape:
-            # If first ball data array is empty, use second ball data array
-            if ball_data_1.size == 0:
-                ball_positions = ball_data_2
-            # If second ball data array is empty, keep first ball data array
-            elif ball_data_2.size == 0:
-                ball_positions = ball_data_1
-            else:
-                raise ValueError(
-                    f"Ball data arrays have different shapes: "
-                    f"{ball_data_1.shape} and {ball_data_2.shape}")
-        else:
-            # Check if ball data arrays have different shapes
-            both_valid = ~np.isnan(ball_data_1) & ~np.isnan(ball_data_2)
-            if np.any(both_valid):
-                raise ValueError(
-                    f"Warning: Found {np.sum(both_valid)} positions where "
-                    "both ball tracks have valid data")
-            ball_positions = np.where(np.isnan(ball_data_1), ball_data_2,
-                                      ball_data_1)
-        pos_index = False
-        ball_index = False
-        none_idx = 0
-        max_time = t_event-500
-        # Search backwards from the event time
-        for t in range(t_event - 1, max(-1, max_time), -1):
-            player_pos = player_data[t, :]
-            ball_pos = ball_positions[t, :]
+        # Skip frames with missing data
+        if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
+            none_idx += 1
+            continue
 
-            # Skip frames with missing data
+        # Calculate distance between player and ball
+        distance = np.linalg.norm(player_pos - ball_pos)
+
+        if distance < 0.3:
+            return t
+    if none_idx >= 499:
+        for t in range(max_time, 0, -1):
             if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
                 none_idx += 1
-                continue
+            else:
+                break
+    if none_idx > 10:
+        print(f"Game was interrupted for {none_idx} frames")
+        max_time = max_time-none_idx
+    for t in range(t_event - 1, max(-1, max_time), -1):
+        player_pos = player_data[t, :]
+        ball_pos = ball_positions[t, :]
+        if not np.isnan(player_pos).any():
+            pos_index = True
+        if not np.isnan(ball_pos).any():
+            ball_index = True
+        # Skip frames with missing data
+        if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
+            continue
 
-            # Calculate distance between player and ball
-            distance = np.linalg.norm(player_pos - ball_pos)
+        # Calculate distance between player and ball
+        distance = np.linalg.norm(player_pos - ball_pos)
 
-            if distance < 0.3:
-                return t
-        if none_idx >= 499:
-            for t in range(max_time, 0, -1):
-                if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
-                    none_idx += 1
-                else:
-                    break
-        if none_idx > 10:
-            print(f"Game was interrupted for {none_idx} frames")
-            max_time = max_time-none_idx
-        for t in range(t_event - 1, max(-1, max_time), -1):
-            player_pos = player_data[t, :]
-            ball_pos = ball_positions[t, :]
-            if not np.isnan(player_pos).any():
-                pos_index = True
-            if not np.isnan(ball_pos).any():
-                ball_index = True
-            # Skip frames with missing data
-            if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
-                continue
-
-            # Calculate distance between player and ball
-            distance = np.linalg.norm(player_pos - ball_pos)
-
-            if distance < threshold:
-                return t
+        if distance < threshold:
+            return t
     else:
 
         raise ValueError(
