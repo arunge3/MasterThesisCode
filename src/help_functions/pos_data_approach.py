@@ -37,11 +37,25 @@ def sync_event_data_pos_data(events: Any,
     # print(pid_dict)
     xids = fliok.create_links_from_meta_data(pid_dict, identifier="name")
     ball_num = find_key_position(pid_dict, "Ball")
+    ball_positions, _ = position_helpers.prepare_ball_data(pos_data[ball_num])
+    # Normalize names in xids dictionary
+    normalized_xids = {}
+    for name, id_value in xids.items():
+        # Remove accents and special characters
+        normalized_name = unicodedata.normalize(
+            'NFKD', name).encode('ASCII', 'ignore').decode('utf-8')
+        # Remove any non-alphanumeric characters except spaces
+        normalized_name = re.sub(r'[^\w\s]', '', normalized_name)
+        # Convert to lowercase and strip whitespace
+        normalized_name = normalized_name.lower().strip()
+        normalized_xids[normalized_name] = id_value
 
     # events = add_information_to_events(events, match_id)
     for idx, event in enumerate(events.values):
-        if (event[0] == "score_change" and str(
-                give_last_event_fl(events.values, event[24])) ==
+        last_event = give_last_event_fl(events.values, event[24])
+        if last_event is not None:
+            last_event = last_event[0]
+        if (event[0] == "score_change" and last_event ==
                 "seven_m_awarded"):
             events.iloc[idx, 0] = "seven_m_scored"
         if event[0] in ["score_change", "shot_saved", "shot_off_target",
@@ -49,21 +63,44 @@ def sync_event_data_pos_data(events: Any,
                         "seven_m_awarded", "steal", "technical_ball_fault"]:
             if event[8] is not None:
                 pos_num = find_key_position(pid_dict, event[10])
-                for i in xids.items():
-                    if i[0] == event[10]:
+                # Normalize the player name from the event for comparison
+                event_player_name = event[10]
+                if event_player_name:
+                    # Apply the same normalization as above
+                    normalized_event_player = (unicodedata.normalize(
+                        'NFKD', event_player_name
+                    ).encode('ASCII', 'ignore').decode('utf-8'))
+                    normalized_event_player = re.sub(
+                        r'[^\w\s]', '', normalized_event_player)
+                    normalized_event_player = (normalized_event_player
+                                               .lower().strip())
+                for i in normalized_xids.items():
+                    # Compare with both original and normalized names
+                    if i[0] == event[10] or i[0] == normalized_event_player:
                         events.iloc[idx, 24] = (sync_pos_data(
                             i[1], event[24],
                             pos_data[pos_num],
-                            pos_data[ball_num],
+                            ball_positions,
                             event[8]))
             elif event[14] is not None:
                 pos_num = find_key_position(pid_dict, event[10])
-                for i in xids.items():
-                    if i[0] == event[10]:
+                # Normalize the player name from the event for comparison
+                event_player_name = event[10]
+                if event_player_name:
+                    # Apply the same normalization as above
+                    normalized_event_player = (unicodedata.normalize(
+                        'NFKD', event_player_name
+                    ).encode('ASCII', 'ignore').decode('utf-8'))
+                    normalized_event_player = re.sub(
+                        r'[^\w\s]', '', normalized_event_player)
+                    normalized_event_player = (normalized_event_player
+                                               .lower().strip())
+                for i in normalized_xids.items():
+                    if i[0] == event[10] or i[0] == normalized_event_player:
                         events.iloc[idx, 24] = (sync_pos_data(
                             i[1], event[24],
                             pos_data[pos_num],
-                            pos_data[ball_num],
+                            ball_positions,
                             event[14]["name"]))
 
     return events
@@ -127,7 +164,7 @@ def get_pos_filepath(match_id: int,
 
 def sync_pos_data(links: Any, t_event: int,
                   pos_data: floodlight.core.xy.XY,
-                  ball_data: floodlight.core.xy.XY, pid: str,
+                  ball_positions: floodlight.core.xy.XY, pid: str,
                   threshold: float = 0.99) -> int:
     """
     This function finds the last frame before a specific event where a
@@ -150,15 +187,19 @@ def sync_pos_data(links: Any, t_event: int,
 
     # Get player positions data
     player_data = pos_data.player(pid_num)
-    ball_positions, _ = position_helpers.prepare_ball_data(ball_data)
+
     pos_index = False
     ball_index = False
     none_idx = 0
     max_time = t_event-500
     # Search backwards from the event time
     for t in range(t_event - 1, max(-1, max_time), -1):
-        player_pos = player_data[t, :]
-        ball_pos = ball_positions[t, :]
+        try:
+            player_pos = player_data[t, :]
+            ball_pos = ball_positions[t, :]
+        except Exception as e:
+            print(f"Warning: Error accessing position data at frame {t}: {e}")
+            continue
 
         # Skip frames with missing data
         if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
@@ -180,8 +221,20 @@ def sync_pos_data(links: Any, t_event: int,
         print(f"Game was interrupted for {none_idx} frames")
         max_time = max_time-none_idx
     for t in range(t_event - 1, max(-1, max_time), -1):
-        player_pos = player_data[t, :]
-        ball_pos = ball_positions[t, :]
+        try:
+            player_pos = player_data[t, :]
+        except Exception as e:
+            print(
+                f"Warning: Error accessing player position data at frame {t}: "
+                f"{e}")
+            continue
+        try:
+            ball_pos = ball_positions[t, :]
+        except Exception as e:
+            print(
+                f"Warning: Error accessing ball position data at frame {t}: "
+                f"{e}")
+            continue
         if not np.isnan(player_pos).any():
             pos_index = True
         if not np.isnan(ball_pos).any():
@@ -197,7 +250,7 @@ def sync_pos_data(links: Any, t_event: int,
             return t
     else:
 
-        raise ValueError(
+        print(
             f"No ball possession found before frame {t_event} for {pid}")
     # If no ball possession is found, return the original event frame
     if not pos_index:
@@ -225,31 +278,36 @@ def plot_test(max_time: int, t_event: int,
     # Define the time range for plotting
     plot_range = range(max_time, t_event)
     # Prepare data for plotting
-    player_positions = player_data[plot_range]
-    ball_positions = ball_positions[plot_range]
+    try:
+        player_positions = player_data[plot_range]
+        ball_positions = ball_positions[plot_range]
 
-    # Create plot
-    plt.figure(figsize=(16, 8))  # Aspect ratio 2:1 for 40x20m field
+        # Create plot
+        plt.figure(figsize=(16, 8))  # Aspect ratio 2:1 for 40x20m field
 
-    # Plot player positions
-    plt.plot(player_positions[:, 0],
-             player_positions[:, 1], 'b.-', label='Player')
+        # Plot player positions
+        plt.plot(player_positions[:, 0],
+                 player_positions[:, 1], 'b.-', label='Player')
 
-    # Plot ball positions
-    plt.plot(ball_positions[:, 0], ball_positions[:, 1], 'r.-', label='Ball')
+        # Plot ball positions
+        plt.plot(ball_positions[:, 0],
+                 ball_positions[:, 1], 'r.-', label='Ball')
 
-    plt.title(f'Movement path of player {pid} and ball')
-    plt.xlabel('X-Position (m)')
-    plt.ylabel('Y-Position (m)')
-    plt.legend()
-    plt.grid(True)
+        plt.title(f'Movement path of player {pid} and ball')
+        plt.xlabel('X-Position (m)')
+        plt.ylabel('Y-Position (m)')
+        plt.legend()
+        plt.grid(True)
 
-    # Set axis limits to exact Handball field dimensions
-    plt.xlim(-20, 20)  # Length of the field (40m)
-    plt.ylim(-10, 10)  # Width of the field (20m)
-    plt.gca().set_aspect('equal')  # Force aspect ratio 2:1
+        # Set axis limits to exact Handball field dimensions
+        plt.xlim(-20, 20)  # Length of the field (40m)
+        plt.ylim(-10, 10)  # Width of the field (20m)
+        plt.gca().set_aspect('equal')  # Force aspect ratio 2:1
 
-    # plt.show()
+        # plt.show()
+    except Exception as e:
+        print(f"Error accessing player position data for plot: {e}")
+        # player_positions = np.array([])  # Empty array as fallback
 
 
 def find_key_position(data: dict[Any, Any], key: str) -> int:
@@ -421,6 +479,24 @@ def calculate_group_id(match_id: int,
     distinct_pairs = df[['group id', 'group name']].drop_duplicates()
     # print(distinct_pairs)
     return distinct_pairs
+
+
+def give_next_event_fl(events: pd.DataFrame, time: int) -> Any:
+    """
+    Returns the next event from the list of events that occurred after the
+    given time, excluding certain types of events.
+    """
+    for event in (events):
+        if event[24] > time:
+
+            if event[0] not in [
+                "suspension",
+                "yellow_card",
+                "red_card",
+                "suspension_over",
+            ]:
+                return event
+    return None
 
 
 def give_last_event_fl(events: pd.DataFrame, time: int) -> Any:

@@ -24,6 +24,7 @@ import help_functions.pos_data_approach
 import help_functions.reformatjson_methods
 import sport_analysis
 import variables.data_variables as dv
+from compute_differences import sportanalysis
 from plot_functions import processing
 from plot_functions.plot_phases import berechne_phase_und_speichern_fl
 
@@ -306,10 +307,16 @@ def approach_plot(match_id: int, approach: dv.Approach
     (events, sequences, datei_pfad) = (handle_approach(
         approach, processing.calculate_sequences(match_id),
         match_id, os.path.join(base_path, r"Datengrundlagen")))
+    events = sportanalysis.evaluation_of_players_on_field(
+        match_id, events, sequences)
+    events = sportanalysis.evaluate_phase_events(events, sequences)
     plot_phases(events, sequences, datei_pfad, match_id, approach)
     if approach == dv.Approach.COST_BASED:
 
         events1, sequences = correct_events_fl(events, sequences)
+        events1 = sportanalysis.evaluation_of_players_on_field(
+            match_id, events1, sequences)
+        events1 = sportanalysis.evaluate_phase_events(events1, sequences)
         datei_pfad = os.path.join(os.path.join(base_path, r"Datengrundlagen"),
                                   r"cost_based_cor",
                                   (str(match_id) + "_cost_based_cor_fl.csv"))
@@ -319,6 +326,9 @@ def approach_plot(match_id: int, approach: dv.Approach
         datei_pfad = os.path.join(os.path.join(base_path, r"Datengrundlagen"),
                                   r"cost_based_rb",
                                   (str(match_id) + "_cost_based_rb_fl.csv"))
+        events2 = sportanalysis.evaluation_of_players_on_field(
+            match_id, events, sequences)
+        events2 = sportanalysis.evaluate_phase_events(events2, sequences)
         plot_phases(events2, sequences, datei_pfad, match_id, approach)
 
 
@@ -536,12 +546,16 @@ def handle_approach(approach: dv.Approach,
             events, match_id)
     elif approach == dv.Approach.BASELINE:
         (_, _, events) = calculate_event_stream(match_id)
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
         events = adjust_timestamp_baseline(events)
 
         datei_pfad = os.path.join(datengrundlage, r"baseline",
                                   (str(match_id) + "_bl_fl.csv"))
     elif approach == dv.Approach.NONE:
         (_, _, events) = calculate_event_stream(match_id)
+        team_order = calculate_team_order(events)
+        events = add_team_to_events(events, team_order)
         datei_pfad = os.path.join(
             datengrundlage, r"none", (str(match_id) + "_none_fl.csv"))
     elif approach == dv.Approach.POS_RB:

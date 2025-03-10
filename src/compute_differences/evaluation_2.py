@@ -91,7 +91,7 @@ def calculate_if_correct(phase_true: int, phase_predicted: int,
 
 def process_csv_file(df: pd.DataFrame, csv_df: pd.DataFrame,
                      phase_column: str, time_column: str,
-                     correct_column: str) -> None:
+                     correct_column: str) -> pd.DataFrame:
     """
     Process a CSV file and update the main DataFrame with phase,
     time, and correctness information.
@@ -104,7 +104,7 @@ def process_csv_file(df: pd.DataFrame, csv_df: pd.DataFrame,
         correct_column: Name of the column to store correctness
         information
     """
-    for index, row in csv_df.iterrows():
+    for _, row in csv_df.iterrows():
         event_id = row['event_id']
         event_time = int(row['time'])
         phase = int(row['phase'])
@@ -135,6 +135,8 @@ def process_csv_file(df: pd.DataFrame, csv_df: pd.DataFrame,
                 phase_true, phase, time_start, time_end, event_time
             )
             df.loc[match_condition, correct_column] = correct_phase
+
+    return df
 
 
 def calculate_model_accuracy(df: pd.DataFrame,
@@ -177,18 +179,54 @@ def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
     return accuracy_per_event
 
 
+def calculate_accuracy_for_specific_events(df: pd.DataFrame,
+                                           correct_column: str
+                                           ) -> Any:
+    """
+    Calculate accuracy specifically for predefined handball events.
+
+    Args:
+        df: DataFrame containing the data
+        correct_column: Column name for correctness values
+
+    Returns:
+        tuple: (overall accuracy for specified events, dict of accuracies
+        per event type)
+    """
+    # Define the specific events we want to analyze
+    specific_events = [
+        "score_change", "shot_saved", "shot_off_target", "shot_blocked",
+        "technical_rule_fault", "seven_m_awarded", "steal",
+        "technical_ball_fault"
+    ]
+
+    # Filter DataFrame for specific events
+    specific_events_df = df[df['eID'].isin(specific_events)]
+
+    # Calculate overall accuracy for specific events
+    correct_count = (specific_events_df[correct_column] == 1).sum()
+    total_count = len(specific_events_df)
+    overall_accuracy = correct_count / total_count if total_count > 0 else 0
+
+    return overall_accuracy
+
+
 def write_results_to_csv(output_path: str,
                          accuracy_data: list[tuple[str, str, float]],
-                         event_type_accuracies: dict[Any, Any]) -> None:
+                         event_type_accuracies: dict[Any, Any],
+                         specific_events_accuracies:
+                             dict[str, tuple[float, dict[str, float]]]
+                         ) -> None:
     """
     Write accuracy results to a CSV file.
 
     Args:
         output_path: Path to the output CSV file
-        accuracy_data: List of tuples containing
-        (approach, event_type, accuracy)
-        event_type_accuracies: Dictionary of event
-        type accuracies per approach
+        accuracy_data: List of tuples containing (approach, event_type,
+        accuracy)
+        event_type_accuracies: Dictionary of event type accuracies per approach
+        specific_events_accuracies: Dictionary of accuracies for specific
+        events per approach
     """
     # Create directory if it doesn't exist
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -207,6 +245,16 @@ def write_results_to_csv(output_path: str,
         for approach, accuracies in event_type_accuracies.items():
             for event, accuracy in accuracies.items():
                 writer.writerow([approach, event, f"{accuracy:.4f}"])
+
+        # Write specific events section
+        writer.writerow([])  # Empty row for spacing
+        writer.writerow(["Specific Events Accuracies"])
+        writer.writerow(["Approach", "Event Type", "Accuracy"])
+
+        for approach, overall_acc in specific_events_accuracies.items():
+            # Write overall accuracy for specific events
+            writer.writerow(
+                [approach, "specific_events_overall", f"{overall_acc:.4f}"])
 
     print(f"Results saved to {output_path}")
 
@@ -241,8 +289,16 @@ def calculate_all_accuracies(directory: str,
                     for _, row in df.iterrows():
                         approach = row['Approach']
                         event_type = row['Event Type']
-                        accuracy = row['Accuracy']
-                        type_accuracies[approach][event_type].append(accuracy)
+                        # Convert accuracy string to float
+                        try:
+                            accuracy = float(row['Accuracy'])
+                            type_accuracies[approach][event_type].append(
+                                accuracy)
+                        except ValueError:
+                            print(
+                                f"Warning: Could not convert accuracy value "
+                                f"'{row['Accuracy']}' to float")
+                            continue
             except Exception as e:
                 print(f"Error processing file {file_path}: {e}")
 
@@ -303,10 +359,8 @@ def initialize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def main() -> None:
+def main(game_number: int, game_name: str) -> None:
     # Generate paths for the current game
-    game_number = 23400311
-    game_name = "Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21"
 
     (excel_path, name_new_game_path, event_path, csv_bl_path,
      csv_rb_path, csv_none_path, csv_pos_path, csv_pos_rb_path,
@@ -315,12 +369,18 @@ def main() -> None:
          generate_paths(game_number, game_name))
 
     # Read and prepare the main DataFrame
-    df = pd.read_excel(excel_path)
+    df = pd.read_excel(excel_path)  # Lesen der Excel Datei (True Values)
     with open(event_path, "r") as file:
         events_inital = json.load(file)
 
     events_inital = events_inital["timeline"]
-
+    for idx, event in enumerate(events_inital):
+        last_event = give_last_event_fl(events_inital, event["time"])
+        if last_event is not None:
+            last_event = last_event[1]
+        if (event["type"] == "score_change" and last_event["type"] ==
+                "seven_m_awarded"):
+            events_inital[idx]["type"] = "seven_m_scored"
     # Adjust the data types
     df["eID"] = df["eID"].astype(str)
     df["minute"] = df["minute"].fillna(0).astype(int)
@@ -328,6 +388,7 @@ def main() -> None:
     df = df.dropna(subset=["clips"])
 
     # Initialize all required columns
+    # Excel Datei mit allen Spalten für die Actual Values
     df = initialize_dataframe_columns(df)
 
     # Extract phase information from clips
@@ -372,24 +433,24 @@ def main() -> None:
     df["Event_id"] = df["Event_id"].fillna(0).astype(int)
 
     # Process all CSV files
-    process_csv_file(df, df_csv_rb, "Phase_rulebased",
-                     "Phase_rb_time", "rb_correct")
-    process_csv_file(df, df_csv_pos, "Phase_pos-based",
-                     "Phase_pos_time", "pos_correct")
-    process_csv_file(df, df_csv_pos_rb, "Phase_pos_rb-based",
-                     "Phase_pos_rb_time", "pos_rb_correct")
-    process_csv_file(df, df_csv_none, "Phase_None",
-                     "Phase_none_time", "none_correct")
-    process_csv_file(df, df_csv_bl, "Phase_baseline",
-                     "Phase_bl_time", "bl_correct")
-    process_csv_file(df, df_csv_pos_cor, "Phase_pos_cor-based",
-                     "Phase_pos_cor_time", "pos_cor_correct")
-    process_csv_file(df, df_csv_cost, "Phase_cost-based",
-                     "cost_time", "cost_correct")
-    process_csv_file(df, df_csv_cost_cor, "Phase_cost_cor-based",
-                     "cost_cor_time", "cost_cor_correct")
-    process_csv_file(df, df_csv_cost_rb, "Phase_cost_based_rb-based",
-                     "cost_rb_time", "cost_rb_correct")
+    df = process_csv_file(df, df_csv_rb, "Phase_rulebased",
+                          "Phase_rb_time", "rb_correct")
+    df = process_csv_file(df, df_csv_pos, "Phase_pos-based",
+                          "Phase_pos_time", "pos_correct")
+    df = process_csv_file(df, df_csv_pos_rb, "Phase_pos_rb-based",
+                          "Phase_pos_rb_time", "pos_rb_correct")
+    df = process_csv_file(df, df_csv_none, "Phase_None",
+                          "Phase_none_time", "none_correct")
+    df = process_csv_file(df, df_csv_bl, "Phase_baseline",
+                          "Phase_bl_time", "bl_correct")
+    df = process_csv_file(df, df_csv_pos_cor, "Phase_pos_cor-based",
+                          "Phase_pos_cor_time", "pos_cor_correct")
+    df = process_csv_file(df, df_csv_cost, "Phase_cost-based",
+                          "cost_time", "cost_correct")
+    df = process_csv_file(df, df_csv_cost_cor, "Phase_cost_cor-based",
+                          "cost_cor_time", "cost_cor_correct")
+    df = process_csv_file(df, df_csv_cost_rb, "Phase_cost_based_rb-based",
+                          "cost_rb_time", "cost_rb_correct")
 
     # Save the updated DataFrame
     os.makedirs(os.path.dirname(name_new_game_path), exist_ok=True)
@@ -453,8 +514,39 @@ def main() -> None:
         "Cost_COR": cost_cor_accuracy_per_event.to_dict()
     }
 
-    # Write detailed results to CSV
-    write_results_to_csv(output_path, accuracy_data, event_type_accuracies)
+    # Calculate accuracies for specific events
+    specific_events_accuracies = {}
+    specific_events_accuracies["None"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'none_correct'))
+    specific_events_accuracies["Baseline"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'bl_correct'))
+    specific_events_accuracies["Rulebased"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'rb_correct'))
+    specific_events_accuracies["pos"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'pos_correct'))
+    specific_events_accuracies["pos_RB"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'pos_rb_correct'))
+    specific_events_accuracies["pos_COR"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'pos_cor_correct'))
+    specific_events_accuracies["Cost"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'cost_correct'))
+    specific_events_accuracies["Cost_RB"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'cost_rb_correct'))
+    specific_events_accuracies["Cost_COR"] = (
+        calculate_accuracy_for_specific_events(
+            df, 'cost_cor_correct'))
+
+    # Write detailed results to CSV with specific events accuracies
+    write_results_to_csv(output_path, accuracy_data,
+                         event_type_accuracies, specific_events_accuracies)
 
     # Calculate and write summary results
     calculate_all_accuracies(directory_results, output_file_all)
@@ -462,5 +554,12 @@ def main() -> None:
     print(f"Evaluation completed for game {game_number}: {game_name}")
 
 
+def give_last_event_fl(events_inital: list[dict[str, Any]], time: int) -> Any:
+    for event in enumerate(events_inital):
+        if event[1]["time"] > time:
+            return event
+    return None
+
+
 if __name__ == "__main__":
-    main()
+    main(23400311, "Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21")
