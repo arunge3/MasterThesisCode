@@ -370,6 +370,19 @@ def plot_phases(events: Any, sequences: list[tuple[int, int, int]],
     #         match_id, os.path.join(base_path, r"Datengrundlagen")))
     analysis_results = sport_analysis.analyze_events_and_formations(
         events, match_id)
+    phase_results = sport_analysis.calculate_goal_success_rate_per_phase(
+        events)
+    player_count_results = sport_analysis.calculate_player_count_per_phase(
+        events)
+
+    # Join all three dictionaries into a
+    # single comprehensive results dictionary
+    combined_results = {
+        **analysis_results,
+        **phase_results,
+        **player_count_results
+    }
+
     # print(analysis_results)
     # Define positions for each phase
     phase_positions = {
@@ -427,7 +440,7 @@ def plot_phases(events: Any, sequences: list[tuple[int, int, int]],
     analysis_results_path = os.path.join(
         base_path, f"analysis_results_{match_id}_{approach.name}.json")
     with open(analysis_results_path, 'w', encoding='utf-8') as f:
-        json.dump(analysis_results, f, ensure_ascii=False, indent=4)
+        json.dump(combined_results, f, ensure_ascii=False, indent=4)
     berechne_phase_und_speichern_fl(events, sequences, datei_pfad)
     # Add event markers with labels from `type`
     if hasattr(events, 'values'):

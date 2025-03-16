@@ -26,7 +26,7 @@ def evaluate_phase_events(events: pd.DataFrame,
     if 'phase' not in events.columns:
         events['phase'] = None
     for idx, event in enumerate(events.values):
-        if event[1] in ["score_change", "shot_saved", "shot_off_target",
+        if event[0] in ["score_change", "shot_saved", "shot_off_target",
                         "shot_blocked", "technical_rule_fault",
                         "seven_m_awarded", "steal", "technical_ball_fault"]:
             (_, _, sequence) = get_sequence(event[24], sequences)
@@ -40,7 +40,7 @@ def get_sequence(timestamp: int, sequence: pd.DataFrame) -> pd.DataFrame:
         start_frame, end_frame, _ = sequence[i]
         if start_frame <= timestamp <= end_frame:
             return sequence[i]
-    return None
+    return (timestamp, timestamp, 0)
 
 
 # def evaluate_counter_events(excel_path: str) -> None:
@@ -66,12 +66,12 @@ def get_sequence(timestamp: int, sequence: pd.DataFrame) -> pd.DataFrame:
 #     pos_events = []
 #     inactive_events = []
 #     for event in df.values:
-#         if event[1] in specific_events:
-#             if event[24] in {3, 4}:
+#         if event[0] in specific_events:
+#             if event[28] in {3, 4}:
 #                 counter_events.append(event)
-#             elif event[24] in {1, 2}:
+#             elif event[28] in {1, 2}:
 #                 pos_events.append(event)
-#             elif event[24] == 0:
+#             elif event[28] == 0:
 #                 inactive_events.append(event)
 
 #     # Calculate accuracy for each approach
@@ -215,9 +215,11 @@ def evaluation_of_players_on_field(match_id: int, events: pd.DataFrame,
     team_home_name = normalized_team_order[0]
     team_away_name = normalized_team_order[1]
     for index, (name, id_value) in enumerate(normalized_xids.items()):
-        if name == team_home_name:
+        # Check if team name is contained in the name or vice versa
+        # to handle partial matches
+        if team_home_name in name or name in team_home_name:
             team_home_position = pos_data[index]
-        if name == team_away_name:
+        if team_away_name in name or name in team_away_name:
             team_away_position = pos_data[index]
     team_home_count = 0.0
     team_away_count = 0.0
@@ -245,6 +247,8 @@ def get_players_count(sequence: pd.DataFrame,
                       position_data: pd.DataFrame) -> float:
     """
     Counts the number of players on the field during a specific sequence.
+    Only counts players who are within the field boundaries:
+    x: [-20, 20], y: [-10, 10]
 
     Args:
         sequence (pd.DataFrame): A row from the sequence
@@ -253,34 +257,39 @@ def get_players_count(sequence: pd.DataFrame,
         position data of players.
 
     Returns:
-        int: The number of players detected in the position data
-        during the sequence.
+        float: The average number of players detected on the
+        field during the sequence.
     """
     start_frame, end_frame, phase = sequence
-    # Count unique player IDs in the filtered position data
-    # Exclude the ball from the count (assuming ball has a specific ID pattern)
     players_count = 0.0
     player_count_frame = 0
     player_count_frame_array = []
-    for frame in range(start_frame, end_frame + 1):
 
+    for frame in range(start_frame, end_frame-1):
         for index in range((position_data.N+1)):
             player_pos = position_data.player(index)
             frame_data = player_pos[frame]
-            # Add player IDs from this frame to the set
-            # Typically we'd exclude the ball ID here if it's known
+
             if frame_data.any() and np.isfinite(frame_data).any():
-                player_count_frame += 1
+                # Check if player is within field boundaries
+                x, y = frame_data[0], frame_data[1]
+                if -20 <= x <= 20 and -10 <= y <= 10:
+                    player_count_frame += 1
+
         player_count_frame_array.append(player_count_frame)
+        if player_count_frame > 7:
+            print(f"Player count frame {frame} is {player_count_frame}")
         player_count_frame = 0
-    # Calculate the mean of all values in player_count_frame
+
+    # Calculate the mean number of players
     if player_count_frame_array:
         players_count = sum(player_count_frame_array) / \
             len(player_count_frame_array)
     else:
         players_count = 0
+
     if players_count > 7:
-        print(f"Player count frame {frame} is {players_count}")
+        print(f"Average player count is {players_count}")
     return players_count
 
 

@@ -19,7 +19,9 @@ def prepare_ball_data(ball_data: Any) -> tuple[Any, Any]:
     else:
         ball_data_1 = ball_data.player(0)
         ball_data_2 = ball_data.player(1)
+
         ball_positions = combine_ball_data(ball_data_1, ball_data_2)
+
         if ball_data.N > 2:
 
             # Process any additional ball data players if they exist
@@ -27,7 +29,6 @@ def prepare_ball_data(ball_data: Any) -> tuple[Any, Any]:
                 ball_data_i = ball_data.player(i)
                 ball_positions = combine_ball_data(ball_positions, ball_data_i)
                 # Here you could add logic to combine additional ball data
-
     combined_ball_data = XY(ball_positions.reshape(-1, 2),
                             framerate=ball_data.framerate)
 
@@ -56,14 +57,18 @@ def combine_ball_data(ball_data_1: Any, ball_data_2: Any) -> Any:
             raise ValueError(
                 f"Ball data arrays have different shapes: "
                 f"{ball_data_1.shape} and {ball_data_2.shape}")
+
     else:
         both_valid = ~np.isnan(ball_data_1) & ~np.isnan(ball_data_2)
         if np.any(both_valid):
             ball_positions = combine_both_valid_ball_data(
                 ball_data_1, ball_data_2)
 
+            first_idx = np.where(both_valid)[0][0] if np.any(
+                both_valid) else 'N/A'
             print(f"Warning: Found {np.sum(both_valid)}"
-                  "positions where both ball tracks have valid data")
+                  f" positions where both ball tracks have valid data. "
+                  f"First occurrence at index {first_idx}")
         else:
             ball_positions = np.where(
                 ~np.isnan(ball_data_1), ball_data_1,

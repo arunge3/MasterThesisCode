@@ -8,7 +8,7 @@ import variables.data_variables as dv
 # # 23400307 THW Kiel_HSG Wetzlar 10.10.20
 
 # floodlight_code.approach_plot(23400307, dv.Approach.NONE)
-floodlight_code.approach_plot(23400307, dv.Approach.BASELINE)
+# floodlight_code.approach_plot(23400307, dv.Approach.BASELINE)
 # floodlight_code.approach_plot(23400307, dv.Approach.RULE_BASED)
 # floodlight_code.approach_plot(23400307, dv.Approach.POS_DATA)
 # floodlight_code.approach_plot(23400307, dv.Approach.POS_CORRECTION)
@@ -82,48 +82,50 @@ floodlight_code.approach_plot(23400307, dv.Approach.BASELINE)
 # floodlight_code.approach_plot(23400311, dv.Approach.NONE)
 # floodlight_code.approach_plot(23400311, dv.Approach.BASELINE)
 # floodlight_code.approach_plot(23400311, dv.Approach.RULE_BASED)
-# floodlight_code.approach_plot(23400311, dv.Approach.POS_DATA)
+floodlight_code.approach_plot(23400311, dv.Approach.POS_DATA)
 # # TODO Ball data. N == 3 and both (0 und 1) data are valid in 10 frames
 # floodlight_code.approach_plot(23400311, dv.Approach.POS_CORRECTION)
 # floodlight_code.approach_plot(23400311, dv.Approach.POS_RB)
-# floodlight_code.approach_plot(23400311, dv.Approach.COST_BASED)
+floodlight_code.approach_plot(23400311, dv.Approach.COST_BASED)
 # # floodlight_code.approach_plot(23400311, dv.Approach.COST_BASED_COR)
 # # floodlight_code.approach_plot(23400311, dv.Approach.COST_BASED_RB)
 
 
 # # 23400321 Rhein-Neckar Löwen_SC DHfK Leipzig 15.10.20
 
-# floodlight_code.approach_plot(23400321, dv.Approach.NONE)
-# floodlight_code.approach_plot(23400321, dv.Approach.BASELINE)
-# floodlight_code.approach_plot(23400321, dv.Approach.RULE_BASED)
+# # floodlight_code.approach_plot(23400321, dv.Approach.NONE)
+# # floodlight_code.approach_plot(23400321, dv.Approach.BASELINE)
+# # floodlight_code.approach_plot(23400321, dv.Approach.RULE_BASED)
 # floodlight_code.approach_plot(23400321, dv.Approach.POS_DATA)
-# floodlight_code.approach_plot(23400321, dv.Approach.POS_CORRECTION)
-# floodlight_code.approach_plot(23400321, dv.Approach.POS_RB)
+# # floodlight_code.approach_plot(23400321, dv.Approach.POS_CORRECTION)
+# # floodlight_code.approach_plot(23400321, dv.Approach.POS_RB)
 # floodlight_code.approach_plot(23400321, dv.Approach.COST_BASED)
-# # floodlight_code.approach_plot(23400321, dv.Approach.COST_BASED_COR)
-# # floodlight_code.approach_plot(23400321, dv.Approach.COST_BASED_RB)
+# # # floodlight_code.approach_plot(23400321, dv.Approach.COST_BASED_COR)
+# # # floodlight_code.approach_plot(23400321, dv.Approach.COST_BASED_RB)
 
 
-# # 23400303 TSV Hannover-Burgdorf_HSC 2000 Coburg 08.10.20
+# # # 23400303 TSV Hannover-Burgdorf_HSC 2000 Coburg 08.10.20
 
-# floodlight_code.approach_plot(23400303, dv.Approach.NONE)
-# floodlight_code.approach_plot(23400303, dv.Approach.BASELINE)
-# floodlight_code.approach_plot(23400303, dv.Approach.RULE_BASED)
-# floodlight_code.approach_plot(23400303, dv.Approach.POS_DATA)
-# floodlight_code.approach_plot(23400303, dv.Approach.POS_CORRECTION)
-# floodlight_code.approach_plot(23400303, dv.Approach.POS_RB)
-# floodlight_code.approach_plot(23400303, dv.Approach.COST_BASED)
-# # floodlight_code.approach_plot(23400303, dv.Approach.COST_BASED_COR)
-# # floodlight_code.approach_plot(23400303, dv.Approach.COST_BASED_RB)
+# # floodlight_code.approach_plot(23400303, dv.Approach.NONE)
+# # floodlight_code.approach_plot(23400303, dv.Approach.BASELINE)
+# # floodlight_code.approach_plot(23400303, dv.Approach.RULE_BASED)
+# # floodlight_code.approach_plot(23400303, dv.Approach.POS_DATA)
+# # floodlight_code.approach_plot(23400303, dv.Approach.POS_CORRECTION)
+# # floodlight_code.approach_plot(23400303, dv.Approach.POS_RB)
+# # floodlight_code.approach_plot(23400303, dv.Approach.COST_BASED)
+# # # floodlight_code.approach_plot(23400303, dv.Approach.COST_BASED_COR)
+# # # floodlight_code.approach_plot(23400303, dv.Approach.COST_BASED_RB)
 
-# # 23400315 TUSEM Essen_Rhein-Neckar Löwen 11.10.20
+# # # 23400315 TUSEM Essen_Rhein-Neckar Löwen 11.10.20
 
-# floodlight_code.approach_plot(23400315, dv.Approach.NONE)
-# floodlight_code.approach_plot(23400315, dv.Approach.BASELINE)
-# floodlight_code.approach_plot(23400315, dv.Approach.RULE_BASED)
+# # floodlight_code.approach_plot(23400315, dv.Approach.NONE)
+# # floodlight_code.approach_plot(23400315, dv.Approach.BASELINE)
+# # floodlight_code.approach_plot(23400315, dv.Approach.RULE_BASED)
 # floodlight_code.approach_plot(23400315, dv.Approach.POS_DATA)
-# floodlight_code.approach_plot(23400315, dv.Approach.POS_CORRECTION)
-# floodlight_code.approach_plot(23400315, dv.Approach.POS_RB)
+# # floodlight_code.approach_plot(23400315, dv.Approach.POS_CORRECTION)
+# # floodlight_code.approach_plot(23400315, dv.Approach.POS_RB)
 # floodlight_code.approach_plot(23400315, dv.Approach.COST_BASED)
-# # floodlight_code.approach_plot(23400315, dv.Approach.COST_BASED_COR)
-# # floodlight_code.approach_plot(23400315, dv.Approach.COST_BASED_RB)
+# # # floodlight_code.approach_plot(23400315, dv.Approach.COST_BASED_COR)
+# # # floodlight_code.approach_plot(23400315, dv.Approach.COST_BASED_RB)
+
+# # 311, 315, 321, 263

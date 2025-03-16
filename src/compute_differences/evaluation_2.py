@@ -154,7 +154,7 @@ def calculate_model_accuracy(df: pd.DataFrame,
         float: Accuracy value
     """
     correct_count = (df[correct_column] == 1).sum()
-    total = len(df)
+    total = df[correct_column].isin([0, 1]).sum()
     return correct_count / total if total > 0 else 0
 
 
@@ -174,7 +174,7 @@ def calculate_accuracy_for_event_type(df: Any, event_type_column: Any,
     # Find the accuracy for each event type
     accuracy_per_event = df.groupby(event_type_column).apply(
         lambda group: (group[correct_column] ==
-                       1).sum() / len(group)
+                       1).sum() / group[correct_column].isin([0, 1]).sum()
     )
     return accuracy_per_event
 
@@ -205,7 +205,7 @@ def calculate_accuracy_for_specific_events(df: pd.DataFrame,
 
     # Calculate overall accuracy for specific events
     correct_count = (specific_events_df[correct_column] == 1).sum()
-    total_count = len(specific_events_df)
+    total_count = specific_events_df[correct_column].isin([0, 1]).sum()
     overall_accuracy = correct_count / total_count if total_count > 0 else 0
 
     return overall_accuracy
@@ -563,3 +563,12 @@ def give_last_event_fl(events_inital: list[dict[str, Any]], time: int) -> Any:
 
 if __name__ == "__main__":
     main(23400311, "Füchse Berlin_SC DHFK Leipzig_11.10.2020_20-21")
+    main(23400275, "Rhein-Neckar Löwen_TVB Stuttgart_04.10.2020_20-21")
+    main(23400263, "TSV GWD Minden_TSV Hannover-Burgdorf_01.10.2020_20-21")
+    main(23400307, "HSG Wetzlar_THW Kiel_10.10.2020_20-21")
+    main(23400277, "HSG Wetzlar_SG Flensburg-Handewitt_04.10.2020_20-21")
+    main(23400267, "HSC 2000 Coburg_TBV Lemgo Lippe_01.10.2020_20-21")
+    main(23400303, "TSV Hannover-Burgdorf_HSC 2000 Coburg_08.10.2020_20-21")
+    main(23400319, "Bergischer HC_HSG Nordhorn-Lingen_11.10.2020_20-21")
+    main(23400315, "TUSEM Essen_Rhein-Neckar Löwen_11.10.2020_20-21")
+    main(23400321, "Rhein-Neckar Löwen_SC DHFK Leipzig_15.10.2020_20-21")

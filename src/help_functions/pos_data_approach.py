@@ -211,6 +211,7 @@ def sync_pos_data(links: Any, t_event: int,
 
         if distance < 0.3:
             return t
+    # plot_test(max_time, t_event, player_data, ball_positions, pid)
     if none_idx >= 499:
         for t in range(max_time, 0, -1):
             if np.isnan(player_pos).any() or np.isnan(ball_pos).any():
@@ -259,7 +260,7 @@ def sync_pos_data(links: Any, t_event: int,
             f"to {max_time}")
     if not ball_index:
         print(f"No ball data found from frame {t_event} to {max_time}")
-    plot_test(max_time, t_event, player_data, ball_positions, pid)
+    # plot_test(max_time, t_event, player_data, ball_positions, pid)
     print(f"No ball possession found before frame {t_event} for {pid}")
     return t_event
 
@@ -304,7 +305,7 @@ def plot_test(max_time: int, t_event: int,
         plt.ylim(-10, 10)  # Width of the field (20m)
         plt.gca().set_aspect('equal')  # Force aspect ratio 2:1
 
-        # plt.show()
+        plt.show()
     except Exception as e:
         print(f"Error accessing player position data for plot: {e}")
         # player_positions = np.array([])  # Empty array as fallback
