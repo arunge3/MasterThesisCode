@@ -8,13 +8,64 @@
 # für die ein neuer Wert gefunden wurde.
 import re
 import unicodedata
-from typing import Any
+from typing import Any, Union
 
 import floodlight.io.kinexon as fliok
 import numpy as np
 import pandas as pd
 
 from help_functions.pos_data_approach import get_pos_filepath
+
+
+def next_phase(events: pd.DataFrame,
+               sequences: list[tuple[int, int, int]]
+               ) -> pd.DataFrame:
+    """
+    Determines the next phase for each event based on the sequences.
+    """
+    if 'next_phase' not in events.columns:
+        events['next_phase'] = None
+    for idx, event in enumerate(events.values):
+        if event[0] in ["score_change", "shot_saved", "shot_off_target",
+                        "shot_blocked", "technical_rule_fault",
+                        "seven_m_awarded", "steal", "technical_ball_fault"]:
+            phase = get_next_phase(sequences, event[24])
+            if phase is not None:
+                events.iloc[idx, 29] = phase
+    return events
+
+
+def get_next_phase(sequences: list[tuple[int, int, int]], timestamp: int
+                   ) -> Union[int, None]:
+    """
+    Determines the next phase for a given sequence.
+    """
+    for i in range(len(sequences)):
+        sequnce = sequences[i]
+        if sequnce[0] <= timestamp <= sequnce[1]:
+
+            return find_next_non_null_phase(sequences, i)
+    return None
+
+
+def find_next_non_null_phase(sequences: list[tuple[int, int, int]],
+                             current_idx: int) -> Union[int, None]:
+    """
+    Findet den nächsten nicht-null Phaseneintrag nach dem aktuellen Index.
+
+    Args:
+        events: DataFrame mit den Events
+        current_idx: Aktueller Index, von dem aus gesucht werden soll
+
+    Returns:
+        tuple: (Index des nächsten nicht-null Eintrags, Phasenwert) oder
+        (None, None) wenn keiner gefunden
+    """
+    for idx in range(current_idx + 1, len(sequences)):
+        sequence = sequences[idx]
+        if sequence[2] is not None and sequence[2] != 0:
+            return sequence[2]
+    return None
 
 
 def evaluate_phase_events(events: pd.DataFrame,

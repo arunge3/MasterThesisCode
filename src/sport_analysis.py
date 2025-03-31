@@ -1,7 +1,62 @@
-from typing import Any, Counter
+from typing import Any, Counter, Union
 
 import variables.data_variables as dv
 from template_start import run_template_matching
+
+
+def calculate_next_phase(events: Any) -> dict[Any, Any]:
+    """
+    Calculates the next phase for each event based on the sequences.
+    Counts how often each event type is followed by specific phases.
+
+    Returns:
+        Dictionary with structure:
+        {
+            'Next_Phase_Statistics': {
+                'event_type': {
+                    'total': total_count,
+                    'next_phases': {
+                        1: count_phase_1,
+                        2: count_phase_2,
+                        3: count_phase_3,
+                        4: count_phase_4
+                    }
+                }
+            }
+        }
+    """
+    stats: dict[str, dict[str, Union[int, dict[int, int]]]] = {}
+
+    for event in events.values:
+        event_type = str(event[0])  # Ensure event_type is a string
+        next_phase = event[29]
+
+        # Skip if event type is not interesting or next phase is None
+        if event_type not in ["score_change", "shot_saved", "shot_off_target",
+                              "shot_blocked", "technical_rule_fault",
+                              "seven_m_awarded", "steal",
+                              "technical_ball_fault"]:
+            continue
+
+        # Initialize dict for new event type
+        if event_type not in stats:
+            stats[event_type] = {
+                'total': 0,
+                'next_phases': {1: 0, 2: 0, 3: 0, 4: 0}
+            }
+
+        # Safely access and increment total count
+        total = stats[event_type]['total']
+        if isinstance(total, int):
+            stats[event_type]['total'] = total + 1
+
+        # Count next phase if it exists
+        if next_phase is not None and next_phase in [1, 2, 3, 4]:
+            next_phases = stats[event_type]['next_phases']
+            if isinstance(next_phases, dict) and next_phase in next_phases:
+                next_phases[next_phase] += 1
+
+    return {'Next_Phase_Statistics': stats}
 
 
 def calculate_goal_success_rate_per_phase(events: Any
@@ -284,17 +339,16 @@ def calculate_player_count_per_phase(events: Any) -> dict[Any, Any]:
 def analyze_events_and_formations(events: Any, match_id: int
                                   ) -> dict[Any, Any]:
     """
-      Analyzes events and defensive formations at specific times
-    in the game.
+    Analyzes events and defensive formations at specific
+    times in the game.
 
     Args:
         events (pd.DataFrame): DataFrame with event data
-        sequences (pd.DataFrame): DataFrame with sequence data
         match_id (int): ID of the match to be analyzed
 
     Returns:
-        dict: Dictionary with statistics on events and formations
-        per phase
+        dict: Dictionary with statistics on events and
+        formations per phase
     """
     # Template Matching ausführen
     phase_results = run_template_matching(match_id)
@@ -320,34 +374,419 @@ def analyze_events_and_formations(events: Any, match_id: int
             analysis_results[current_phase]['events'].append(event_type)
             analysis_results[current_phase]['formations'].append(formation)
 
-    # Zusammenfassung erstellen
+    # Modify the summary creation section
     for phase in analysis_results:
         events_count = Counter(analysis_results[phase]['events'])
         formations_count = Counter(analysis_results[phase]['formations'])
+
+        # Create formation-specific statistics
+        formation_stats = {}
+        events_by_formation: dict[str, list[str]] = {}
+
+        # Group events by formation
+        for event_type, formation in zip(analysis_results[phase]['events'],
+                                         analysis_results[phase]['formations']
+                                         ):
+            formation_str = str(formation)  # Ensure formation is a string
+            if formation_str not in events_by_formation:
+                events_by_formation[formation_str] = []
+            events_by_formation[formation_str].append(str(event_type))
+
+        # Calculate success rate for each formation
+        for formation, formation_events in events_by_formation.items():
+            total_shots = 0
+            successful_goals = 0
+
+            for event in formation_events:
+                if event in ['shot_blocked', 'shot_saved', 'shot_off_target',
+                             'score_change']:
+                    total_shots += 1
+                    if event == 'score_change':
+                        successful_goals += 1
+
+            goal_success_rate = (successful_goals /
+                                 total_shots * 100) if total_shots > 0 else 0
+            formation_stats[formation] = {
+                'total_shots': total_shots,
+                'goals': successful_goals,
+                'goal_success_rate': goal_success_rate
+            }
+
         analysis_results[phase] = {
             'event_statistics': dict(events_count),
-            'formation_statistics': dict(formations_count)
+            'formation_statistics': dict(formations_count),
+            'formation_goal_rates': formation_stats
         }
-    total_shots = 0
-    successful_goals = 0
-    for phase in analysis_results:
-        for event, count in analysis_results[phase]['event_statistics'
-                                                    ].items():
-            if event in ['shot_blocked', 'shot_saved', 'shot_off_target',
-                         'score_change']:
-                total_shots += count
-                if event == 'score_change':
-                    successful_goals += count
 
-        if total_shots > 0:
-            goal_success_rate = (successful_goals / total_shots) * 100
-        else:
-            goal_success_rate = 0
-
-        analysis_results[phase]['goal_success_rate'] = goal_success_rate
-
-    # Add a higher level structure with goal_success_rate_per_formation
     return {
-        'goal_success_rate_per_formation': analysis_results,
-
+        'goal_success_rate_per_formation': analysis_results
     }
+
+
+def create_combined_statistics(events: Any, match_id: int
+                               ) -> dict[Any, Any]:
+    """
+    Creates a combined analysis of all statistics,
+    merging the results from all analyses
+    Args:
+        events (pd.DataFrame): DataFrame with event data
+        match_id (int): ID of the match to be analyzed
+
+    Returns:
+        dict: Dictionary with combined statistics
+    """
+    # Gather all individual statistics
+    formation_stats = analyze_events_and_formations(events, match_id)
+    phase_stats = calculate_goal_success_rate_per_phase(events)
+    player_count_stats = calculate_player_count_per_phase(events)
+    next_phase_stats = calculate_next_phase(events)
+    # all_events = ["score_change", "shot_saved", "shot_off_target",
+    #               "shot_blocked", "technical_rule_fault",
+    #   "seven_m_awarded", "steal", "technical_ball_fault"]
+    # Create combined insights
+    combined_stats = {}
+    combined_stats = {
+        'Combined_Match_Statistics': {
+            'player_situation_analysis': {
+                'home': {
+                    'outnumbered_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[26] is not None and
+                            e[26] < 7)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[26] is not None and
+                            e[26] < 7 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.HOME,
+                            is_outnumbered=True)
+                    },
+                    'power_play_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[27] is not None and
+                            e[27] < 7)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[27] is not None and
+                            e[27] < 7 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.HOME,
+                            is_power_play=True)
+                    },
+                    'equal_strength_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[26] is not None and
+                            e[27] is not None and
+                            e[26] >= 7 and
+                            e[27] >= 7)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[26] is not None and
+                            e[27] is not None and
+                            e[26] >= 7 and
+                            e[27] >= 7 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.HOME,
+                            is_equal_strength=True)
+                    },
+                    'positional_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[28] == 3)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[28] == 3 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.HOME,
+                            phase_type=3),
+                        'against_formations': _calculate_opponent_formations(
+                            events,
+                            dv.Opponent.HOME,
+                            phase_type=3)
+                    },
+                    'counter_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[28] == 1)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.HOME and
+                            e[28] == 1 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.HOME,
+                            phase_type=1)
+                    }
+                },
+                'away': {
+                    'outnumbered_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[26] is not None and
+                            e[26] < 7)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[26] is not None and
+                            e[26] < 7 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.AWAY,
+                            is_outnumbered=True)
+                    },
+                    'power_play_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[27] is not None and
+                            e[27] < 7)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[27] is not None and
+                            e[27] < 7 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.AWAY,
+                            is_power_play=True)
+                    },
+                    'equal_strength_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[26] is not None and
+                            e[27] is not None and
+                            e[26] >= 7 and
+                            e[27] >= 7)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[26] is not None and
+                            e[27] is not None and
+                            e[26] >= 7 and
+                            e[27] >= 7 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.AWAY,
+                            is_equal_strength=True)
+                    },
+                    'positional_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[28] == 4)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[28] == 4 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.AWAY,
+                            phase_type=4),
+                        'against_formations':
+                            _calculate_opponent_formations(
+                            events,
+                            dv.Opponent.AWAY,
+                            phase_type=4)
+                    },
+                    'counter_attacks': {
+                        'total_attempts': len([e for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[28] == 2)]),
+                        'goals': sum(1 for e in events.values if (
+                            e[21] ==
+                            dv.Opponent.AWAY and
+                            e[28] == 2 and
+                            e[0] == 'score_change')),
+                        'next_phase_distribution':
+                            _calculate_next_phases_for_situation(
+                            events,
+                            dv.Opponent.AWAY,
+                            phase_type=2)
+                    }
+                }
+            },
+            'phase_transition_analysis': {
+                'successful_attacks': {
+                    'total': sum(1 for e in events.values if (
+                        e[0] == 'score_change')),
+                    'by_previous_phase':
+                        (next_phase_stats['Next_Phase_Statistics']
+                         ['score_change']['next_phases'])
+                },
+                'failed_attacks': {
+                    'total': sum(1 for e in events.values if (
+                        e[0] in ['shot_saved', 'shot_blocked',
+                                 'shot_off_target'])),
+                    'leading_to_phase': _calculate_failed_attack_transitions(
+                        events)
+                }
+            },
+            'original_statistics': {
+                'formations': formation_stats,
+                'phases': phase_stats,
+                'player_counts': player_count_stats,
+                'next_phases': next_phase_stats
+            }
+        }
+    }
+    print(type(combined_stats))
+
+    return combined_stats
+
+
+def _calculate_next_phases_for_situation(events: Any, team: Any,
+                                         is_outnumbered: bool = False,
+                                         is_power_play: bool = False,
+                                         is_equal_strength: bool = False,
+                                         phase_type: Union[int, None] = None
+                                         ) -> dict[int, int]:
+    """
+    Helper function to calculate next phase distribution for
+    specific situations
+    Args:
+        events: The event data
+        team: The team (HOME/AWAY) whose attacks we're analyzing
+        is_outnumbered: Whether to filter for outnumbered attacks
+        is_power_play: Whether to filter for power play attacks
+        is_equal_strength: Whether to filter for equal strength attacks
+        phase_type: The phase type to analyze (3 for home positional,
+        4 for away positional)
+    """
+    phase_counts = {1: 0, 2: 0, 3: 0, 4: 0}
+
+    for event in events.values:
+        if event[21] != team:
+            continue
+
+        # Skip if conditions don't match
+        if is_outnumbered and (event[26] is None or event[26] >= 7):
+            continue
+        if is_power_play and (event[27] is None or event[27] >= 7):
+            continue
+        if is_equal_strength and (event[26] is None or event[27] is None or
+                                  event[26] < 7 or event[27] < 7):
+            continue
+        if phase_type is not None and event[28] != phase_type:
+            continue
+
+        if event[29] in [1, 2, 3, 4]:
+            phase_counts[event[29]] += 1
+
+    return phase_counts
+
+
+def _calculate_failed_attack_transitions(events: Any) -> dict[int, int]:
+    """Helper function to analyze where failed attacks lead to
+    Args:
+        events: The event data
+
+    Returns:
+        Dictionary with transition counts for each phase
+    """
+    transition_counts = {1: 0, 2: 0, 3: 0, 4: 0}
+
+    for event in events.values:
+        if event[0] in ['shot_saved', 'shot_blocked',
+                        'shot_off_target']:
+            if event[29] in [1, 2, 3, 4]:
+                transition_counts[event[29]] += 1
+
+    return transition_counts
+
+
+def _calculate_opponent_formations(events: Any, team: Any,
+                                   phase_type: int
+                                   ) -> dict[str, dict[str, int]]:
+    """
+    Calculate statistics for each opponent formation
+    encountered during positional attacks.
+
+    Args:
+        events: The event data
+        team: The team (HOME/AWAY) whose attacks we're analyzing
+        phase_type: The phase type to analyze (3 for home
+        positional, 4 for away positional)
+
+    Returns:
+        Dictionary with formation statistics:
+        {
+            'formation_name': {
+                'total_attempts': int,
+                'goals': int,
+                'failed_attempts': int  # shots saved,
+                blocked, or off target
+            }
+        }
+    """
+    formation_stats = {}
+
+    for event in events.values:
+
+        # Check if it's the correct team and phase
+        if event[21] != team or event[28] != phase_type:
+            continue
+
+        # Get the opponent's formation
+        if event[25] == dv.Team.NONE:
+            formation = "none"
+        elif event[25] == dv.Team.A:
+            formation = "Team A"
+        elif event[25] == dv.Team.B:
+            formation = "Team B"
+        else:
+            formation = "unknown"
+
+        # Initialize formation stats if not exists
+        if formation not in formation_stats:
+            formation_stats[formation] = {
+                'total_attempts': 0,
+                'goals': 0,
+                'failed_attempts': 0
+            }
+
+        # Update statistics
+        formation_stats[formation]['total_attempts'] += 1
+
+        if event[0] == 'score_change':
+            formation_stats[formation]['goals'] += 1
+        elif event[0] in ['shot_saved', 'shot_blocked', 'shot_off_target']:
+            formation_stats[formation]['failed_attempts'] += 1
+
+    return formation_stats

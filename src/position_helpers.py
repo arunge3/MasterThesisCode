@@ -21,11 +21,9 @@ def prepare_ball_data(ball_data: Any) -> tuple[Any, Any]:
         ball_data_2 = ball_data.player(1)
 
         ball_positions = combine_ball_data(ball_data_1, ball_data_2)
-
         if ball_data.N > 2:
-
             # Process any additional ball data players if they exist
-            for i in range(3, ball_data.N+1):
+            for i in range(2, ball_data.N+1):
                 ball_data_i = ball_data.player(i)
                 ball_positions = combine_ball_data(ball_positions, ball_data_i)
                 # Here you could add logic to combine additional ball data

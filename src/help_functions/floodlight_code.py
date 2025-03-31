@@ -303,6 +303,12 @@ def approach_plot(match_id: int, approach: dv.Approach
                   ) -> None:
     """
     Plots the phases of a handball match along with event markers.
+    Args:
+        match_id (int): The ID of the match.
+        approach (dv.Approach): The approach to use for synchronization.
+        base_path (str): The base path to the data files.
+    Returns:
+        None
     """
     (events, sequences, datei_pfad) = (handle_approach(
         approach, processing.calculate_sequences(match_id),
@@ -310,6 +316,7 @@ def approach_plot(match_id: int, approach: dv.Approach
     events = sportanalysis.evaluation_of_players_on_field(
         match_id, events, sequences)
     events = sportanalysis.evaluate_phase_events(events, sequences)
+    events = sportanalysis.next_phase(events, sequences)
     plot_phases(events, sequences, datei_pfad, match_id, approach)
     if approach == dv.Approach.COST_BASED:
 
@@ -368,20 +375,25 @@ def plot_phases(events: Any, sequences: list[tuple[int, int, int]],
     #     (events, sequences, datei_pfad) = (handle_approach(
     #         approach, processing.calculate_sequences(match_id),
     #         match_id, os.path.join(base_path, r"Datengrundlagen")))
-    analysis_results = sport_analysis.analyze_events_and_formations(
+    # analysis_results = sport_analysis.analyze_events_and_formations(
+    #     events, match_id)
+    # phase_results = sport_analysis.calculate_goal_success_rate_per_phase(
+    #     events)
+    # player_count_results = sport_analysis.calculate_player_count_per_phase(
+    #     events)
+    # next_phase_results = sport_analysis.calculate_next_phase(events)
+
+    combined_results = sport_analysis.create_combined_statistics(
         events, match_id)
-    phase_results = sport_analysis.calculate_goal_success_rate_per_phase(
-        events)
-    player_count_results = sport_analysis.calculate_player_count_per_phase(
-        events)
 
     # Join all three dictionaries into a
     # single comprehensive results dictionary
-    combined_results = {
-        **analysis_results,
-        **phase_results,
-        **player_count_results
-    }
+    # combined_results = {
+    #     **analysis_results,
+    #     **phase_results,
+    #     **player_count_results,
+    #     **next_phase_results
+    # }
 
     # print(analysis_results)
     # Define positions for each phase
@@ -438,7 +450,8 @@ def plot_phases(events: Any, sequences: list[tuple[int, int, int]],
     added_labels = set()
     # Save analysis results to a JSON file
     analysis_results_path = os.path.join(
-        base_path, f"analysis_results_{match_id}_{approach.name}.json")
+        base_path, r"Analysis_results",
+        f"analysis_results_{match_id}_{approach.name}.json")
     with open(analysis_results_path, 'w', encoding='utf-8') as f:
         json.dump(combined_results, f, ensure_ascii=False, indent=4)
     berechne_phase_und_speichern_fl(events, sequences, datei_pfad)
