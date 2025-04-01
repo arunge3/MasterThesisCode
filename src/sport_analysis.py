@@ -59,91 +59,88 @@ def calculate_next_phase(events: Any) -> dict[Any, Any]:
     return {'Next_Phase_Statistics': stats}
 
 
-def calculate_goal_success_rate_per_phase(events: Any
-                                          ) -> (dict[str,
-                                                     dict[str, object]]):
+def calculate_goal_success_rate_per_phase(
+    events: Any
+) -> dict[str, dict[str, dict[str, dict[Any, Any]]]]:
     """
-    Calculates the goal success rate per phase.
+    Calculates two success rates per phase:
+    1. Goal rate: score_change / (total_events - seven_m_awarded)
+    2. Successful attack rate:
+        (score_change + seven_m_awarded) / total_events
     """
     (position_events_home, counter_events_home,
      neutral_events_home, position_events_away,
-     counter_events_away, neutral_events_away
-     ) = evaluate_phase_events(events)
+     counter_events_away, neutral_events_away) = evaluate_phase_events(events)
 
-    # Initialize a dictionary to store goal counts and success rates
-    goal_stats = {
+    # Initialize a dictionary to store counts
+    stats = {
         'home': {
-            'position': {'goals': 0, 'total': len(position_events_home)},
-            'counter': {'goals': 0, 'total': len(counter_events_home)},
-            'neutral': {'goals': 0, 'total': len(neutral_events_home)}
+            'position': {'score_change': 0, 'seven_m_awarded': 0,
+                         'total': len(position_events_home)},
+            'counter': {'score_change': 0, 'seven_m_awarded': 0,
+                        'total': len(counter_events_home)},
+            'neutral': {'score_change': 0, 'seven_m_awarded': 0,
+                        'total': len(neutral_events_home)}
         },
         'away': {
-            'position': {'goals': 0, 'total': len(position_events_away)},
-            'counter': {'goals': 0, 'total': len(counter_events_away)},
-            'neutral': {'goals': 0, 'total': len(neutral_events_away)}
+            'position': {'score_change': 0, 'seven_m_awarded': 0,
+                         'total': len(position_events_away)},
+            'counter': {'score_change': 0, 'seven_m_awarded': 0,
+                        'total': len(counter_events_away)},
+            'neutral': {'score_change': 0, 'seven_m_awarded': 0,
+                        'total': len(neutral_events_away)}
         }
     }
 
-    # Count goals for each phase and team
-    for event in position_events_home:
-        if event[0] in ["score_change"]:
-            goal_stats['home']['position']['goals'] += 1
+    # Count events for each phase and team
+    for team, phase_types in [
+        ('home', [(position_events_home, 'position'),
+                  (counter_events_home, 'counter'),
+                  (neutral_events_home, 'neutral')]),
+        ('away', [(position_events_away, 'position'),
+                  (counter_events_away, 'counter'),
+                  (neutral_events_away, 'neutral')])
+    ]:
+        for events_list, phase_type in phase_types:
+            for event in events_list:
+                if event[0] == "score_change":
+                    stats[team][phase_type]['score_change'] += 1
+                elif event[0] == "seven_m_awarded":
+                    stats[team][phase_type]['seven_m_awarded'] += 1
 
-    for event in position_events_away:
-        if event[0] in ["score_change"]:
-            goal_stats['away']['position']['goals'] += 1
+    # Calculate both rates for each team and phase
+    success_rates: dict[str, dict[Any, Any]] = {
+        'home': {},
+        'away': {}
+    }
 
-    for event in counter_events_home:
-        if event[0] in ["score_change"]:
-            goal_stats['home']['counter']['goals'] += 1
+    for team in ['home', 'away']:
+        for phase_type in ['position', 'counter', 'neutral']:
+            phase_stats = stats[team][phase_type]
+            total_events = phase_stats['total']
+            events_without_7m = total_events - phase_stats['seven_m_awarded']
 
-    for event in counter_events_away:
-        if event[0] in ["score_change"]:
-            goal_stats['away']['counter']['goals'] += 1
+            # Calculate goal rate (excluding 7m from denominator)
+            goal_rate = (phase_stats['score_change'] / events_without_7m
+                         if events_without_7m > 0 else 0)
 
-    for event in neutral_events_home:
-        if event[0] in ["score_change"]:
-            goal_stats['home']['neutral']['goals'] += 1
+            # Calculate successful attack rate (including
+            # both goals and 7m awards)
+            successful_attack_rate = ((phase_stats['score_change'] +
+                                       phase_stats['seven_m_awarded'])
+                                      / total_events if total_events > 0
+                                      else 0)
 
-    for event in neutral_events_away:
-        if event[0] in ["score_change"]:
-            goal_stats['away']['neutral']['goals'] += 1
+            success_rates[team][phase_type] = {
+                'goal_rate': goal_rate,
+                'successful_attack_rate': successful_attack_rate
+            }
 
-    # Calculate success rates
-    pos_suc_rate_home = (goal_stats['home']['position']['goals'] /
-                         goal_stats['home']['position']['total'] if
-                         goal_stats['home']['position']['total'] > 0 else 0)
-    pos_suc_rate_away = (goal_stats['away']['position']['goals'] /
-                         goal_stats['away']['position']['total'] if
-                         goal_stats['away']['position']['total'] > 0 else 0)
-    counter_suc_rate_home = (goal_stats['home']['counter']['goals'] /
-                             goal_stats['home']['counter']['total'] if
-                             goal_stats['home']['counter']['total'] > 0 else 0)
-    counter_suc_rate_away = (goal_stats['away']['counter']['goals'] /
-                             goal_stats['away']['counter']['total'] if
-                             goal_stats['away']['counter']['total'] > 0 else 0)
-    neutral_suc_rate_home = (goal_stats['home']['neutral']['goals'] /
-                             goal_stats['home']['neutral']['total'] if
-                             goal_stats['home']['neutral']['total'] > 0 else 0)
-    neutral_suc_rate_away = (goal_stats['away']['neutral']['goals'] /
-                             goal_stats['away']['neutral']['total'] if
-                             goal_stats['away']['neutral']['total'] > 0 else 0)
-    # Create a dictionary to store all the analysis results
+    # Create final analysis results
     analysis_results = {
         'Goal_success_rate_per_phase': {
-            'goal_stats': goal_stats,
-            'success_rates': {
-                'home': {
-                    'position': pos_suc_rate_home,
-                    'counter': counter_suc_rate_home,
-                    'neutral': neutral_suc_rate_home
-                },
-                'away': {
-                    'position': pos_suc_rate_away,
-                    'counter': counter_suc_rate_away,
-                    'neutral': neutral_suc_rate_away
-                }
-            },
+            'event_stats': stats,
+            'success_rates': success_rates,
             'event_counts': {
                 'home': {
                     'position': len(position_events_home),
@@ -318,16 +315,16 @@ def calculate_player_count_per_phase(events: Any) -> dict[Any, Any]:
         goal_rate_both_outnumbered_away = 0
 
     analysis_results = {
-        'Goal_Rate in Unter- und Überzahl': {
+        'Goal_Rate power_play and outnumbered attacks': {
             'home': {
                 'goal_rate_full': goal_rate_full_home,
-                'goal_rate_uberzahl': goal_rate_uberzahl_home,
+                'goal_rate_power_play': goal_rate_uberzahl_home,
                 'goal_rate_outnumbered': goal_rate_outnumbered_home,
                 'goal_rate_both_outnumbered': goal_rate_both_outnumbered_home
             },
             'away': {
                 'goal_rate_full': goal_rate_full_away,
-                'goal_rate_uberzahl': goal_rate_uberzahl_away,
+                'goal_rate_power_play': goal_rate_uberzahl_away,
                 'goal_rate_outnumbered': goal_rate_outnumbered_away,
                 'goal_rate_both_outnumbered': goal_rate_both_outnumbered_away
             }
@@ -337,7 +334,7 @@ def calculate_player_count_per_phase(events: Any) -> dict[Any, Any]:
 
 
 def analyze_events_and_formations(events: Any, match_id: int
-                                  ) -> dict[Any, Any]:
+                                  ) -> tuple[dict[str, dict[Any, Any]], Any]:
     """
     Analyzes events and defensive formations at specific
     times in the game.
@@ -358,7 +355,10 @@ def analyze_events_and_formations(events: Any, match_id: int
     analysis_results = {
         phase: {'events': [], 'formations': []} for phase in range(5)
     }
-    for event in events.values:
+    if 'opponent_formation' not in events.columns:
+        events['opponent_formation'] = None
+
+    for idx, event in events.iterrows():
         event_time = event[24]
         event_type = event[0]
 
@@ -368,6 +368,7 @@ def analyze_events_and_formations(events: Any, match_id: int
             if phase_info['start'] <= event_time <= phase_info['end']:
                 current_phase = phase_info['phase_type']
                 formation = phase_info['formation']
+                events.loc[idx, 'opponent_formation'] = formation
                 break
 
         if current_phase is not None:
@@ -387,10 +388,13 @@ def analyze_events_and_formations(events: Any, match_id: int
         for event_type, formation in zip(analysis_results[phase]['events'],
                                          analysis_results[phase]['formations']
                                          ):
-            formation_str = str(formation)  # Ensure formation is a string
-            if formation_str not in events_by_formation:
-                events_by_formation[formation_str] = []
-            events_by_formation[formation_str].append(str(event_type))
+            if event_type in ['shot_blocked', 'shot_saved', 'shot_off_target',
+                              'score_change', 'seven_m_awarded', 'steal',
+                              'technical_ball_fault', 'technical_rule_fault']:
+                formation_str = str(formation)  # Ensure formation is a string
+                if formation_str not in events_by_formation:
+                    events_by_formation[formation_str] = []
+                events_by_formation[formation_str].append(str(event_type))
 
         # Calculate success rate for each formation
         for formation, formation_events in events_by_formation.items():
@@ -399,9 +403,10 @@ def analyze_events_and_formations(events: Any, match_id: int
 
             for event in formation_events:
                 if event in ['shot_blocked', 'shot_saved', 'shot_off_target',
-                             'score_change']:
+                             'score_change', 'seven_m_awarded', 'steal',
+                             'technical_ball_fault', 'technical_rule_fault']:
                     total_shots += 1
-                    if event == 'score_change':
+                    if event in ['score_change', 'seven_m_awarded']:
                         successful_goals += 1
 
             goal_success_rate = (successful_goals /
@@ -409,18 +414,18 @@ def analyze_events_and_formations(events: Any, match_id: int
             formation_stats[formation] = {
                 'total_shots': total_shots,
                 'goals': successful_goals,
-                'goal_success_rate': goal_success_rate
+                'attack_success_rate': goal_success_rate
             }
 
         analysis_results[phase] = {
             'event_statistics': dict(events_count),
             'formation_statistics': dict(formations_count),
-            'formation_goal_rates': formation_stats
+            'formation_attack_success_rates': formation_stats
         }
 
     return {
-        'goal_success_rate_per_formation': analysis_results
-    }
+        'attack_success_rate_per_formation': analysis_results
+    }, events
 
 
 def create_combined_statistics(events: Any, match_id: int
@@ -436,7 +441,7 @@ def create_combined_statistics(events: Any, match_id: int
         dict: Dictionary with combined statistics
     """
     # Gather all individual statistics
-    formation_stats = analyze_events_and_formations(events, match_id)
+    formation_stats, events = analyze_events_and_formations(events, match_id)
     phase_stats = calculate_goal_success_rate_per_phase(events)
     player_count_stats = calculate_player_count_per_phase(events)
     next_phase_stats = calculate_next_phase(events)
@@ -464,7 +469,6 @@ def create_combined_statistics(events: Any, match_id: int
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.HOME,
                             is_outnumbered=True)
                     },
                     'power_play_attacks': {
@@ -482,7 +486,6 @@ def create_combined_statistics(events: Any, match_id: int
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.HOME,
                             is_power_play=True)
                     },
                     'equal_strength_attacks': {
@@ -504,43 +507,31 @@ def create_combined_statistics(events: Any, match_id: int
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.HOME,
                             is_equal_strength=True)
                     },
                     'positional_attacks': {
                         'total_attempts': len([e for e in events.values if (
-                            e[21] ==
-                            dv.Opponent.HOME and
                             e[28] == 3)]),
                         'goals': sum(1 for e in events.values if (
-                            e[21] ==
-                            dv.Opponent.HOME and
                             e[28] == 3 and
-                            e[0] == 'score_change')),
+                            e[0] in ['score_change', 'seven_m_awarded'])),
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.HOME,
                             phase_type=3),
                         'against_formations': _calculate_opponent_formations(
                             events,
-                            dv.Opponent.HOME,
                             phase_type=3)
                     },
                     'counter_attacks': {
                         'total_attempts': len([e for e in events.values if (
-                            e[21] ==
-                            dv.Opponent.HOME and
                             e[28] == 1)]),
                         'goals': sum(1 for e in events.values if (
-                            e[21] ==
-                            dv.Opponent.HOME and
                             e[28] == 1 and
-                            e[0] == 'score_change')),
+                            e[0] in ['score_change', 'seven_m_awarded'])),
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.HOME,
                             phase_type=1)
                     }
                 },
@@ -560,7 +551,6 @@ def create_combined_statistics(events: Any, match_id: int
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.AWAY,
                             is_outnumbered=True)
                     },
                     'power_play_attacks': {
@@ -578,7 +568,6 @@ def create_combined_statistics(events: Any, match_id: int
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.AWAY,
                             is_power_play=True)
                     },
                     'equal_strength_attacks': {
@@ -600,44 +589,32 @@ def create_combined_statistics(events: Any, match_id: int
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.AWAY,
                             is_equal_strength=True)
                     },
                     'positional_attacks': {
                         'total_attempts': len([e for e in events.values if (
-                            e[21] ==
-                            dv.Opponent.AWAY and
                             e[28] == 4)]),
                         'goals': sum(1 for e in events.values if (
-                            e[21] ==
-                            dv.Opponent.AWAY and
                             e[28] == 4 and
-                            e[0] == 'score_change')),
+                            e[0] in ['score_change', 'seven_m_awarded'])),
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.AWAY,
                             phase_type=4),
                         'against_formations':
                             _calculate_opponent_formations(
                             events,
-                            dv.Opponent.AWAY,
                             phase_type=4)
                     },
                     'counter_attacks': {
                         'total_attempts': len([e for e in events.values if (
-                            e[21] ==
-                            dv.Opponent.AWAY and
                             e[28] == 2)]),
                         'goals': sum(1 for e in events.values if (
-                            e[21] ==
-                            dv.Opponent.AWAY and
                             e[28] == 2 and
-                            e[0] == 'score_change')),
+                            e[0] in ['score_change', 'seven_m_awarded'])),
                         'next_phase_distribution':
                             _calculate_next_phases_for_situation(
                             events,
-                            dv.Opponent.AWAY,
                             phase_type=2)
                     }
                 }
@@ -645,17 +622,24 @@ def create_combined_statistics(events: Any, match_id: int
             'phase_transition_analysis': {
                 'successful_attacks': {
                     'total': sum(1 for e in events.values if (
-                        e[0] == 'score_change')),
-                    'by_previous_phase':
-                        (next_phase_stats['Next_Phase_Statistics']
-                         ['score_change']['next_phases'])
+                        e[0] in ['score_change', 'seven_m_awarded'])),
                 },
                 'failed_attacks': {
                     'total': sum(1 for e in events.values if (
                         e[0] in ['shot_saved', 'shot_blocked',
-                                 'shot_off_target'])),
-                    'leading_to_phase': _calculate_failed_attack_transitions(
-                        events)
+                                 'shot_off_target', 'technical_rule_fault',
+                                 'technical_ball_fault', 'steal'])),
+                    'leading_to_phase': {
+                        phase: sum(
+                            (next_phase_stats['Next_Phase_Statistics']
+                             [event]['next_phases']).get(
+                                str(phase), 0)
+                            for event in (next_phase_stats
+                                          ['Next_Phase_Statistics'])
+                            if event not in ['score_change', 'seven_m_awarded']
+                        )
+                        for phase in ['1', '2', '3', '4']
+                    }
                 }
             },
             'original_statistics': {
@@ -671,7 +655,7 @@ def create_combined_statistics(events: Any, match_id: int
     return combined_stats
 
 
-def _calculate_next_phases_for_situation(events: Any, team: Any,
+def _calculate_next_phases_for_situation(events: Any,
                                          is_outnumbered: bool = False,
                                          is_power_play: bool = False,
                                          is_equal_strength: bool = False,
@@ -692,8 +676,6 @@ def _calculate_next_phases_for_situation(events: Any, team: Any,
     phase_counts = {1: 0, 2: 0, 3: 0, 4: 0}
 
     for event in events.values:
-        if event[21] != team:
-            continue
 
         # Skip if conditions don't match
         if is_outnumbered and (event[26] is None or event[26] >= 7):
@@ -712,26 +694,7 @@ def _calculate_next_phases_for_situation(events: Any, team: Any,
     return phase_counts
 
 
-def _calculate_failed_attack_transitions(events: Any) -> dict[int, int]:
-    """Helper function to analyze where failed attacks lead to
-    Args:
-        events: The event data
-
-    Returns:
-        Dictionary with transition counts for each phase
-    """
-    transition_counts = {1: 0, 2: 0, 3: 0, 4: 0}
-
-    for event in events.values:
-        if event[0] in ['shot_saved', 'shot_blocked',
-                        'shot_off_target']:
-            if event[29] in [1, 2, 3, 4]:
-                transition_counts[event[29]] += 1
-
-    return transition_counts
-
-
-def _calculate_opponent_formations(events: Any, team: Any,
+def _calculate_opponent_formations(events: Any,
                                    phase_type: int
                                    ) -> dict[str, dict[str, int]]:
     """
@@ -760,16 +723,16 @@ def _calculate_opponent_formations(events: Any, team: Any,
     for event in events.values:
 
         # Check if it's the correct team and phase
-        if event[21] != team or event[28] != phase_type:
+        if event[28] != phase_type:
             continue
 
         # Get the opponent's formation
-        if event[25] == dv.Team.NONE:
-            formation = "none"
-        elif event[25] == dv.Team.A:
-            formation = "Team A"
-        elif event[25] == dv.Team.B:
-            formation = "Team B"
+        if event[30] == "60":
+            formation = "60"
+        elif event[30] == "51":
+            formation = "51"
+        elif event[30] == "321":
+            formation = "321"
         else:
             formation = "unknown"
 
@@ -781,12 +744,13 @@ def _calculate_opponent_formations(events: Any, team: Any,
                 'failed_attempts': 0
             }
 
-        # Update statistics
-        formation_stats[formation]['total_attempts'] += 1
-
-        if event[0] == 'score_change':
+        if event[0] in ['score_change', 'seven_m_awarded']:
             formation_stats[formation]['goals'] += 1
-        elif event[0] in ['shot_saved', 'shot_blocked', 'shot_off_target']:
+            formation_stats[formation]['total_attempts'] += 1
+        elif event[0] in ['shot_saved', 'shot_blocked', 'shot_off_target',
+                          'technical_rule_fault', 'technical_ball_fault',
+                          'steal']:
             formation_stats[formation]['failed_attempts'] += 1
+            formation_stats[formation]['total_attempts'] += 1
 
     return formation_stats

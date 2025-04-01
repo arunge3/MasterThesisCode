@@ -302,19 +302,21 @@ def get_players_count(sequence: pd.DataFrame,
     x: [-20, 20], y: [-10, 10]
 
     Args:
-        sequence (pd.DataFrame): A row from the sequence
-        DataFrame containing start_frame and end_frame.
+        sequence (pd.DataFrame): A row from the sequence DataFrame
+        containing start_frame and end_frame.
         position_data (pd.DataFrame): DataFrame containing
         position data of players.
 
     Returns:
-        float: The average number of players detected on the
-        field during the sequence.
+        float: The average number of players detected, when there
+        are more than 40 frames (2 seconds) with less than 7
+        players, it will be set to 7.0
     """
     start_frame, end_frame, phase = sequence
     players_count = 0.0
     player_count_frame = 0
     player_count_frame_array = []
+    frames_less_than_7_players = 0
 
     for frame in range(start_frame, end_frame-1):
         for index in range((position_data.N+1)):
@@ -328,6 +330,9 @@ def get_players_count(sequence: pd.DataFrame,
                     player_count_frame += 1
 
         player_count_frame_array.append(player_count_frame)
+        if player_count_frame < 7:
+            frames_less_than_7_players += 1
+
         if player_count_frame > 7:
             print(f"Player count frame {frame} is {player_count_frame}")
         player_count_frame = 0
@@ -341,6 +346,9 @@ def get_players_count(sequence: pd.DataFrame,
 
     if players_count > 7:
         print(f"Average player count is {players_count}")
+    if frames_less_than_7_players > 40:
+        players_count = 7.0
+
     return players_count
 
 
