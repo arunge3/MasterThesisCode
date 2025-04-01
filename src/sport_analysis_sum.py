@@ -1,3 +1,16 @@
+"""
+This script is used to aggregate statistics from multiple JSON files
+and calculate rates and averages for each statistic.
+It is used to create summary statistics for handball matches.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
+"""
+
+import argparse
 import copy
 import json
 import os
@@ -180,17 +193,21 @@ def aggregate_statistics(input_dir: str, output_dir: str) -> None:
 
     # Process all JSON files
     for file_path in Path(input_dir).glob('**/*.json'):
-        with open(file_path, 'r') as f:
-            try:
-                data = json.load(f)
-                if not combined_stats:
-                    combined_stats = copy.deepcopy(data)
-                else:
-                    combined_stats = deep_sum_dicts(combined_stats, data)
-                file_count += 1
-            except json.JSONDecodeError:
-                print(f"Error reading file: {file_path}")
-                continue
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                try:
+                    data = json.load(f)
+                    if not combined_stats:
+                        combined_stats = copy.deepcopy(data)
+                    else:
+                        combined_stats = deep_sum_dicts(combined_stats, data)
+                    file_count += 1
+                except json.JSONDecodeError:
+                    print(f"Error reading JSON from file: {file_path}")
+                    continue
+        except IOError as e:
+            print(f"Error opening file {file_path}: {e}")
+            continue
 
     if file_count == 0:
         print("No valid JSON files found")
@@ -203,19 +220,48 @@ def aggregate_statistics(input_dir: str, output_dir: str) -> None:
     calculate_rates(combined_stats)
 
     # Save total sums
-    with open(os.path.join(output_dir, 'total_statistics.json'), 'w') as f:
-        json.dump(combined_stats, f, indent=4)
+    try:
+        with open(os.path.join(output_dir, 'total_statistics.json'),
+                  'w',
+                  encoding='utf-8') as f:
+            json.dump(combined_stats, f, indent=4, ensure_ascii=False)
+    except IOError as e:
+        print(f"Error saving total statistics: {e}")
+        return
 
     # Calculate averages (including the rates)
     average_stats = calculate_averages(combined_stats, file_count)
 
     # Save averages
-    with open(os.path.join(output_dir, 'average_statistics.json'), 'w') as f:
-        json.dump(average_stats, f, indent=4)
+    try:
+        with open(os.path.join(output_dir, 'average_statistics.json'),
+                  'w',
+                  encoding='utf-8') as f:
+            json.dump(average_stats, f, indent=4, ensure_ascii=False)
+    except IOError as e:
+        print(f"Error saving average statistics: {e}")
 
 
 # Example usage
 if __name__ == "__main__":
-    input_directory = "D:/Handball/HBL_Events/season_20_21/Analysis_results"
-    output_directory = "D:/Handball/HBL_Events/season_20_21/Summary_Statistics"
-    aggregate_statistics(input_directory, output_directory)
+    # Default paths
+    DEFAULT_INPUT_DIR = "D:/Handball/HBL_Events/season_20_21/Analysis_results"
+    DEFAULT_OUTPUT_DIR = "D:/Handball/HBL_Events/season_20_21/" \
+                         "Summary_Statistics"
+
+    # Set up command line argument parser
+    parser = argparse.ArgumentParser(
+        description='Aggregate handball match statistics.')
+    parser.add_argument('--input-dir',
+                        default=os.getenv(
+                            'HANDBALL_INPUT_DIR', DEFAULT_INPUT_DIR),
+                        help='Directory containing JSON files to process')
+    parser.add_argument('--output-dir',
+                        default=os.getenv(
+                            'HANDBALL_OUTPUT_DIR', DEFAULT_OUTPUT_DIR),
+                        help='Directory where output files will be saved')
+
+    args = parser.parse_args()
+
+    # Run the aggregation
+    aggregate_statistics(args.input_dir, args.output_dir)
