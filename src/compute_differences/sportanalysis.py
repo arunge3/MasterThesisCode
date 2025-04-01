@@ -1,11 +1,14 @@
-# TODO 1: Berrechne eine Accuary für die Events, die in einem
-# Konterangriff stattfinden, die in einem Positionsangriff
-# stattfinden etc.
-# TODO 2: Evaluiere wie viele Personen sich in auf dem Feld
-# befinden in der bestimmten Spielphase. Um dass dann mit
-# einfließen zu lassen in die Accuracy Berechnung.
-# TODO 3: Nur die Events in die Evaluation einbeziehen,
-# für die ein neuer Wert gefunden wurde.
+"""
+This module provides functions for analyzing and computing various metrics
+from handball match data. It includes functions for evaluating event accuracy,
+calculating team order, and counting players on the field at specific times.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
+"""
 import re
 import unicodedata
 from typing import Any, Union
@@ -22,6 +25,11 @@ def next_phase(events: pd.DataFrame,
                ) -> pd.DataFrame:
     """
     Determines the next phase for each event based on the sequences.
+    Args:
+        events: The event data
+        sequences: The sequences of events
+    Returns:
+        The event data with the next phase
     """
     if 'next_phase' not in events.columns:
         events['next_phase'] = None
@@ -39,6 +47,13 @@ def get_next_phase(sequences: list[tuple[int, int, int]], timestamp: int
                    ) -> Union[int, None]:
     """
     Determines the next phase for a given sequence.
+
+    Args:
+        sequences: List of sequences (start, end, phase)
+        timestamp: The timestamp of the event
+
+    Returns:
+        int: The next phase
     """
     for i in range(len(sequences)):
         sequnce = sequences[i]
@@ -51,15 +66,15 @@ def get_next_phase(sequences: list[tuple[int, int, int]], timestamp: int
 def find_next_non_null_phase(sequences: list[tuple[int, int, int]],
                              current_idx: int) -> Union[int, None]:
     """
-    Findet den nächsten nicht-null Phaseneintrag nach dem aktuellen Index.
+    Finds the next non-null phase entry after the current index.
 
     Args:
-        events: DataFrame mit den Events
-        current_idx: Aktueller Index, von dem aus gesucht werden soll
+        sequences: List of sequences (start, end, phase)
+        current_idx: The current index from which to search
 
     Returns:
-        tuple: (Index des nächsten nicht-null Eintrags, Phasenwert) oder
-        (None, None) wenn keiner gefunden
+        tuple: (Index of the next non-null entry, phase value) or
+        (None, None) if no entry is found
     """
     for idx in range(current_idx + 1, len(sequences)):
         sequence = sequences[idx]
@@ -73,6 +88,11 @@ def evaluate_phase_events(events: pd.DataFrame,
                           ) -> pd.DataFrame:
     """
     Evaluates the accuracy of phase events in a handball match.
+    Args:
+        events: The event data
+        sequences: The sequences of events
+    Returns:
+        The event data with the phase
     """
     if 'phase' not in events.columns:
         events['phase'] = None
@@ -87,126 +107,19 @@ def evaluate_phase_events(events: pd.DataFrame,
 
 
 def get_sequence(timestamp: int, sequence: pd.DataFrame) -> pd.DataFrame:
+    """
+    Gets the sequence for a given timestamp.
+    Args:
+        timestamp: The timestamp of the event
+        sequence: The sequence of events
+    Returns:
+        The sequence of events
+    """
     for i in range(len(sequence)):
         start_frame, end_frame, _ = sequence[i]
         if start_frame <= timestamp <= end_frame:
             return sequence[i]
     return (timestamp, timestamp, 0)
-
-
-# def evaluate_counter_events(excel_path: str) -> None:
-#     """
-#     Evaluates the accuracy of counter events in a handball match.
-
-#     Args:
-
-#     excel_path (str): The path to the Excel file
-#                       containing the event data.
-
-#     Returns:
-#         None
-#     """
-#     # Read the Excel file
-#     df = pd.read_excel(excel_path)
-#     specific_events = [
-#         "score_change", "shot_saved", "shot_off_target",
-#         "shot_blocked", "technical_rule_fault",
-#         "seven_m_awarded", "steal", "technical_ball_fault"
-#     ]
-#     counter_events = []
-#     pos_events = []
-#     inactive_events = []
-#     for event in df.values:
-#         if event[0] in specific_events:
-#             if event[28] in {3, 4}:
-#                 counter_events.append(event)
-#             elif event[28] in {1, 2}:
-#                 pos_events.append(event)
-#             elif event[28] == 0:
-#                 inactive_events.append(event)
-
-#     # Calculate accuracy for each approach
-#     approaches = [
-#         ("None", "none_correct"),
-#         ("Baseline", "bl_correct"),
-#         ("Rule-based", "rb_correct"),
-#         ("Position-based", "pos_correct"),
-#         ("Position Correction", "pos_cor_correct"),
-#         ("Position Rule-based", "pos_rb_correct"),
-#         ("Cost-based", "cost_correct"),
-#         ("Cost-based Correction", "cost_cor_correct"),
-#         ("Cost-based Rule-based", "cost_rb_correct")
-#     ]
-
-#     # Print results for counter attacks
-#     print("\n=== COUNTER ATTACK EVENTS ACCURACY ===")
-#     if counter_events:
-#         for approach_name, correct_col in approaches:
-#             # Find the index of the correct column in the dataframe
-#             correct_col_idx = df.columns.get_loc(correct_col)
-#             # Calculate accuracy if there are valid values
-#             valid_values = [e[correct_col_idx]
-#                             for e in counter_events
-#                             if pd.notna(e[correct_col_idx])]
-#             if valid_values:
-#                 accuracy = sum(valid_values) / len(valid_values) * 100
-#                 print(
-#                     f"{approach_name} Accuracy: {accuracy:.2f}% "
-#                     f"({sum(valid_values)}/{len(valid_values)})")
-#             else:
-#                 print(f"{approach_name} Accuracy: N/A (No valid data)")
-#     else:
-#         print("No counter attack events found.")
-
-#     # Print results for positional attacks
-#     print("\n=== POSITIONAL ATTACK EVENTS ACCURACY ===")
-#     if pos_events:
-#         for approach_name, correct_col in approaches:
-#             correct_col_idx = df.columns.get_loc(correct_col)
-#             valid_values = [e[correct_col_idx]
-#                             for e in pos_events
-#                             if pd.notna(e[correct_col_idx])]
-#             if valid_values:
-#                 accuracy = sum(valid_values) / len(valid_values) * 100
-#                 print(
-#                     f"{approach_name} Accuracy: {accuracy:.2f}% "
-#                     f"({sum(valid_values)}/{len(valid_values)})")
-#             else:
-#                 print(f"{approach_name} Accuracy: N/A (No valid data)")
-#     else:
-#         print("No positional attack events found.")
-
-#     # Print results for inactive phase
-#     print("\n=== INACTIVE PHASE EVENTS ACCURACY ===")
-#     if inactive_events:
-#         for approach_name, correct_col in approaches:
-#             correct_col_idx = df.columns.get_loc(correct_col)
-#             valid_values = [e[correct_col_idx]
-#                             for e in inactive_events
-#                             if pd.notna(e[correct_col_idx])]
-#             if valid_values:
-#                 accuracy = sum(valid_values) / len(valid_values) * 100
-#                 print(
-#                     f"{approach_name} Accuracy: {accuracy:.2f}% "
-#                     f"({sum(valid_values)}/{len(valid_values)})")
-#             else:
-#                 print(f"{approach_name} Accuracy: N/A (No valid data)")
-#     else:
-#         print("No inactive phase events found.")
-
-#     # Print overall results
-#     print("\n=== OVERALL EVENTS ACCURACY ===")
-#     for approach_name, correct_col in approaches:
-#         correct_col_idx = df.columns.get_loc(correct_col)
-#         valid_values = [e[correct_col_idx]
-#                         for e in df.values if pd.notna(e[correct_col_idx])]
-#         if valid_values:
-#             accuracy = sum(valid_values) / len(valid_values) * 100
-#             print(
-#                 f"{approach_name} Accuracy: {accuracy:.2f}% "
-#                 f"({sum(valid_values)}/{len(valid_values)})")
-#         else:
-#             print(f"{approach_name} Accuracy: N/A (No valid data)")
 
 
 def evaluation_of_players_on_field(match_id: int, events: pd.DataFrame,
@@ -265,6 +178,8 @@ def evaluation_of_players_on_field(match_id: int, events: pd.DataFrame,
         normalized_xids[normalized_name] = id_value
     team_home_name = normalized_team_order[0]
     team_away_name = normalized_team_order[1]
+    team_home_position = None
+    team_away_position = None
     for index, (name, id_value) in enumerate(normalized_xids.items()):
         # Check if team name is contained in the name or vice versa
         # to handle partial matches
@@ -312,7 +227,7 @@ def get_players_count(sequence: pd.DataFrame,
         are more than 40 frames (2 seconds) with less than 7
         players, it will be set to 7.0
     """
-    start_frame, end_frame, phase = sequence
+    start_frame, end_frame, _ = sequence
     players_count = 0.0
     player_count_frame = 0
     player_count_frame_array = []
@@ -354,12 +269,12 @@ def get_players_count(sequence: pd.DataFrame,
 
 def calculate_team_order(events: Any) -> list[str]:
     """
-    Berechnet die Reihenfolge der Teams basierend auf den Ereignissen.
+    Calculates the order of teams based on the events.
 
     Args:
-        events: Die Event-Daten
+        events: The event data
     Returns:
-        Liste der Teams in der Reihenfolge der Ereignisse
+        List of teams in the order of events
     """
     team_order = []
     for event in events.values:

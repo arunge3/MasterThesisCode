@@ -1,7 +1,28 @@
 """
-This script demonstrates various functionalities of the `os` module
-for interacting with the operating system.
+This module contains various functions and classes used for processing and
+analyzing handball match data. It includes functions for creating event
+objects, evaluating player performance, synchronizing events, and plotting
+phases of the match. The module relies on several external libraries such as
+numpy, pandas, matplotlib, and floodlight, as well as custom modules for
+specific approaches and data handling.
+
+Key functionalities provided by this module include:
+- Creating event streams from timeline files.
+- Evaluating player performance on the field.
+- Synchronizing events based on different rules.
+- Plotting phases of the match with event markers.
+- Handling different approaches for data analysis and correction.
+
+The module is designed to work with handball match data and provides tools for
+comprehensive analysis and visualization of match events and phases.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
 """
+
 
 import json
 import os
@@ -22,7 +43,7 @@ import cost_function_approach_2
 import help_functions
 import help_functions.pos_data_approach
 import help_functions.reformatjson_methods
-import sport_analysis
+import sport_analysis_overall
 import variables.data_variables as dv
 from compute_differences import sportanalysis
 from plot_functions import processing
@@ -131,6 +152,12 @@ def add_event_time_framerate(dataframe: pd.DataFrame, first_timestamp_ms: str,
                              fps: float) -> pd.DataFrame:
     """
     Adds a new column to the DataFrame with the event time in frames.
+    Args:
+        dataframe (pd.DataFrame): The DataFrame to add the event time to.
+        first_timestamp_ms (str): The first timestamp in milliseconds.
+        fps (float): The frames per second.
+    Returns:
+        pd.DataFrame: The DataFrame with the event time in frames.
     """
     dataframe['event_time_framerate'] = None
     for idx, row in dataframe.iterrows():
@@ -366,36 +393,10 @@ def plot_phases(events: Any, sequences: list[tuple[int, int, int]],
         The function assumes the existence of several helper functions
         and modules such as `helpFuctions`, `np`, `plt`, and `Code`.
     """
-    # if approach == dv.Approach.COST_BASED:
-    #     (events, sequences, datei_pfad) = (handle_approach(
-    #     approach, processing.calculate_sequences(match_id),
-    #     match_id, os.path.join(base_path, r"Datengrundlagen")))
 
-    # else:
-    #     (events, sequences, datei_pfad) = (handle_approach(
-    #         approach, processing.calculate_sequences(match_id),
-    #         match_id, os.path.join(base_path, r"Datengrundlagen")))
-    # analysis_results = sport_analysis.analyze_events_and_formations(
-    #     events, match_id)
-    # phase_results = sport_analysis.calculate_goal_success_rate_per_phase(
-    #     events)
-    # player_count_results = sport_analysis.calculate_player_count_per_phase(
-    #     events)
-    # next_phase_results = sport_analysis.calculate_next_phase(events)
-
-    combined_results = sport_analysis.create_combined_statistics(
+    combined_results = sport_analysis_overall.create_combined_statistics(
         events, match_id)
 
-    # Join all three dictionaries into a
-    # single comprehensive results dictionary
-    # combined_results = {
-    #     **analysis_results,
-    #     **phase_results,
-    #     **player_count_results,
-    #     **next_phase_results
-    # }
-
-    # print(analysis_results)
     # Define positions for each phase
     phase_positions = {
         0: 2,  # (inac)
@@ -646,6 +647,10 @@ def handle_approach(approach: dv.Approach,
 def adjust_timestamp_baseline(events: Any) -> Any:
     """
     Adjusts the timestamp of the events to the baseline.
+    Args:
+        events: The event data
+    Returns:
+        The event data with the adjusted timestamp
     """
     event_adjustments = {
         'break_start': -359,
@@ -682,13 +687,13 @@ def adjust_timestamp_baseline(events: Any) -> Any:
 def add_team_to_events(events: pd.DataFrame,
                        team_order: list[str]) -> pd.DataFrame:
     """
-    Fügt die Team-Information zu den Ereignissen hinzu.
+    Adds the team information to the events.
 
     Args:
-        events: Die Event-Daten
-        team_order: Die Reihenfolge der Teams
+        events: The event data
+        team_order: The order of teams
     Returns:
-        Die Event-Daten mit der Team-Information
+        The event data with the team information
     """
     # Add new column for team if it doesn't exist
     if 'teamAB' not in events.columns:
@@ -706,12 +711,12 @@ def add_team_to_events(events: pd.DataFrame,
 
 def calculate_team_order(events: Any) -> list[str]:
     """
-    Berechnet die Reihenfolge der Teams basierend auf den Ereignissen.
+    Calculates the order of teams based on the events.
 
     Args:
-        events: Die Event-Daten
+        events: The event data
     Returns:
-        Liste der Teams in der Reihenfolge der Ereignisse
+        List of teams in the order of events
     """
     team_order = []
     for event in events.values:
@@ -726,13 +731,13 @@ def calculate_team_order(events: Any) -> list[str]:
 def correct_events_fl(events: Any, sequences: list[tuple[int, int, int]]
                       ) -> tuple[Any, list[tuple[int, int, int]]]:
     """
-    Korrigiert ML-basierte Event-Synchronisation mit Floodlight-Daten.
+    Corrects ML-based event synchronization with Floodlight data.
 
     Args:
-        events: Die Event-Daten
-        sequences: Liste von Sequenzen (start, end, phase)
+        events: The event data
+        sequences: List of sequences (start, end, phase)
     Returns:
-        Tuple aus korrigierten Events und Sequenzen
+        Tuple of corrected events and sequences
     """
     for idx, event in enumerate(events.values):
         if event[0] in ["score_change", "shot_saved", "shot_off_target",
@@ -747,7 +752,6 @@ def synchronize_events_fl_rule_based(events: Any,
                                      sequences: list[tuple[int, int, int]]
                                      ) -> tuple[list[Any], list[Any]]:
     """
-
     Synchronizes events with the given sequences by updating the event times
     and phases based on specific conditions.
     Args:
@@ -800,7 +804,6 @@ def handle_score_change(event: np.ndarray[Any, Any], events: Any,
     """
     Handles score change events by calculating the appropriate phase.
 
-
     Args:
         event (dict): The event dictionary containing event information.
             event[24] represents the event time
@@ -809,6 +812,8 @@ def handle_score_change(event: np.ndarray[Any, Any], events: Any,
         sequences (list[tuple[int, int, int]]): List of sequences
         where each tuple contains
             start time, end time and phase number.
+    Returns:
+        int: The event time.
     """
     if str(give_last_event_fl(events, event.values[24])) != "seven_m_awarded":
         return calculate_correct_phase_fl(
@@ -822,7 +827,6 @@ def handle_seven_m_missed(event: Any,
     """
     Handles seven_m_missed events by calculating the appropriate phase.
 
-
     Args:
         event (dict): The event dictionary containing event information.
             event[24] represents the event time
@@ -830,6 +834,8 @@ def handle_seven_m_missed(event: Any,
         sequences (list[tuple[int, int, int]]): List of sequences
         where each tuple contains
             start time, end time and phase number.
+    Returns:
+        int: The event time.
     """
     return calculate_inactive_phase_fl(event.values[24], sequences)
 
@@ -840,7 +846,6 @@ def handle_timeout(event: np.ndarray,
     """
     Handles timeout events by calculating the appropriate phase.
 
-
     Args:
         event (dict): The event dictionary containing event information.
             event[24] represents the event time
@@ -848,6 +853,8 @@ def handle_timeout(event: np.ndarray,
         sequences (list[tuple[int, int, int]]): List of sequences
         where each tuple contains
             start time, end time and phase number.
+    Returns:
+        int: The event time.
     """
     return calculate_timeouts_fl(event.values[24], sequences,
                                  event.values[25], event)
@@ -859,9 +866,7 @@ def handle_timeout_over(event: dict[Any, Any],
                         ) -> int:
     """
     Handles timeout over events by calculating the appropriate
-    phase after a timeout ends.
-
-
+    phase after a timeout ends
     Args:
         event (dict): The event dictionary containing event
         information.
@@ -884,9 +889,6 @@ def handle_phase_correction(event: dict[Any, Any],
                             ) -> int:
     """
     Handles phase correction for an event by calculating the correct phase.
-
-
-
     Args:
         event (dict): The event dictionary containing event information.
             event[24] represents the event time
@@ -935,8 +937,6 @@ def calculate_correct_phase_fl(
     time: int, sequences: list[tuple[int, int, int]], team_ab: dv.Team
 ) -> int:
     """
-
-
     Determines the correct phase for a given event based on the provided time,
     sequences, and team.
     Args:
@@ -972,21 +972,20 @@ def search_phase_ml_fl(time: int,
                        competitor: dv.Team
                        ) -> int:
     """
-    Sucht nach der passenden Phase für einen Competitor, prüft zuerst
-    die aktuelle Phase, dann die nächste und schließlich die vorherigen
-    Phasen.
+    Searches for the appropriate phase for a competitor, first checking
+    the current phase, then the next, and finally the previous phases.
 
 
     Args:
-        time (int): Der Zeitpunkt für den die Phase gesucht wird
-        sequences (list): Liste von Sequenzen (start, end, phase)
-        competitor (dv.Opponent): Der zu prüfende Competitor (HOME/AWAY)
+        time (int): The time for which the phase is being searched.
+        sequences (list): List of sequences (start, end, phase).
+        competitor (dv.Opponent): The competitor being checked (HOME/AWAY).
 
     Returns:
-        int: Zeitpunkt in der passenden Phase
+        int: Time in the appropriate phase.
 
     Raises:
-        ValueError: Wenn keine passende Phase gefunden wurde
+        ValueError: If no appropriate phase is found.
     """
     # Prüfe aktuelle Phase
     current_sequence = (-1, -1, -1)
@@ -1177,10 +1176,6 @@ def calculate_timeouts_over_fl(sequences: list[tuple[int, int, int]],
             if start <= time < end:
                 break
         if phase == 0:
-            # TODO Ich möchte berechnen dass das letzte Event
-            # das Timeout war und das in der Zeit dazwischen
-            # nur inaktive phase war
-            # TODO ist noch flasch gibt das flasche event zurück
             lastevent = give_last_event_fl(events, time)
             if lastevent[0] == "timeout":
                 return time
