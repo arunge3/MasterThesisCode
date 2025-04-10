@@ -18,13 +18,14 @@ from pathlib import Path
 from typing import Any, Dict
 
 
-def calculate_rates(d: Dict[str, Any]) -> None:
+def calculate_rates(d: Dict[str, Any]) -> Dict[str, Any]:
     """
     Recalculate rates and percentages based on the underlying totals.
     Args:
         d: The dictionary containing the statistics.
     Returns:
-        None
+        d: The dictionary containing the statistics with the
+        recalculated rates.
     """
     # Handle formation attack success rates - corrected path
     if ("Combined_Match_Statistics" in d and
@@ -119,6 +120,8 @@ def calculate_rates(d: Dict[str, Any]) -> None:
                     outnumbered["total_attempts"]
             else:
                 stats["goal_rate_outnumbered"] = 0.0
+
+    return d
 
 
 def deep_sum_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]
@@ -217,7 +220,7 @@ def aggregate_statistics(input_dir: str, output_dir: str) -> None:
     combined_stats['total_files_processed'] = file_count
 
     # Calculate rates for the total statistics
-    calculate_rates(combined_stats)
+    combined_stats = calculate_rates(combined_stats)
 
     # Save total sums
     try:
@@ -231,7 +234,7 @@ def aggregate_statistics(input_dir: str, output_dir: str) -> None:
 
     # Calculate averages (including the rates)
     average_stats = calculate_averages(combined_stats, file_count)
-
+    average_stats = calculate_rates(average_stats)
     # Save averages
     try:
         with open(os.path.join(output_dir, 'average_statistics.json'),
