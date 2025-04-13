@@ -1,5 +1,14 @@
 """
-This module contains the template matching function.
+This module implements template matching functionality for
+handball match analysis. It provides functions for processing position
+data, calculating team metrics, and identifying formations during
+different phases of the game.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
 """
 # from matplotlib import pyplot as plt
 import json

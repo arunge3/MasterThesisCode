@@ -1,13 +1,24 @@
 import help_functions.reformatjson_methods as helpFuctions
 
 """
-This script reformats JSON data for a specific match video.
+This module reformats JSON data for handball match videos, providing
+functionality to process and transform match data into a standardized
+format.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
+
 Modules:
     helpFunctions.reformatJson_Methods: Contains helper functions
     for reformatting JSON data.
+
 Constants:
     fps (float): Frames per second of the video.
     match_id (int): Unique identifier for the match.
+
 Functions:
     helpFuctions.get_paths_by_match_id(match_id):
         Retrieves various file paths based on the match ID.
@@ -18,10 +29,6 @@ Functions:
             position file, cut height, offset, and first video height.
     helpFuctions.load_first_timestamp_and_offset(file_path_position):
         Loads the first timestamp and offset from the position file.
-        Args:
-            file_path_position (str): Path to the position file.
-        Returns:
-            int: First timestamp in milliseconds.
     helpFuctions.reformatJson(path_timeline, path_output_jsonl,
     first_timestamp_ms, cut_h1, offset_h2, first_vh2, fps):
         Reformats the JSON data based on the provided parameters.

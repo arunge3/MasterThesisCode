@@ -2,6 +2,12 @@
 This module synchronizes events using a cost function approach.
 It calculates a cost matrix based on event types and phases,
 and then finds the optimal sequence for each event.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
 """
 from typing import Any, List, Tuple
 

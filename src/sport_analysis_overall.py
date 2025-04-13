@@ -1,3 +1,17 @@
+"""
+This module provides comprehensive analysis functions for handball
+match statistics. It includes functions for calculating phase
+transitions, goal success rates, player counts, and formation
+analysis. The module processes event data to generate detailed
+match statistics and insights.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
+"""
+
 from typing import Any, Counter, Union
 
 import variables.data_variables as dv

@@ -1,3 +1,16 @@
+"""
+This is the main entry point for the handball match analysis system.
+It orchestrates the analysis of multiple matches by coordinating various
+analysis modules and functions. The module contains match IDs and configuration
+for processing handball match data.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
+"""
+
 import help_functions.floodlight_code as floodlight_code
 # import plot_functions.plot_phases as plot_phases
 import variables.data_variables as dv

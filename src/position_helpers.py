@@ -1,3 +1,16 @@
+"""
+This module provides helper functions for processing and analyzing position
+data in handball matches. It includes functions for handling ball data
+calculating accelerations, and combining position data from different
+sources.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
+"""
+
 from typing import Any
 
 import numpy as np

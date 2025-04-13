@@ -1,5 +1,14 @@
 """
-This module contains the template matching function.
+This module implements core template matching functionality
+for handball match analysis. It provides functions for scaling
+coordinates and matching player positions against predefined
+formation templates to identify team formations during the game.
+
+Author:
+    @Annabelle Runge
+
+Date:
+    2025-04-01
 """
 import numpy as np
 from scipy.optimize import linear_sum_assignment
