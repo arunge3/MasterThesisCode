@@ -23,21 +23,27 @@ def calculate_next_phase(events: Any) -> dict[Any, Any]:
     Calculates the next phase for each event based on the sequences.
     Counts how often each event type is followed by specific phases.
 
+    Args:
+        events (pd.DataFrame): DataFrame containing event data with
+        columns:
+            - event_type: Type of the event
+            - next_phase: The phase that follows the event
+
     Returns:
-        Dictionary with structure:
-        {
-            'Next_Phase_Statistics': {
-                'event_type': {
-                    'total': total_count,
-                    'next_phases': {
-                        1: count_phase_1,
-                        2: count_phase_2,
-                        3: count_phase_3,
-                        4: count_phase_4
+        dict: Dictionary with structure:
+            {
+                'Next_Phase_Statistics': {
+                    'event_type': {
+                        'total': total_count,
+                        'next_phases': {
+                            1: count_phase_1,
+                            2: count_phase_2,
+                            3: count_phase_3,
+                            4: count_phase_4
+                        }
                     }
                 }
             }
-        }
     """
     stats: dict[str, dict[str, Union[int, dict[int, int]]]] = {}
 
@@ -79,8 +85,38 @@ def calculate_goal_success_rate_per_phase(
     """
     Calculates two success rates per phase:
     1. Goal rate: score_change / (total_events - seven_m_awarded)
-    2. Successful attack rate:
-        (score_change + seven_m_awarded) / total_events
+    2. Successful attack rate: (score_change + seven_m_awarded) / total_events
+
+    Args:
+        events (pd.DataFrame): DataFrame containing event data with columns:
+            - event_type: Type of the event (e.g., 'score_change',
+            'seven_m_awarded')
+            - phase_type: Type of phase (position, counter, neutral)
+            - team: Team identifier (home/away)
+
+    Returns:
+        dict: Dictionary with structure:
+            {
+                'Goal_success_rate_per_phase': {
+                    'event_stats': {
+                        'home/away': {
+                            'position/counter/neutral': {
+                                'score_change': int,
+                                'seven_m_awarded': int,
+                                'total': int
+                            }
+                        }
+                    },
+                    'success_rates': {
+                        'home/away': {
+                            'position/counter/neutral': {
+                                'goal_rate': float,
+                                'successful_attack_rate': float
+                            }
+                        }
+                    }
+                }
+            }
     """
     (position_events_home, counter_events_home,
      neutral_events_home, position_events_away,
@@ -174,17 +210,28 @@ def calculate_goal_success_rate_per_phase(
 
 
 def evaluate_phase_events(events: Any
-                          ) -> (tuple[list[Any], list[Any], list[Any],
-                                      list[Any], list[Any], list[Any]]):
+                          ) -> tuple[list[Any], list[Any], list[Any],
+                                     list[Any], list[Any], list[Any]]:
     """
-    Analyzes events and defensive formations at specific times
-    in the game.
+    Analyzes events and categorizes them into different phase types
+    for both teams.
+
     Args:
-        events (pd.DataFrame): DataFrame with event data
+        events (pd.DataFrame): DataFrame containing event data with
+        columns:
+            - event_type: Type of the event
+            - phase_type: Type of phase (1-4)
+            - team: Team identifier (home/away)
+            - opponent: Opponent team identifier
 
     Returns:
-        tuple: Tuple with statistics on events and formations
-        per phase
+        tuple: Contains six lists of events:
+            - position_events_home: Position attack events for home team
+            - counter_events_home: Counter attack events for home team
+            - neutral_events_home: Neutral events for home team
+            - position_events_away: Position attack events for away team
+            - counter_events_away: Counter attack events for away team
+            - neutral_events_away: Neutral events for away team
     """
     position_events_home = []
     counter_events_home = []
@@ -216,14 +263,35 @@ def evaluate_phase_events(events: Any
 
 def calculate_player_count_per_phase(events: Any) -> dict[Any, Any]:
     """
-    Analyzes the number of players on the field at specific times
-    in the game.
+    Analyzes the number of players on the field during different phases
+    and calculates goal rates for various player count situations.
+
     Args:
-        events (pd.DataFrame): DataFrame with event data
+        events (pd.DataFrame): DataFrame containing event data with columns:
+            - event_type: Type of the event
+            - team: Team identifier (home/away)
+            - home_players: Number of home team players
+            - away_players: Number of away team players
 
     Returns:
-        dict: Dictionary with statistics on events and formations
-        per phase
+        dict: Dictionary containing goal rates for different player
+        count situations:
+            {
+                'Goal_Rate power_play and outnumbered attacks': {
+                    'home': {
+                        'goal_rate_full': float,
+                        'goal_rate_power_play': float,
+                        'goal_rate_outnumbered': float,
+                        'goal_rate_both_outnumbered': float
+                    },
+                    'away': {
+                        'goal_rate_full': float,
+                        'goal_rate_power_play': float,
+                        'goal_rate_outnumbered': float,
+                        'goal_rate_both_outnumbered': float
+                    }
+                }
+            }
     """
     home_full_events = []
     away_full_events = []
@@ -350,16 +418,30 @@ def calculate_player_count_per_phase(events: Any) -> dict[Any, Any]:
 def analyze_events_and_formations(events: Any, match_id: int
                                   ) -> tuple[dict[str, dict[Any, Any]], Any]:
     """
-    Analyzes events and defensive formations at specific
-    times in the game.
+    Analyzes events and defensive formations during different phases of the
+    game.
 
     Args:
-        events (pd.DataFrame): DataFrame with event data
-        match_id (int): ID of the match to be analyzed
+        events (pd.DataFrame): DataFrame containing event data with columns:
+            - event_type: Type of the event
+            - time: Timestamp of the event
+            - team: Team identifier (home/away)
+        match_id (int): Unique identifier for the match
 
     Returns:
-        dict: Dictionary with statistics on events and
-        formations per phase
+        tuple: Contains two elements:
+            1. dict: Dictionary with formation analysis results:
+                {
+                    'attack_success_rate_per_formation': {
+                        phase_number: {
+                            'event_statistics': dict,
+                            'formation_statistics': dict,
+                            'formation_attack_success_rates': dict
+                        }
+                    }
+                }
+            2. pd.DataFrame: Updated events DataFrame with formation
+            information
     """
     # Template Matching ausführen
     phase_results = run_template_matching(match_id)
@@ -445,14 +527,40 @@ def analyze_events_and_formations(events: Any, match_id: int
 def create_combined_statistics(events: Any, match_id: int
                                ) -> dict[Any, Any]:
     """
-    Creates a combined analysis of all statistics,
-    merging the results from all analyses
+    Creates a comprehensive analysis combining all match statistics
+    including player situations, phase transitions, and formation analysis.
+
     Args:
-        events (pd.DataFrame): DataFrame with event data
-        match_id (int): ID of the match to be analyzed
+        events (pd.DataFrame): DataFrame containing event data with columns:
+            - event_type: Type of the event
+            - time: Timestamp of the event
+            - team: Team identifier (home/away)
+            - home_players: Number of home team players
+            - away_players: Number of away team players
+        match_id (int): Unique identifier for the match
 
     Returns:
-        dict: Dictionary with combined statistics
+        dict: Dictionary containing combined match statistics:
+            {
+                'Combined_Match_Statistics': {
+                    'player_situation_analysis': {
+                        'home/away': {
+                            'outnumbered_attacks': {...},
+                            'power_play_attacks': {...},
+                            'equal_strength_attacks': {...},
+                            'positional_attacks': {...},
+                            'counter_attacks': {...}
+                        }
+                    },
+                    'phase_transition_analysis': {...},
+                    'original_statistics': {
+                        'formations': {...},
+                        'phases': {...},
+                        'player_counts': {...},
+                        'next_phases': {...}
+                    }
+                }
+            }
     """
     # Gather all individual statistics
     formation_stats, events = analyze_events_and_formations(events, match_id)
@@ -676,16 +784,27 @@ def _calculate_next_phases_for_situation(events: Any,
                                          phase_type: Union[int, None] = None
                                          ) -> dict[int, int]:
     """
-    Helper function to calculate next phase distribution for
-    specific situations
+    Helper function to calculate the distribution of next phases for specific
+    game situations.
+
     Args:
-        events: The event data
-        team: The team (HOME/AWAY) whose attacks we're analyzing
-        is_outnumbered: Whether to filter for outnumbered attacks
-        is_power_play: Whether to filter for power play attacks
-        is_equal_strength: Whether to filter for equal strength attacks
-        phase_type: The phase type to analyze (3 for home positional,
-        4 for away positional)
+        events (pd.DataFrame): DataFrame containing event data
+        is_outnumbered (bool, optional): Whether to analyze outnumbered
+        situations
+        is_power_play (bool, optional): Whether to analyze power play
+        situations
+        is_equal_strength (bool, optional): Whether to analyze equal
+        strength situations
+        phase_type (int, optional): Specific phase type to analyze (1-4)
+
+    Returns:
+        dict: Dictionary mapping phase numbers to their occurrence counts:
+            {
+                1: count_phase_1,
+                2: count_phase_2,
+                3: count_phase_3,
+                4: count_phase_4
+            }
     """
     phase_counts = {1: 0, 2: 0, 3: 0, 4: 0}
 
@@ -712,25 +831,27 @@ def _calculate_opponent_formations(events: Any,
                                    phase_type: int
                                    ) -> dict[str, dict[str, int]]:
     """
-    Calculate statistics for each opponent formation
-    encountered during positional attacks.
+    Calculates statistics for each opponent formation encountered during
+    positional attacks.
 
     Args:
-        events: The event data
-        team: The team (HOME/AWAY) whose attacks we're analyzing
-        phase_type: The phase type to analyze (3 for home
-        positional, 4 for away positional)
+        events (pd.DataFrame): DataFrame containing event data with columns:
+            - event_type: Type of the event
+            - phase_type: Type of phase (1-4)
+            - formation: Opponent's formation type
+        phase_type (int): The phase type to analyze (3 for home positional,
+        4 for away positional)
 
     Returns:
-        Dictionary with formation statistics:
-        {
-            'formation_name': {
-                'total_attempts': int,
-                'goals': int,
-                'failed_attempts': int  # shots saved,
-                blocked, or off target
+        dict: Dictionary containing formation statistics:
+            {
+                'formation_name': {
+                    'total_attempts': int,
+                    'goals': int,
+                    'failed_attempts': int
+                }
             }
-        }
+        where formation_name can be '60', '51', '321', or 'unknown'
     """
     formation_stats = {}
 
@@ -768,3 +889,38 @@ def _calculate_opponent_formations(events: Any,
             formation_stats[formation]['total_attempts'] += 1
 
     return formation_stats
+
+
+def _calculate_formation_success_rates(formation_stats:
+                                       dict[str, dict[str, int]]
+                                       ) -> dict[str, float]:
+    """
+    Calculates success rates for each formation type based on the provided
+    statistics.
+    Success rate is defined as the percentage of attempts that resulted
+    in goals.
+
+    Args:
+        formation_stats (dict): Dictionary containing formation statistics:
+            {
+                'formation_name': {
+                    'total_attempts': int,
+                    'goals': int,
+                    'failed_attempts': int
+                }
+            }
+
+    Returns:
+        dict: Dictionary containing success rates for each formation:
+            {
+                'formation_name': float  # success rate as a percentage
+            }
+        where formation_name can be '60', '51', '321', or 'unknown'
+    """
+    goal_rates = {}
+    for formation, stats in formation_stats.items():
+        total_attempts = stats['total_attempts']
+        goals = stats['goals']
+        goal_rate = (goals / total_attempts) * 100 if total_attempts > 0 else 0
+        goal_rates[formation] = goal_rate
+    return goal_rates
