@@ -182,13 +182,13 @@ def evaluate_phase_events(events: Any
         if event[0] in ["score_change", "shot_saved", "shot_off_target",
                         "shot_blocked", "technical_rule_fault",
                         "seven_m_awarded", "steal", "technical_ball_fault"]:
-            if event[28] in [1]:
+            if event[28] in [3]:
                 position_events_home.append(event)
-            elif event[28] in [3]:
+            elif event[28] in [1]:
                 counter_events_home.append(event)
-            elif event[28] in [2]:
-                position_events_away.append(event)
             elif event[28] in [4]:
+                position_events_away.append(event)
+            elif event[28] in [2]:
                 counter_events_away.append(event)
             elif event[28] in [0]:
                 if event[21] is not None:

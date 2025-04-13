@@ -37,7 +37,7 @@ match_ids_20_21 = [
 match_ids_20_21_not_working = [23400749]
 
 for match_id in match_ids_20_21:
-    floodlight_code.approach_plot(match_id, dv.Approach.POS_RB)
+    floodlight_code.approach_plot(match_id, dv.Approach.NONE)
 
 # floodlight_code.approach_plot(23400439, dv.Approach.POS_RB)
 
