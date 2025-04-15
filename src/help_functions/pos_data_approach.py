@@ -16,6 +16,7 @@ from rapidfuzz import fuzz
 
 import position_helpers
 import variables.data_variables as dv
+from template_start import fuzzy_match_team_name
 
 
 def sync_event_data_pos_data(events: Any,
@@ -76,7 +77,8 @@ def sync_event_data_pos_data(events: Any,
                                                .lower().strip())
                 for i in normalized_xids.items():
                     # Compare with both original and normalized names
-                    if i[0] == event[10] or i[0] == normalized_event_player:
+                    if fuzzy_match_team_name(
+                            normalized_event_player, i[0]):
                         events.iloc[idx, 24] = (sync_pos_data(
                             i[1], event[24],
                             pos_data[pos_num],
@@ -96,7 +98,8 @@ def sync_event_data_pos_data(events: Any,
                     normalized_event_player = (normalized_event_player
                                                .lower().strip())
                 for i in normalized_xids.items():
-                    if i[0] == event[10] or i[0] == normalized_event_player:
+                    if fuzzy_match_team_name(
+                            normalized_event_player, i[0]):
                         events.iloc[idx, 24] = (sync_pos_data(
                             i[1], event[24],
                             pos_data[pos_num],

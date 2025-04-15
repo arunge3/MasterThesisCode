@@ -12,6 +12,8 @@ Date:
 """
 # from matplotlib import pyplot as plt
 import json
+import re
+import unicodedata
 from typing import Any, Union
 
 # import floodlight.core.pitch
@@ -20,6 +22,7 @@ import floodlight.core.xy as xy
 import matplotlib
 import numpy as np
 import pandas as pd
+import rapidfuzz
 from floodlight import Code
 from floodlight.io.kinexon import (create_links_from_meta_data, get_meta_data,
                                    read_position_data_csv)
@@ -329,6 +332,40 @@ def run_template_matching(match_id: int
     return formations
 
 
+def fuzzy_match_team_name(team_name: str,
+                          lookup_name: str,
+                          threshold: float = 0.8) -> Any:
+    """
+    Performs fuzzy matching between two team names.
+
+    Args:
+        team_name (str): The first team name to compare
+        lookup_name (str): The second team name to compare
+        threshold (float): The minimum similarity score to
+        consider a match (0-1)
+
+    Returns:
+        bool: True if the names match above the threshold, False otherwise
+    """
+    # Normalize both names
+    def normalize_name(name: str) -> str:
+        # Remove accents and special characters
+        name = unicodedata.normalize('NFKD', name).encode(
+            'ASCII', 'ignore').decode('utf-8')
+        # Remove any non-alphanumeric characters except spaces
+        name = re.sub(r'[^\w\s]', '', name)
+        # Convert to lowercase and strip whitespace
+        return name.lower().strip()
+
+    norm_team = normalize_name(team_name)
+    norm_lookup = normalize_name(lookup_name)
+
+    # Calculate similarity using rapidfuzz
+    similarity = rapidfuzz.fuzz.ratio(norm_team, norm_lookup) / 100.0
+
+    return (similarity >= threshold)
+
+
 def map_teams_and_extract_player_ids(team_a_name: str, match: str,
                                      lookup: pd.DataFrame,
                                      home_team_statistics: dict[str, Any],
@@ -336,7 +373,6 @@ def map_teams_and_extract_player_ids(team_a_name: str, match: str,
                                      ) -> tuple[str, str, list[str],
                                                 list[str], str]:
     """
-
     Assigns teams (A/B) to home/away teams and extracts player IDs.
     Args:
         team_a_name: Name of team A
@@ -345,14 +381,12 @@ def map_teams_and_extract_player_ids(team_a_name: str, match: str,
         home_team_statistics: Statistics of the home team
         away_team_statistics: Statistics of the away team
 
-
     Returns:
         team_a_id: ID of team A
         team_b_id: ID of team B
         team_a_player_ids: List of player IDs of team A
         team_b_player_ids: List of player IDs of team B
         home_team: String "a" or "b" to identify the home team
-
     """
     # map team_a/b on home/away and extract player sr IDs
     if (team_a_name == lookup.loc[lookup["file_name"] == f"{match}",

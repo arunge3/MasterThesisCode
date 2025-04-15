@@ -42,7 +42,7 @@ import cost_function_approach
 import cost_function_approach_2
 import help_functions
 import help_functions.pos_data_approach
-import help_functions.reformatjson_methods
+import help_functions.reformatJson_methods as reformatjson_methods
 import sport_analysis_overall
 import variables.data_variables as dv
 from compute_differences import sportanalysis
@@ -162,7 +162,7 @@ def add_event_time_framerate(dataframe: pd.DataFrame, first_timestamp_ms: str,
     dataframe['event_time_framerate'] = None
     for idx, row in dataframe.iterrows():
         event_time = row['time_stamp']
-        event_time_framerate = (help_functions.reformatjson_methods.
+        event_time_framerate = (reformatjson_methods.
                                 synchronize_time(
                                     event_time, first_timestamp_ms, fps))
 
@@ -286,12 +286,12 @@ def calculate_event_stream(match_id: int) -> tuple[Any, int, Any]:
 
     (
         _, path_timeline, _, positions_path, _, _, _, _
-    ) = help_functions.reformatjson_methods.get_paths_by_match_id(match_id)
+    ) = reformatjson_methods.get_paths_by_match_id(match_id)
     (
         first_time_pos_str,
         first_time_pos_unix,
         fps_positional,
-    ) = help_functions.reformatjson_methods.load_first_timestamp_position(
+    ) = reformatjson_methods.load_first_timestamp_position(
         positions_path)
 
     # Load event data and adjust timestamps

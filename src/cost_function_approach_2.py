@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 
 import position_helpers
+import template_start
 import variables.data_variables as dv
 from help_functions.pos_data_approach import (find_key_position,
                                               get_pid_from_name,
@@ -198,7 +199,8 @@ def prepare_position_cost(pos_data: Any,
         if not isinstance(event[8], type(None)):
             pos_num = find_key_position(pid_dict, event[10])
             for i in xids.items():
-                if i[0] == event[10]:
+                if template_start.fuzzy_match_team_name(
+                        event[10], i[0]):
                     links = i[1]
                     if isinstance(links, tuple):
                         links = links[0]
@@ -208,7 +210,8 @@ def prepare_position_cost(pos_data: Any,
         elif not isinstance(event[14], type(None)):
             pos_num = find_key_position(pid_dict, event[10])
             for i in xids.items():
-                if i[0] == event[10]:
+                if template_start.fuzzy_match_team_name(
+                        event[10], i[0]):
                     links = i[1]
                     if isinstance(links, tuple):
                         links = links[0]
@@ -302,24 +305,44 @@ def inf_values(total_cost: Any,
     Returns:
         Any: The total cost
     """
-    if time is not None and time > 0:
-        total_cost[time:] = np.inf
+    if time is None or time <= 0:
+        return total_cost
+
+    # Ensure time is within bounds
+    data_length = len(player_data)
+    if time >= data_length:
+        time = data_length - 1
+
+    # Set future values to infinity
+    total_cost[time:] = np.inf
+
     none_idx = 0
-    max_time = time-500
-    for t in range(time - 1, max(-1, max_time), -1):
-        # test = player_data[t]
+    max_time = max(0, time - 500)  # Ensure max_time is not negative
+
+    # Check for None values in the window
+    for t in range(time - 1, max_time - 1, -1):
+        if t >= data_length:
+            continue
         if player_data[t].any() is None or ball_data[t].any() is None:
             none_idx += 1
+
     if none_idx >= 499:
-        for t in range(max_time, 0, -1):
+        for t in range(max_time - 1, -1, -1):
+            if t >= data_length:
+                continue
             if player_data[t].any() is None or ball_data[t].any() is None:
                 none_idx += 1
             else:
                 break
+
     if none_idx > 10:
         print(f"Game was interrupted for {none_idx} frames")
-        max_time = max_time-none_idx
-    for t in range(max_time - 1, 0, -1):
-        total_cost[t] = np.inf
+        # Ensure max_time is not negative
+        max_time = max(0, max_time - none_idx)
+
+    # Set past values to infinity
+    for t in range(max_time - 1, -1, -1):
+        if t < data_length:
+            total_cost[t] = np.inf
 
     return total_cost

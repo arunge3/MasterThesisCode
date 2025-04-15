@@ -49,8 +49,8 @@ match_ids_20_21 = [
 ]
 match_ids_20_21_not_working = [23400749]
 
-for match_id in match_ids_20_21:
-    floodlight_code.approach_plot(match_id, dv.Approach.NONE)
+# for match_id in match_ids_20_21:
+#     floodlight_code.approach_plot(match_id, dv.Approach.POS_DATA)
 
 # floodlight_code.approach_plot(23400439, dv.Approach.POS_RB)
 
@@ -75,7 +75,7 @@ for match_id in match_ids_20_21:
 # floodlight_code.approach_plot(23400263, dv.Approach.POS_DATA)
 # floodlight_code.approach_plot(23400263, dv.Approach.POS_CORRECTION)
 # floodlight_code.approach_plot(23400263, dv.Approach.POS_RB)
-# floodlight_code.approach_plot(23400263, dv.Approach.COST_BASED)
+# floodlight_code.approach_plot(23400263, dv .Approach.COST_BASED)
 # # floodlight_code.approach_plot(23400263, dv.Approach.COST_BASED_COR)
 # # floodlight_code.approach_plot(23400263, dv.Approach.COST_BASED_RB)
 
@@ -136,7 +136,7 @@ for match_id in match_ids_20_21:
 # # # #  Ball data. N == 3 and both (0 und 1) data are valid in 10 frames
 # floodlight_code.approach_plot(23400311, dv.Approach.POS_CORRECTION)
 # floodlight_code.approach_plot(23400311, dv.Approach.POS_RB)
-# floodlight_code.approach_plot(23400311, dv.Approach.COST_BASED)
+floodlight_code.approach_plot(23400311, dv.Approach.COST_BASED)
 # # # floodlight_code.approach_plot(23400311, dv.Approach.COST_BASED_COR)
 # # # floodlight_code.approach_plot(23400311, dv.Approach.COST_BASED_RB)
 
@@ -147,7 +147,7 @@ for match_id in match_ids_20_21:
 # # floodlight_code.approach_plot(23400321, dv.Approach.BASELINE)
 # # floodlight_code.approach_plot(23400321, dv.Approach.RULE_BASED)
 # floodlight_code.approach_plot(23400321, dv.Approach.POS_DATA)
-# # floodlight_code.approach_plot(23400321, dv.Approach.POS_CORRECTION)
+# floodlight_code.approach_plot(23400321, dv.Approach.POS_CORRECTION)
 # floodlight_code.approach_plot(23400321, dv.Approach.POS_RB)
 # floodlight_code.approach_plot(23400321, dv.Approach.COST_BASED)
 # # # floodlight_code.approach_plot(23400321, dv.Approach.COST_BASED_COR)
@@ -172,8 +172,8 @@ for match_id in match_ids_20_21:
 # # floodlight_code.approach_plot(23400315, dv.Approach.BASELINE)
 # # floodlight_code.approach_plot(23400315, dv.Approach.RULE_BASED)
 # floodlight_code.approach_plot(23400315, dv.Approach.POS_DATA)
-# # floodlight_code.approach_plot(23400315, dv.Approach.POS_CORRECTION)
-# # floodlight_code.approach_plot(23400315, dv.Approach.POS_RB)
+# floodlight_code.approach_plot(23400315, dv.Approach.POS_CORRECTION)
+# floodlight_code.approach_plot(23400315, dv.Approach.POS_RB)
 # floodlight_code.approach_plot(23400315, dv.Approach.COST_BASED)
 # # # floodlight_code.approach_plot(23400315, dv.Approach.COST_BASED_COR)
 # # # floodlight_code.approach_plot(23400315, dv.Approach.COST_BASED_RB)

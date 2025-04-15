@@ -84,15 +84,27 @@ def adjust_timestamp(match_id: int) -> tuple[Any, dict[Any, Any]]:
 
 
 def calculate_sequences(match_id: int, base_path: str = "D:\\Handball\\",
-                        season: str = "season_20_21") -> list[Any]:
+                        season: str = "season_20_21") -> list[dict[Any, Any]]:
     """
     Calculate sequences of game phases for a given match.
     Args:
         match_id (int): The identifier for the match.
+        base_path (str): Base path for data files. Defaults to
+        "D:\\Handball\\".
+        season (str): Season identifier. Defaults to "season_20_21".
     Returns:
-        list: A list of sequences where each sequence is represented as a
-            tuple (start_frame, end_frame).
-            Only sequences longer than one frame duration are included.
+        list[dict]: A list of sequences where each sequence is a
+        dictionary containing:
+            - match_id: The match identifier
+            - sequence_id: Unique identifier for the sequence
+            - start_time: Start time of the sequence
+            - end_time: End time of the sequence
+            - phase: Phase type (attack, defense, transition)
+            - duration: Duration of the sequence in seconds
+            - team: Team involved in the sequence
+            - player: Main player involved
+            - x: X coordinate
+            - y: Y coordinate
     """
     sequences: list[Any]
     # Paths
