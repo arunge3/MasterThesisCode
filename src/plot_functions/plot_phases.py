@@ -3,39 +3,20 @@ This script demonstrates various functionalities of the `os` module
 for interacting with the operating system.
 """
 import os
-from enum import Enum
 from typing import Any
 
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 
+import variables.data_variables as dv
 from plot_functions import processing
-
-# Enum für die drei Wahlmöglichkeiten
-
-
-class Approach(Enum):
-    """
-    Enum class representing different approaches for synchronizing.
-
-    Attributes:
-        RULE_BASED (str): Represents a rule-based approach.
-        BASELINE (str): Represents a baseline approach.
-        NONE (str): Represents no calculation.
-        ML_BASED (str): Represents a machine learning-based approach.
-    """
-    RULE_BASED = "Rule-based Approach"
-    BASELINE = "Baseline"
-    NONE = "No Calcuation"
-    ML_BASED = "Machine Learning Approach"
-
 
 matplotlib.use("TkAgg", force=True)
 
 
-def plot_phases(match_id: int, approach: Approach
-                = Approach.RULE_BASED) -> None:
+def plot_phases(match_id: int, approach: dv.Approach
+                = dv.Approach.RULE_BASED) -> None:
     """
     Plots the phases of a handball match along with event markers.
     Args:
@@ -64,8 +45,8 @@ def plot_phases(match_id: int, approach: Approach
     base_path_grundlage = os.path.join(base_path, datengrundlage)
     sequences = processing.calculate_sequences(match_id)
 
-    if approach == Approach.RULE_BASED:
-        events, team_info = processing.adjust_timestamp(match_id)
+    if approach == dv.Approach.RULE_BASED:
+        events, team_info = processing.adjust_timestsamp(match_id)
         events, sequences = processing.synchronize_events(
             events, sequences, team_info)
         new_name = str(match_id) + "_rb.csv"
@@ -76,11 +57,11 @@ def plot_phases(match_id: int, approach: Approach
     #         events, sequences, team_info)
     #     new_name = str(match_id) + "_ml.csv"
     #     datei_pfad = os.path.join(base_path_grundlage, r"ml", new_name)
-    elif approach == Approach.BASELINE:
+    elif approach == dv.Approach.BASELINE:
         events, team_info = processing.adjust_timestamp_baseline(match_id)
         new_name = str(match_id) + "_bl.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"baseline", new_name)
-    elif approach == Approach.NONE:
+    elif approach == dv.Approach.NONE:
         events, _ = processing.get_events(match_id)
         new_name = str(match_id) + "_none.csv"
         datei_pfad = os.path.join(base_path_grundlage, r"none", new_name)
@@ -187,7 +168,7 @@ def plot_phases(match_id: int, approach: Approach
     plt.show()
 
 
-def berechne_phase_und_speichern_fl(events: list[Any],
+def berechne_phase_und_speichern_fl(events: pd.DataFrame,
                                     sequences: list[tuple[int, int, int]],
                                     dateipfad: str) -> None:
     """
@@ -205,36 +186,67 @@ def berechne_phase_und_speichern_fl(events: list[Any],
     """
     # Erstelle eine Liste, um die Event-Daten zu speichern
     event_data = []
+    # Überprüfe, ob events DataFrame-ähnliche Struktur mit .values hat
+    if hasattr(events, 'values'):
+        # Durchlaufe jedes Event
+        for event in events.values:
+            event_id = event[23]
+            event_type = event[0]
+            event_time = event[24]
 
-    # Durchlaufe jedes Event
-    for event in events:
-        event_id = event[11]
-        event_type = event[0]
-        event_time = event[22]
+            # Phase berechnen
+            phase = None
+            for start, end, ph in sequences:
+                if start <= event_time < end:
+                    phase = ph
+                    break
 
-        # Phase berechnen
-        phase = None
-        for start, end, ph in sequences:
-            if start <= event_time < end:
-                phase = ph
-                break
+            # Event-Daten hinzufügen
+            if phase is not None:
+                event_data.append({
+                    "event_id": event_id,
+                    "phase": phase,
+                    "type": event_type,
+                    "time": event_time
+                })
 
-        # Event-Daten hinzufügen
-        if phase is not None:
-            event_data.append({
-                "event_id": event_id,
-                "phase": phase,
-                "type": event_type,
-                "time": event_time
-            })
+        # DataFrame erstellen
+        df = pd.DataFrame(event_data)
 
-    # DataFrame erstellen
-    df = pd.DataFrame(event_data)
+        # Speichern in eine CSV-Datei (oder Excel)
+        # Ändere dies zu .to_excel für Excel-Datei
+        df.to_csv(dateipfad, index=False)
+        print(f"Die Datei wurde unter {dateipfad} gespeichert.")
+    else:
+        # Durchlaufe jedes Event
+        for event in events:
+            event_id = event["id"]
+            event_type = event["type"]
+            event_time = event["time"]
 
-    # Speichern in eine CSV-Datei (oder Excel)
-    # Ändere dies zu .to_excel für Excel-Datei
-    df.to_csv(dateipfad, index=False)
-    print(f"Die Datei wurde unter {dateipfad} gespeichert.")
+            # Phase berechnen
+            phase = None
+            for start, end, ph in sequences:
+                if start <= event_time < end:
+                    phase = ph
+                    break
+
+            # Event-Daten hinzufügen
+            if phase is not None:
+                event_data.append({
+                    "event_id": event_id,
+                    "phase": phase,
+                    "type": event_type,
+                    "time": event_time
+                })
+
+        # DataFrame erstellen
+        df = pd.DataFrame(event_data)
+
+        # Speichern in eine CSV-Datei (oder Excel)
+        # Ändere dies zu .to_excel für Excel-Datei
+        df.to_csv(dateipfad, index=False)
+        print(f"Die Datei wurde unter {dateipfad} gespeichert.")
 
 
 def berechne_phase_und_speichern(events: list[Any],

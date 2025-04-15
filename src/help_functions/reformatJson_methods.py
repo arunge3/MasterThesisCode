@@ -42,13 +42,8 @@ def load_first_timestamp_position(file_path: str) -> tuple[str, Any, Any]:
 
 
 def synchronize_time(
-    event_time_str: str,
-    second_half: bool,
-    first_timestamp_opt: Optional[Union[str, tuple[Any]]],
-    offset_fr: int,
-    offseth2_fr: int,
-    first_vh2: int,
-    fps: float,
+    event_time_str: Any,
+    first_timestamp_opt: Optional[Union[str, tuple[Any]]], fps: float = 20.0
 ) -> float:
     """
     Synchronizes the event time with the first timestamp and calculates
@@ -69,9 +64,13 @@ def synchronize_time(
     """
     utc_timezone = pytz.utc
     first_timestamp_str: str
-    event_time = datetime.fromisoformat(
-        event_time_str).replace(tzinfo=utc_timezone)
+    if isinstance(event_time_str, str):
+        event_time_date = datetime.fromisoformat(
+            event_time_str).replace(tzinfo=utc_timezone)
+    else:
+        event_time_date = event_time_str
     if isinstance(first_timestamp_opt, tuple):
+
         first_timestamp_str = first_timestamp_opt[0]
     else:
         first_timestamp_str = str(first_timestamp_opt)
@@ -79,13 +78,13 @@ def synchronize_time(
         tzinfo=utc_timezone
     )
 
-    delta = event_time - first_timestamp
+    delta = event_time_date - first_timestamp
     delta_fr = delta.seconds * fps
 
-    synced_time = delta_fr + offset_fr
-    if second_half:
-        synced_time = synced_time + offseth2_fr
-    return synced_time
+    # synced_time = delta_fr + offset_fr
+    # if second_half:
+    #     synced_time = synced_time + offseth2_fr
+    return int(delta_fr)
 
 
 def get_paths_by_match_id(
@@ -273,7 +272,7 @@ def reformat_json(
             competitor = event.get("competitor", None)
             type = event.get("type")
             id = event.get("id")
-            match_clock = event.get("match_clock", None)
+            # match_clock = event.get("match_clock", None)
             ball_possession = {"home": "A", "away": "B",
                                "None": "none"}.get(competitor, "")
 
@@ -340,7 +339,7 @@ def reformat_json(
                 ball_reception = ""
                 static_ball_action = "kick-off"
                 referee_decision = ""
-                period_name = event.get("period_name", None)
+                # period_name = event.get("period_name", None)
             elif type == "shot_off_target":
                 pass_handball = ""
                 shot = "off target"
@@ -418,29 +417,25 @@ def reformat_json(
                 ball_reception = ""
                 static_ball_action = ""
                 referee_decision = ""
-            second_half = False
-            if match_clock is not None:
-                match_minutes, match_seconds = map(int, match_clock.split(":"))
-                threshold_minutes = 30
-                threshold_seconds = 0
-                if (match_minutes > threshold_minutes) or (
-                    match_minutes == threshold_minutes
-                    and match_seconds > threshold_seconds
-                ):
-                    second_half = True
-            if type == "period_start" and period_name == "2nd Half":
-                second_half = True
+            # second_half = False
+            # if match_clock is not None:
+            #     match_minutes, match_seconds = map(int,
+            # match_clock.split(":"))
+            #     threshold_minutes = 30
+            #     threshold_seconds = 0
+            #     if (match_minutes > threshold_minutes) or (
+            #         match_minutes == threshold_minutes
+            #         and match_seconds > threshold_seconds
+            #     ):
+            #         second_half = True
+            # if type == "period_start" and period_name == "2nd Half":
+            #     second_half = True
 
             reformatted_event = {
                 "t_start": int(
                     synchronize_time(
                         event.get("time", None),
-                        second_half,
                         first_timestamp_ms,
-                        offset,
-                        offset_h2,
-                        first_vh2,
-                        fps,
                     )
                 ),
                 "t_end": "-1",
@@ -461,11 +456,7 @@ def reformat_json(
 
 def reformat_json_time_only(
     path_timeline: str,
-    first_timestamp_ms: str,
-    offset: int,
-    offset_h2: int,
-    first_vh2: int,
-    fps: float,
+    first_timestamp_ms: str
 ) -> dict[Any, Any]:
     """
     Reformats the timestamps in a JSON timeline file.
@@ -490,32 +481,10 @@ def reformat_json_time_only(
 
     # Loop through the entries and change their timestamps
     for event in events_df:
-        type = event.get("type")
-        match_clock = event.get("match_clock", None)
-        second_half = False
-        if type == "period_start":
-            period_name = event.get("period_name", None)
-        else:
-            period_name = None
-        if match_clock is not None:
-            match_minutes, match_seconds = map(int, match_clock.split(":"))
-            threshold_minutes = 30
-            threshold_seconds = 0
-            if ((match_minutes > threshold_minutes) or
-                    (match_minutes == (threshold_minutes and
-                                       match_seconds > threshold_seconds))):
-                second_half = True
-            elif type == "period_start" and period_name == "2nd Half":
-                second_half = True
         event["time"] = int(
             synchronize_time(
                 event.get("time", None),
-                second_half,
                 str(first_timestamp_ms),
-                offset,
-                offset_h2,
-                first_vh2,
-                fps,
             )
         )
 
