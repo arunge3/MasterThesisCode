@@ -1,4 +1,4 @@
-import help_functions.reformatjson_methods as helpFuctions
+import help_functions.reformatJson_methods as helpFuctions
 
 """
 This module reformats JSON data for handball match videos, providing

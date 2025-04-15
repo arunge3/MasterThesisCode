@@ -9,7 +9,7 @@ import numpy as np
 import pytz  # type: ignore
 from floodlight.core.code import Code
 
-import help_functions.reformatjson_methods as helpFuctions
+import help_functions.reformatJson_methods as helpFuctions
 from existing_code.rolling_mode import rolling_mode
 
 
