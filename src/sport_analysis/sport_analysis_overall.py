@@ -15,7 +15,8 @@ Date:
 from typing import Any, Counter, Union
 
 import variables.data_variables as dv
-from template_start import run_template_matching
+from preprocessing.template_matching.template_start import \
+    run_template_matching
 
 
 def calculate_next_phase(events: Any) -> dict[Any, Any]:

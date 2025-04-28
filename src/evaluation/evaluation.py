@@ -228,6 +228,7 @@ def calculate_accuracy_for_specific_events(df: pd.DataFrame,
 
     # Calculate overall accuracy for specific events
     correct_count = (specific_events_df[correct_column] == 1).sum()
+    # false_count = (specific_events_df[correct_column] == 0).sum()
     total_count = specific_events_df[correct_column].isin([0, 1]).sum()
     overall_accuracy = correct_count / total_count if total_count > 0 else 0
 

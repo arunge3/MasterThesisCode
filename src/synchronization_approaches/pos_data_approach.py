@@ -14,9 +14,10 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from rapidfuzz import fuzz
 
-import position_helpers
+import help_functions.position_helpers as position_helpers
 import variables.data_variables as dv
-from template_start import fuzzy_match_team_name
+from preprocessing.template_matching.template_start import \
+    fuzzy_match_team_name
 
 
 def sync_event_data_pos_data(events: Any,

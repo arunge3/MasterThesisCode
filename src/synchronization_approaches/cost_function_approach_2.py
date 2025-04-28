@@ -15,12 +15,13 @@ import floodlight.io.kinexon as fliok
 import numpy as np
 import pandas as pd
 
-import position_helpers
-import template_start
+import help_functions.position_helpers as position_helpers
+import preprocessing.template_matching.template_start as template_start
 import variables.data_variables as dv
-from help_functions.pos_data_approach import (find_key_position,
-                                              get_pid_from_name,
-                                              get_pos_filepath, normalize)
+from synchronization_approaches.pos_data_approach import (find_key_position,
+                                                          get_pid_from_name,
+                                                          get_pos_filepath,
+                                                          normalize)
 
 # def get_distance_ball_event_cost(tracking_data, event):
 #     distance = np.hypot(

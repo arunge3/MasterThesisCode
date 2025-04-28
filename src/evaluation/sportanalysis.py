@@ -17,7 +17,7 @@ import floodlight.io.kinexon as fliok
 import numpy as np
 import pandas as pd
 
-from help_functions.pos_data_approach import get_pos_filepath
+from synchronization_approaches.pos_data_approach import get_pos_filepath
 
 
 def next_phase(events: pd.DataFrame,

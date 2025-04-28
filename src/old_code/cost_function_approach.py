@@ -17,9 +17,10 @@ import numpy as np
 import pandas as pd
 
 import variables.data_variables as dv
-from help_functions.pos_data_approach import (find_key_position,
-                                              get_pid_from_name,
-                                              get_pos_filepath, normalize)
+from synchronization_approaches.pos_data_approach import (find_key_position,
+                                                          get_pid_from_name,
+                                                          get_pos_filepath,
+                                                          normalize)
 
 
 def sigmoid(
