@@ -1,6 +1,10 @@
 """
 This script demonstrates various functionalities of the `os` module
 for interacting with the operating system.
+Author:
+    @Annabelle Runge
+Date:
+    2025-04-29
 """
 import os
 from typing import Any

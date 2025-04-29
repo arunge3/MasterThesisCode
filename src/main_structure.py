@@ -187,7 +187,7 @@ def plot_phases(events: Any, sequences: list[tuple[int, int, int]],
         # Set x-axis limit to show only from 0 to 2000
         ax.set_xlim(6000, 50000)
         # Show plot
-        # plt.show()
+        plt.show()
     else:
         for event in events:
             # Find the y value on the continuous line for this event's time

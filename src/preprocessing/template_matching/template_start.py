@@ -349,6 +349,14 @@ def fuzzy_match_team_name(team_name: str,
     """
     # Normalize both names
     def normalize_name(name: str) -> str:
+        """
+        This function normalizes the team name by removing accents and
+        special characters.
+        Args:
+            name (str): The team name to normalize
+        Returns:
+            str: The normalized team name
+        """
         # Remove accents and special characters
         name = unicodedata.normalize('NFKD', name).encode(
             'ASCII', 'ignore').decode('utf-8')

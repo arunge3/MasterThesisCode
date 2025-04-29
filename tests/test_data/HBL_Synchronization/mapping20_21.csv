@@ -1,3 +1,0 @@
-match_id;date;home_team_name;away_team_name;home_team_id;away_team_id;raw_pos_knx;raw_video;cutH1;offset_h2;firstVH2;
-1234;01.10.2020;Heimteam;Auswaerts Team;0123;0045;match_1234_knx.csv;video_1234.mp4;9345;0;0;
-5678;13.01.2021;Heim-team;AuswaertsTeam;0125;0345;match_5678_knx.csv;video_5678.mp4;34849;234;0;
