@@ -2,9 +2,7 @@
 
 ## Description
 
-This repo contains code that was created as part of Annabelle Runge's master's thesis. 
-
-The code can be executed via the main.py function. The game number must also be passed. However, the paths may need to be changed. The paths are based on the directory "D" and the corresponding hard drive that contains the data. 
+This repository contains code developed for Annabelle Runge's master's thesis, focusing on sports event analysis and synchronization. The project implements various approaches for synchronizing sports event data and analyzing game progression phases.
 
 ## Installation
 
@@ -16,42 +14,59 @@ The code can be executed via the main.py function. The game number must also be 
     ```bash
     cd MasterThesisCode
     ```
-3. Install the required dependencies:
+3. Create and activate a virtual environment:
+    ```bash
+    python -m venv .venv
+    # On Windows:
+    .\.venv\Scripts\activate
+    # On macOS and Linux:
+    source .venv/bin/activate
+    ```
+4. Install the required dependencies:
     ```bash
     pip install -r requirements.txt
     ```
-4. Used python version: 3.9.13
-5. Create a virtual environment:
-    ```bash
-    python -m venv env
-    ```
-6. Activate the virtual environment:
-    - On Windows:
-        ```bash
-        .\env\Scripts\activate
-        ```
-    - On macOS and Linux:
-        ```bash
-        source env/bin/activate
-        ```
-
-## Usage
-
-To run the main script, use the following command:
-```bash
-python main.py
-```
 
 ## Project Structure
 
-- `compute_difference/`: Contains code to calculate the differences between newly annotated and original events. 
-- `existing_code/`: Code that was already available from Manuel Bassek. 
-- `figures/`: Contains the generated plots that represent the synchronisation of the game progression phases and event data.
-- `help_functions/`: Auxiliary functions that are used for reformatted.
-- `plot_functions/`: Contains code that performs the rule-based synchronisation and code that creates the graphics.
-- `main.py`: This function must be executed so that the rule-based synchronisation is carried out for a game. 
-- `reformat_json`: The code was used to prepare the event data for the annotation module. 
-- `README.md`: Project documentation.
+The project is organized into the following main components:
+
+### Source Code (`src/`)
+- `main.py`: Entry point for running the synchronization and analysis pipeline
+- `main_structure.py`: Core structure and functionality implementation
+- `preprocessing/`: Data preprocessing and transformation modules
+- `synchronization_approaches/`: Different methods for synchronizing event data
+- `evaluation/`: Code for evaluating synchronization results
+- `sport_analysis/`: Sports-specific analysis modules
+- `plot_functions/`: Visualization and plotting utilities
+- `help_functions/`: Utility functions and helper modules
+- `variables/`: Configuration and constant definitions
+- `existing_code/`: Legacy code from previous implementations
+
+### Testing (`tests/`)
+- Unit tests and integration tests for various components
+
+### Configuration
+- `pyproject.toml`: Project configuration and dependencies
+- `pytest.ini`: Testing configuration
+- `.pre-commit-config.yaml`: Pre-commit hooks configuration
+
+### Output
+- `figures/`: Generated plots and visualizations
+
+## Usage
+
+To run the main analysis pipeline:
+```bash
+python src/main.py
+```
+
+## Development
+
+The project uses several development tools:
+- pytest for testing
+- pre-commit for code quality checks
+- mypy for type checking
 
 ## Contact
 
