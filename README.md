@@ -43,9 +43,6 @@ The project is organized into the following main components:
 - `variables/`: Configuration and constant definitions
 - `existing_code/`: Legacy code from previous implementations
 
-### Testing (`tests/`)
-- Unit tests and integration tests for various components
-
 ### Configuration
 - `pyproject.toml`: Project configuration and dependencies
 - `pytest.ini`: Testing configuration
