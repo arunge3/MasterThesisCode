@@ -56,10 +56,29 @@ The project is organized into the following main components:
 
 ## Usage
 
-To run the main analysis pipeline:
+The code can be run in two ways:
+
+1. Using the main script:
 ```bash
 python src/main.py
 ```
+
+2. Using the `approach_plot` function with custom parameters:
+```python
+from src.main_structure import approach_plot
+
+# Example usage:
+approach_plot(
+    match_id="your_match_id",  # ID of the match to analyze
+    approach="your_approach",   # Name of the synchronization approach to use
+    base_path="your_base_path" # Base path for data files
+)
+```
+
+The `approach_plot` function allows you to:
+- Specify which match to analyze using `match_id`
+- Choose which synchronization approach to use with `approach`
+- Set the base path for data files with `base_path`
 
 ## Development
 
