@@ -7,7 +7,7 @@ import numpy as np
 import pytz  # type: ignore
 from floodlight import Code
 
-import help_functions.reformatJson_Methods as helpFuctions
+import preprocessing.reformatJson_methods as helpFuctions
 from existing_code.rolling_mode import rolling_mode
 
 matplotlib.use("TkAgg", force=True)

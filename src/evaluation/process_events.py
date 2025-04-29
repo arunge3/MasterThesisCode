@@ -1,5 +1,14 @@
 import pandas as pd
 
+"""
+This script processes event data from an Excel file and calculates
+various statistics for each event type.
+Author:
+    @Annabelle Runge
+Date:
+    2025-04-29
+"""
+
 # List of event IDs we want to analyze
 target_events = [
     'score_change',

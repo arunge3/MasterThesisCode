@@ -1,6 +1,10 @@
 """
 This script demonstrates the use of the `datetime` module for
 working with dates and times in Python.
+Author:
+    @Annabelle Runge
+Date:
+    2025-04-29
 """
 from datetime import datetime as dt
 from typing import Any, List, Tuple

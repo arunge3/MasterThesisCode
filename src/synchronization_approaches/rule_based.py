@@ -1,5 +1,12 @@
 
-
+"""
+    This module contains the rule-based synchronization approach for
+    handball event timelines.
+    Author:
+        @Annabelle Runge
+    Date:
+        2025-04-29
+    """
 from typing import Any, Callable, Dict, List, Tuple
 
 import numpy as np

@@ -1,3 +1,12 @@
+"""
+    This module contains the correction extension for the cost_based and
+    pos_based synchronization approaches.
+    Author:
+        @Annabelle Runge
+    Date:
+        2025-04-29
+"""
+
 from typing import Any
 
 from synchronization_approaches.rule_based import search_phase_ml_fl
